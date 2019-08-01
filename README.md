@@ -4,7 +4,7 @@ WXInlinePlayer
 ## 0.示例地址
 https://qiaozi-tech.github.io/WXInlinePlayer/example/index.html
 
-## 01.兼容性
+## 1.兼容性
 在BrowserStack中测试，主流系统版本均通过，其余机型请考虑通过降级页面功能进行处理：
 1. iOS 9+ (含Safari及Safari WebView)
 2. Android 5+（部分4.4.2+的系统浏览器也支持）
