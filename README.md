@@ -107,3 +107,7 @@ ffmpeg -i <your file> -vcodec h264 -acodec aac -profile:v baseline mtv.flv
 * 如何获取播放器的当前进度？
 
  由于需要考虑到playtimeout的问题，因此API不提供相关的支持。一个简单粗暴的办法是使用setTimeout自己粗略模拟。当然如果仍然想获取相关的数据，可以使用 player.sound.seek() 方法来获取，但请做好返回类型的判断（playtimeout使用此API会返回非Number类型数据）。
+
+ * 为什么在部分低端机器上有音画不同步的情况
+  
+WXInlinePlayer的音画同步依靠音频时间戳，浏览器目前没有非常底层的方式控制音频buffer，同时由于此实现是CPU软解H264，低端机CPU性能羸弱，解析一帧H264的时间会比较长（大约30-50ms），而音频大部分是24ms左右，因此很容易出现音画不同步的情况。你可以尝试降低视频码率试一试是否有缓解。
