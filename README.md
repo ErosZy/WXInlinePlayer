@@ -85,7 +85,12 @@ ffmpeg -i <your file> -vcodec h264 -acodec aac -profile:v baseline mtv.flv
 </html>
 ```
 
-## 4. 其余问题
+## 4.TODO
+1. 流式解析，提高首帧显示和内存占用情况
+2. 支持FLV直播流播放
+3. 进一步提升H264解析性能
+
+## 5. 其余问题
 * 如何获取播放器的当前进度？
 
  由于需要考虑到playtimeout的问题，因此API不提供相关的支持。一个简单粗暴的办法是使用setTimeout自己粗略模拟。当然如果仍然想获取相关的数据，可以使用 player.sound.seek() 方法来获取，但请做好返回类型的判断（playtimeout使用此API会返回非Number类型数据）。
