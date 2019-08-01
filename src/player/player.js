@@ -308,7 +308,7 @@ class Player extends EventEmitter {
       this.drawer.destroy();
       this.drawer = null;
     }
-    
+
     this.codecSegs = [];
     this.audioNalus = [];
     this.videoNalus = [];
@@ -409,6 +409,11 @@ class Player extends EventEmitter {
     const t1 = this.audioNalus[1].timestamp;
     const framerate = (this.framerate = t1 - t0);
     const loop = () => {
+      if (this.frames.length >= 128) {
+        this.loopTimer = setTimeout(loop, 1000 / 60);
+        return;
+      }
+
       if (!this.isPlaying) {
         this.loopTimer = setTimeout(loop, 1000 / 60);
         return;
