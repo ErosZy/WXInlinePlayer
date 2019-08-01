@@ -1,7 +1,10 @@
 WXInlinePlayer
 ------------------
 
-## 0.兼容性
+## 0.示例地址
+https://qiaozi-tech.github.io/WXInlinePlayer/example/index.html
+
+## 01.兼容性
 在BrowserStack中测试，主流系统版本均通过，其余机型请考虑通过降级页面功能进行处理：
 1. iOS 9+ (含Safari及Safari WebView)
 2. Android 5+（部分4.4.2+的系统浏览器也支持）
@@ -11,18 +14,18 @@ WXInlinePlayer
 6. Safari
 7. Edge 15+
 
-## 1.优点
+## 2.优点
 1. 整体核心极小（gzip ~110kb)，减少移动端加载与解析时间
 2. 性能进行高度优化，稳定使用在线上产品中
 3. 移动端兼容性良好，不依赖系统/软件平台的【魔改】播放器，便于产品实现
 
-## 2.限制
+## 3.限制
 目前仅支持FLV（AVC+AAC+baseline）格式，如果是MP4等其他格式请使用ffmpeg进行转码
 ```shell
 ffmpeg -i <your file> -vcodec h264 -acodec aac -profile:v baseline mtv.flv
 ``` 
 
-## 3. 起步
+## 4. 起步
 ```html
 <html>
     <head></head>
@@ -85,7 +88,7 @@ ffmpeg -i <your file> -vcodec h264 -acodec aac -profile:v baseline mtv.flv
 </html>
 ```
 
-## 4. 其余问题
+## 5. 其余问题
 * 如何获取播放器的当前进度？
 
  由于需要考虑到playtimeout的问题，因此API不提供相关的支持。一个简单粗暴的办法是使用setTimeout自己粗略模拟。当然如果仍然想获取相关的数据，可以使用 player.sound.seek() 方法来获取，但请做好返回类型的判断（playtimeout使用此API会返回非Number类型数据）。
