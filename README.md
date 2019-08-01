@@ -16,7 +16,7 @@ https://qiaozi-tech.github.io/WXInlinePlayer/example/index.html
 
 ## 2.优点
 1. 整体核心极小（gzip ~110kb)，减少移动端加载与解析时间
-2. 性能进行高度优化，稳定使用在线上产品中
+2. 性能进行高度优化，稳定使用在线上产品中[好惠买](https://h5.haohuimai1.com)
 3. 移动端兼容性良好，不依赖系统/软件平台的【魔改】播放器，便于产品实现
 
 ## 3.限制
