@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>WXInlinePlayer Demo Page</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+      }
+      #container {
+        width: 640px;
+        height: 360px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-left: -320px;
+        margin-top: -180px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container"></div>
+    <script src="../dist/index.js"></script>
+    <script>
+      if (WXInlinePlayer && WXInlinePlayer.isSupport()) {
+        WXInlinePlayer.init({
+          asmUrl: "../dist/TinyH264.asm.js",
+          wasmUrl: "../dist/TinyH264.wasm.js"
+        });
+
+        WXInlinePlayer.ready().then(() => {
+          let player = new WXInlinePlayer({
+            url: "./mtv.flv", // 仅支持flv格式(H264+AAC)
+            $container: document.getElementById("container"),
+            volume: 1.0, // iOS不允许代码调节声量，请注意兼容
+            muted: false, // iOS和Android均支持代码控制静音
+            autoplay: true,
+            loop: false
+          });
+        });
+      }
+    </script>
+  </body>
+</html>
