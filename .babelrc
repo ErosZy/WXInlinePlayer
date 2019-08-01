@@ -1,0 +1,17 @@
+{
+    "presets": [
+        "@babel/preset-env",
+    ],
+    "plugins": [
+        "@babel/plugin-transform-object-assign",
+        "@babel/plugin-proposal-class-properties",
+        "@babel/plugin-transform-classes",
+        "@babel/plugin-transform-arrow-functions",
+        "@babel/plugin-transform-block-scoping",
+        "@babel/plugin-transform-template-literals",
+        "@babel/plugin-transform-destructuring",
+        "transform-es2015-destructuring",
+        "@babel/plugin-transform-parameters",
+        "transform-es2015-parameters"
+    ]
+}

@@ -1,0 +1,25 @@
+{
+  "name": "tinyh264",
+  "version": "1.0.0",
+  "description": "This project was forked from [h264bsd](https://github.com/oneam/h264bsd).",
+  "main": "concat.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/udevbe/tinyh264.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/udevbe/tinyh264/issues"
+  },
+  "homepage": "https://github.com/udevbe/tinyh264#readme",
+  "dependencies": {
+    "uglify-js": "^3.5.8"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.4.5"
+  }
+}
