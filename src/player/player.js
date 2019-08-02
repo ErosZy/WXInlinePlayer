@@ -95,6 +95,7 @@ class Player extends EventEmitter {
     this.renderTimestamp = 0;
     this.framerate = 0;
     this.destroyed = false;
+    this.loopCount = 0;
 
     this.loader = new Loader();
     this.loader
@@ -180,11 +181,15 @@ class Player extends EventEmitter {
       return;
     }
 
-    this.isPlaying = false;
-    Ticker.framerate = 0;
-    Ticker.removeEventListener("tick", this.tick);
     clearTimeout(this.autoPlayTimer);
     clearTimeout(this.loopTimer);
+
+    this.isPlaying = false;
+    this.loopCount = 0;
+    this.frames = [];
+
+    Ticker.framerate = 0;
+    Ticker.removeEventListener("tick", this.tick);
 
     if (this.loader) {
       this.loader.abort();
@@ -211,10 +216,8 @@ class Player extends EventEmitter {
       this.blobUrl = null;
     }
 
-    this.frames = [];
     this.index = 0;
     this.timestamp = 0;
-    this.isPlaying = false;
     this.framerate = 0;
     this.renderTimestamp = 0;
     this.emit("stop");
@@ -409,22 +412,18 @@ class Player extends EventEmitter {
     const t1 = this.audioNalus[1].timestamp;
     const framerate = (this.framerate = t1 - t0);
     const loop = () => {
-      if (this.frames.length >= 128) {
-        this.loopTimer = setTimeout(loop, 1000 / 60);
+      if (this.loopCount >= 64 || !this.isPlaying) {
+        this.loopTimer = setTimeout(() => loop(), 1000 / 60);
         return;
       }
 
-      if (!this.isPlaying) {
-        this.loopTimer = setTimeout(loop, 1000 / 60);
-        return;
-      }
-
+      this.loopCount += 1;
       const item = this.videoNalus[this.index++];
       if (item) {
         const { data, timestamp } = item;
         this.timestamp = timestamp;
         this.h264Codec.decode(data);
-        this.loopTimer = setTimeout(loop, 1000 / 60);
+        this.loopTimer = setTimeout(() => loop(), 1000 / 60);
       }
     };
 
@@ -470,17 +469,32 @@ class Player extends EventEmitter {
           break;
         }
       }
+
+      if (frame == null && this.frames.length) {
+        const lastFrame = this.frames[this.frames.length - 1];
+        if (audioCurTimestamp - lastFrame.timestamp > MAX_TS_DIFF) {
+          this.loopCount = 0;
+          this.frames = [];
+        }
+      }
     } else {
       frame = this.frames.shift();
       const { timestamp } = frame || {};
       const { lasttimestamp } = this.mediaInfo;
-      const diff = frame ? Math.abs(timestamp - lasttimestamp * 1000) : 1000;
+      let diff = 1000;
+      if (frame) {
+        diff = Math.abs(timestamp - lasttimestamp * 1000);
+      }
+
       if (diff <= this.framerate) {
         this.onSoundEnd();
       }
     }
 
     if (frame) {
+      this.loopCount -= 1;
+      this.loopCount = this.loopCount < 0 ? 0 : this.loopCount;
+
       const { width, height, data } = frame;
       this.renderTimestamp = frame.timestamp;
       this.drawer.drawNextOutputPicture(
