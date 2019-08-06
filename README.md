@@ -33,7 +33,7 @@ https://qiaozi-tech.github.io/WXInlinePlayer/example/index.html
 ffmpeg -i <your file> -vcodec h264 -acodec aac -profile:v baseline -vf scale=640:-1 mtv.flv
 ```
 
-2. 目前没有对视频进行流式加载与解析，因此播放1080P会导致大量的内存占用，推荐参数ffmpeg基础转码上设定以下参数：
+2. 目前没有对视频进行流式加载与解析，因此播放1080P会导致大量的内存占用，推荐附加参数：
 * 分辨率: -vf scale=-1:360
 * fps: -r 25
 * 码率：-b:v 1200K
