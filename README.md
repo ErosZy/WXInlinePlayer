@@ -35,7 +35,10 @@ https://qiaozi-tech.github.io/WXInlinePlayer/example/index.html
 ffmpeg -i <your file> -vcodec h264 -acodec aac -profile:v baseline -vf scale=640:-1 mtv.flv
 ```
 
-2. 目前没有对视频进行Stream Parse，因此播放1080P会导致大量的内存占用，推荐720P/360P的视频分辨率，此问题已在TODO规划之中。
+2. 目前没有对视频进行Stream Parse，因此播放1080P会导致大量的内存占用，推荐参数：
+* 分辨率: -vf scale=-1:360
+* fps: -r 25
+* 码率：-b:v 1200K
 
 ## 5. 起步
 ```html
