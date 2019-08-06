@@ -9,8 +9,6 @@ WXInlinePlayer
 4. 各种播放前后的广告
 5. 纯Native组件，无法很好的进行触摸事件交互
 
-当然，其他厂商例如百度/UC/360及手机厂商的默认系统浏览器也做了非常多恶心人的奇怪限制。
-
 ## 1.示例
 https://qiaozi-tech.github.io/WXInlinePlayer/example/index.html
 
@@ -18,7 +16,7 @@ https://qiaozi-tech.github.io/WXInlinePlayer/example/index.html
 在BrowserStack中测试，主流系统版本均通过，其余机型请考虑通过降级页面功能进行处理：
 1. iOS 9+ (含Safari及Safari WebView)
 2. Android 5+（部分4.4.2+的系统浏览器也支持）
-3. IE11+
+3. IE11
 4. Chrome 24+
 5. Firefox
 6. Safari
@@ -26,8 +24,8 @@ https://qiaozi-tech.github.io/WXInlinePlayer/example/index.html
 
 ## 3.优点
 1. 整体核心极小（gzip ~110kb)，减少移动端加载与解析时间
-2. 性能进行高度优化，稳定使用在线上产品中[好惠买](https://h5.haohuimai1.com)
-3. 移动端兼容性良好，不依赖系统/软件平台的【魔改】播放器，便于产品实现
+2. 性能进行高度优化，稳定使用在线上产品[好惠买](https://h5.haohuimai1.com)中
+3. 移动端兼容性良好，不依赖系统/软件平台的魔改播放器，便于产品实现
 
 ## 4.限制
 1. 目前仅支持FLV（AVC+AAC+baseline）格式，如果是MP4等其他格式请使用ffmpeg进行转码
@@ -35,7 +33,7 @@ https://qiaozi-tech.github.io/WXInlinePlayer/example/index.html
 ffmpeg -i <your file> -vcodec h264 -acodec aac -profile:v baseline -vf scale=640:-1 mtv.flv
 ```
 
-2. 目前没有对视频进行Stream Parse，因此播放1080P会导致大量的内存占用，推荐参数：
+2. 目前没有对视频进行流式加载与解析，因此播放1080P会导致大量的内存占用，推荐参数ffmpeg基础转码上设定以下参数：
 * 分辨率: -vf scale=-1:360
 * fps: -r 25
 * 码率：-b:v 1200K
@@ -105,8 +103,8 @@ ffmpeg -i <your file> -vcodec h264 -acodec aac -profile:v baseline -vf scale=640
 
 ## 6.TODO
 1. 流式解析，提高首帧显示和内存占用情况
-2. 支持FLV直播流播放
-3. 进一步提升H264解析性能
+2. 进一步提升H264解析性能
+3. 支持FLV直播流播放
 
 ## 7. 其余问题
 * 如何获取播放器的当前进度？
