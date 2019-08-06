@@ -30,10 +30,12 @@ https://qiaozi-tech.github.io/WXInlinePlayer/example/index.html
 3. 移动端兼容性良好，不依赖系统/软件平台的【魔改】播放器，便于产品实现
 
 ## 4.限制
-目前仅支持FLV（AVC+AAC+baseline）格式，如果是MP4等其他格式请使用ffmpeg进行转码
+1. 目前仅支持FLV（AVC+AAC+baseline）格式，如果是MP4等其他格式请使用ffmpeg进行转码
 ```shell
 ffmpeg -i <your file> -vcodec h264 -acodec aac -profile:v baseline mtv.flv
-``` 
+```
+
+2. 目前没有对视频进行Stream Parse，因此播放1080P会导致大量的内存占用，推荐720P/360P的视频分辨率，此问题已在TODO规划之中。
 
 ## 5. 起步
 ```html
