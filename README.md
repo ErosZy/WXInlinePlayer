@@ -74,12 +74,41 @@ ffmpeg -i <your file> -vcodec h264 -acodec aac -profile:v baseline -vf scale=640
         });
         WXInlinePlayer.ready().then(() => {
           let player = new WXInlinePlayer({
-            url: "./mtv.flv", // 仅支持flv格式(H264+AAC)
-            $container: document.getElementById("container"),
-            volume: 1.0, // iOS不允许代码调节声量，请注意兼容
-            muted: false, // iOS和Android均支持代码控制静音
-            autoplay: true,
-            loop: false
+              url: './sample.flv', // 仅支持flv格式(H264+AAC)
+              $container: document.getElementById('container'),
+              volume: 1.0, // iOS不允许代码调节声量，请注意兼容
+              muted: false, // iOS和Android均支持代码控制静音
+              autoplay: false,
+              loop: false
+          });
+
+          player.on('load:success', ()=>{
+              player.play();
+          });
+
+          player.on('load:error', ()=>{
+              console.log('>>>>>>>>>load error');
+          });
+
+          player.on('play', ()=>{
+              // player.volume(0.0); GET/SET方法
+              // player.mute(true); GET/SET方法
+              // player.resume(); 播放器恢复播放
+              // player.pause(); 播放器暂停
+              // player.stop(); 播放器停止
+          });
+
+          player.on('stop', ()=>{
+              player.destroy();
+              player = null;
+          });
+          
+          // iOS及Chrome高版本禁止声音播放
+          // WXInlinePlayer的音画同步依靠音源的播放时间戳进行对齐
+          // 当音源播放被阻止时会等待250ms后尝试直接绘制画面
+          // 同时触发playtimeout
+          player.on('playtimeout', ()=>{
+              console.log('>>>>>>>>>playtimeout');
           });
         });
       }
