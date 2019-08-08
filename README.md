@@ -40,64 +40,51 @@ ffmpeg -i <your file> -vcodec h264 -acodec aac -profile:v baseline -vf scale=640
 
 ## 5. 起步
 ```html
-<html>
-    <head></head>
-    <body>
-        <div id="container"></div>
-        <script src="./dist/index.js"></script>
-        <script>
-            // 相关特性不支持时需要降级页面功能
-            if(WXInlinePlayer && WXInlinePlayer.isSupport()){
-                WXInlinePlayer.init({
-                    asmUrl: './dist/TinyH264.asm.js',
-                    wasmUrl: './dist/TinyH264.wasm.js',
-                }).catch(()=>{
-                    // 部分浏览器会在解析wasm/asm时失败（但相关特性支持）
-                    // 此时同样需要降级页面功能
-                });
-
-                WXInlinePlayer.ready().then(()=>{
-                    let player = new WXInlinePlayer({
-                        url: './sample.flv', // 仅支持flv格式(H264+AAC)
-                        $container: document.getElementById('container'),
-                        volume: 1.0, // iOS不允许代码调节声量，请注意兼容
-                        muted: false, // iOS和Android均支持代码控制静音
-                        autoplay: false,
-                        loop: false
-                    });
-
-                    player.on('load:success', ()=>{
-                        player.play();
-                    });
-
-                    player.on('load:error', ()=>{
-                        console.log('>>>>>>>>>load error');
-                    });
-
-                    player.on('play', ()=>{
-                        player.volume(0.0); // GET/SET方法
-                        player.mute(true); // GET/SET方法
-                        player.resume();
-                        player.pause();
-                        player.stop();
-                    });
-
-                    player.on('stop', ()=>{
-                        player.destroy();
-                        player = null;
-                    });
-                    
-                    // iOS及Chrome高版本禁止声音播放
-                    // WXInlinePlayer的音画同步依靠音源的播放时间戳进行对齐
-                    // 当音源播放被阻止时会等待250ms后尝试直接绘制画面
-                    // 同时触发playtimeout
-                    player.on('playtimeout', ()=>{
-                        console.log('>>>>>>>>>playtimeout');
-                    });
-                });
-            }
-        </script>
-    </body>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>WXInlinePlayer Demo Page</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+      }
+      #container {
+        width: 1280px;
+        height: 720px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-left: -640px;
+        margin-top: -360px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container"></div>
+    <script src="../dist/index.js"></script>
+    <script>
+      if (WXInlinePlayer && WXInlinePlayer.isSupport()) {
+        WXInlinePlayer.init({
+          asmUrl: "../dist/TinyH264.asm.js",
+          wasmUrl: "../dist/TinyH264.wasm.js"
+        });
+        WXInlinePlayer.ready().then(() => {
+          let player = new WXInlinePlayer({
+            url: "./mtv.flv", // 仅支持flv格式(H264+AAC)
+            $container: document.getElementById("container"),
+            volume: 1.0, // iOS不允许代码调节声量，请注意兼容
+            muted: false, // iOS和Android均支持代码控制静音
+            autoplay: true,
+            loop: false
+          });
+        });
+      }
+    </script>
+  </body>
 </html>
 ```
 
