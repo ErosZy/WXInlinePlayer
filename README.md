@@ -118,6 +118,7 @@ ffmpeg -i <your file> -vcodec h264 -acodec aac -profile:v baseline -vf scale=640
 ```
 
 ## 6.TODO
+0. flv-demux替换为wasm实现，整合demux + h264codec，大幅度降低内存使用
 1. 流式解析，提高首帧显示和内存占用情况
 2. 进一步提升H264解析性能
 3. 支持FLV直播流播放
