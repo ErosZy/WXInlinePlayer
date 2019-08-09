@@ -9,7 +9,7 @@ WXInlinePlayer
 4. 各种播放前后的广告
 5. 纯Native组件，无法很好的进行触摸事件交互
 
-## 1.示例
+## 1.示例（科学翻墙）
 https://qiaozi-tech.github.io/WXInlinePlayer/example/index.html
 
 ## 2.兼容性
