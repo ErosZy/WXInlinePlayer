@@ -33,7 +33,7 @@
 
         WXInlinePlayer.ready().then(() => {
           let player = new WXInlinePlayer({
-            url: "./mtv.flv", // 仅支持flv格式(H264+AAC)
+            url: "http://static.petera.cn/mtv.flv?_=" + Math.random(), // 仅支持flv格式(H264+AAC)
             $container: document.getElementById("container"),
             volume: 1.0, // iOS不允许代码调节声量，请注意兼容
             muted: false, // iOS和Android均支持代码控制静音

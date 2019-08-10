@@ -9,6 +9,7 @@ rm -rf ./combine/TinyH264.wasm.js
 rm -rf ./combine/TinyH264.asm.js
 
 emcc -Oz --memory-init-file 0 \
+    -s TOTAL_MEMORY=33554432 \
     -s SINGLE_FILE=1 \
     -s DISABLE_EXCEPTION_CATCHING=0 \
     -s ERROR_ON_UNDEFINED_SYMBOLS=0 \
@@ -54,6 +55,7 @@ emcc -Oz --memory-init-file 0 \
     -o ./combine/TinyH264.wasm.js
 
 emcc -Oz --memory-init-file 0 \
+    -s TOTAL_MEMORY=33554432 \
     -s SINGLE_FILE=1 \
     -s DISABLE_EXCEPTION_CATCHING=0 \
     -s ELIMINATE_DUPLICATE_FUNCTIONS=1 \

@@ -331,6 +331,10 @@ class Player extends EventEmitter {
   }
 
   onLoadSuccess(buffer) {
+    if (this.loader) {
+      this.loader.abort();
+      this.loader = null;
+    }
     this.samples = Buffer.from(buffer || []);
     if (this.samples == null || !this.samples.length) {
       return;
@@ -372,6 +376,12 @@ class Player extends EventEmitter {
 
   onVideoComplete() {
     this.emit("load:success");
+    this.samples = null;
+    if (this.flv2h264) {
+      this.flv2h264.destroy();
+      this.flv2h264 = null;
+    }
+
     if (this.autoplay) {
       this.play();
     }
@@ -410,9 +420,10 @@ class Player extends EventEmitter {
     clearTimeout(this.autoPlayTimer);
     const t0 = this.audioNalus[0].timestamp;
     const t1 = this.audioNalus[1].timestamp;
-    const framerate = (this.framerate = t1 - t0);
+    this.framerate = t1 - t0;
+
     const loop = () => {
-      if (this.loopCount >= 64 || !this.isPlaying) {
+      if (this.loopCount >= this.framerate || !this.isPlaying) {
         this.loopTimer = setTimeout(() => loop(), 1000 / 60);
         return;
       }
@@ -428,7 +439,7 @@ class Player extends EventEmitter {
     };
 
     loop();
-    Ticker.framerate = framerate * 1.2;
+    Ticker.framerate = this.framerate * 1.2;
     this.tick = this.onTick.bind(this);
     Ticker.addEventListener("tick", this.tick);
     this.emit("play");
