@@ -3,13 +3,13 @@ WXInlinePlayer
 
 ## 0.背景
 国内的各个浏览器厂商对于Video都有着各种技术上的限制和管控，例如腾讯系的X5引擎对Video进行了大量的魔改，其中包括：
-1. 所谓的同层播放层（？？）
+1. 所谓的同层播放层
 2. 无法正常playsinline
 3. 即使静音也无法自动播放
 4. 各种播放前后的广告
 5. 纯Native组件，无法很好的进行触摸事件交互
 
-## 1.示例
+## 1.示例（720P视频，文件较大请耐心等待）
 https://qiaozi-tech.github.io/WXInlinePlayer/example/index.html
 
 ## 2.兼容性
@@ -33,7 +33,7 @@ https://qiaozi-tech.github.io/WXInlinePlayer/example/index.html
 ffmpeg -i <your file> -vcodec h264 -acodec aac -profile:v baseline -vf scale=640:-1 mtv.flv
 ```
 
-2. 目前没有对视频进行流式加载与解析，因此播放1080P会导致大量的内存占用，推荐附加参数：
+2. 1080P视频软解效率不高，会出现卡顿的情况，推荐增加转码参数：
 * 分辨率: -vf scale=-1:360
 * fps: -r 25
 * 码率：-b:v 1200K
