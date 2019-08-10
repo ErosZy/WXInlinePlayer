@@ -122,6 +122,7 @@ ffmpeg -i <your file> -vcodec h264 -acodec aac -profile:v baseline -vf scale=640
 1. 流式解析，提高首帧显示和内存占用情况
 2. 进一步提升H264解析性能
 3. 支持FLV直播流播放
+4. 多worker线程解码支持
 
 ## 7. 其余问题
 * 如何获取播放器的当前进度？
