@@ -1,36 +1,22 @@
 cmake_minimum_required(VERSION 3.13)
-project(codec)
+project(CODEC)
 set(CMAKE_CXX_STANDARD 11)
 
-set(CXX_FLAGS
-        -g
-        -DCHECK_PTHREAD_RETURN_VALUE
-        -D_FILE_OFFSET_BITS=64
-        -Wextra
-        -Werror
-        -Wno-unused-parameter
-        -Wpointer-arith
-        -Wwrite-strings
-        -march=native
-        )
-
-string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CXX_FLAGS}")
-
-set(CMAKE_CXX_COMPILER "g++")
-set(CMAKE_CXX_FLAGS_DEBUG "-O0")
-set(CMAKE_CXX_FLAGS_RELEASE "-O2 -finline-limit=1000 -DNDEBUG")
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
-
-message(STATUS "Project Directory: ${PROJECT_SOURCE_DIR}")
-
-string(TOUPPER ${CMAKE_BUILD_TYPE} BUILD_TYPE)
-message(STATUS "CXX_FLAGS = " ${CMAKE_CXX_FLAGS} " " ${CMAKE_CXX_FLAGS_${BUILD_TYPE}})
+set(LIBRARY_OUTPUT_PATH  ${PROJECT_SOURCE_DIR}/lib)
 
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
 add_subdirectory(src/stream)
+add_subdirectory(src/factor)
 add_subdirectory(src/demuxer)
+add_subdirectory(src/h264)
+add_subdirectory(src/codec)
+add_subdirectory(src)
+#add_subdirectory(test)
 
-add_executable(main src/main.cpp)
-target_link_libraries(main stream demuxer)
+set(EM_CONFIG_PARAM "-O3 -s ENVIRONMENT=\"web,worker\" -s SINGLE_FILE=1 -s WASM=1 -s FETCH=0 -s DISABLE_EXCEPTION_CATCHING=0 -s ERROR_ON_UNDEFINED_SYMBOLS=0 -s NO_EXIT_RUNTIME=0 -s FILESYSTEM=0 -s INVOKE_RUN=0 -s ASSERTIONS=1 -s TOTAL_MEMORY=33554432 -s EXPORTED_FUNCTIONS=\"['_codecInit', '_codecSetBridgeName', '_codecDecode', '_codecSetVideoBuffer', '_codecSetAudioBuffer', '_codecTry2Seek', '_codecFree']\"")
+#set(EM_CONFIG_PARAM "-O3 -s ENVIRONMENT=\"web,worker\" -s SINGLE_FILE=1 -s WASM=0 -s FETCH=0 -s DISABLE_EXCEPTION_CATCHING=0 -s ERROR_ON_UNDEFINED_SYMBOLS=0 -s NO_EXIT_RUNTIME=0 -s FILESYSTEM=0 -s TOTAL_MEMORY=33554432 -s INVOKE_RUN=0 -s LEGACY_VM_SUPPORT=1 -s MEM_INIT_METHOD=0 -s ELIMINATE_DUPLICATE_FUNCTIONS=1 -s ASSERTIONS=1 -s TOTAL_MEMORY=33554432 -s EXPORTED_FUNCTIONS=\"['_codecInit', '_codecSetBridgeName', '_codecDecode', '_codecSetVideoBuffer', '_codecSetAudioBuffer', '_codecTry2Seek', '_codecFree']\"")
+set(EM_OPTIMIZE_PARAM "--closure 1 --memory-init-file 0 --llvm-lto 3")
+set_target_properties(prod PROPERTIES LINK_FLAGS "${EM_CONFIG_PARAM} ${EM_OPTIMIZE_PARAM}")
+#set_target_properties(test PROPERTIES LINK_FLAGS "${EM_CONFIG_PARAM} ${EM_OPTIMIZE_PARAM}")

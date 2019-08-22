@@ -1,0 +1,1 @@
+C:\emsdk\fastcomp\emscripten\emar.bat rc ..\..\..\lib\libcodec.a  @CMakeFiles\codec.dir\objects1.rsp

@@ -1,5 +1,5 @@
 #ifndef _STREAM_BUFFER_
-#define _STREAM_BUFFER_ 1
+#define _STREAM_BUFFER_
 
 #include <memory>
 #include <vector>

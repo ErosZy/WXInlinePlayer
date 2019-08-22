@@ -1,0 +1,1 @@
+C:\emsdk\fastcomp\emscripten\emar.bat rc ..\..\..\lib\libdemuxer.a  @CMakeFiles\demuxer.dir\objects1.rsp

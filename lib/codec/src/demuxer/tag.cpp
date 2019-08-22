@@ -13,7 +13,7 @@ TagValue Tag::decode(shared_ptr<Buffer> &buffer, uint32_t size) {
     return TagValue(true);
   }
 
-  if (buffer->get_length() < Tag::MIN_LENGTH + size) {
+  if (buffer->get_length() < Tag::MIN_LENGTH + _size) {
     return TagValue(true);
   }
 
@@ -24,25 +24,29 @@ TagValue Tag::decode(shared_ptr<Buffer> &buffer, uint32_t size) {
     case AudioTag::TYPE: {
       AudioTag tag;
       value.type = AudioTag::TYPE;
-      value.audioTag = tag.decode(buffer, size);
+      value.audioTag = tag.decode(buffer, _size);
+      value.audioTag.buffer = make_shared<Buffer>();
       break;
     }
     case VideoTag::TYPE: {
       VideoTag tag;
       value.type = VideoTag::TYPE;
-      value.videoTag = tag.decode(buffer, size);
+      value.videoTag = tag.decode(buffer, _size);
+      value.videoTag.buffer = make_shared<Buffer>();
       break;
     }
     case DataTag::TYPE: {
       DataTag tag;
       value.type = DataTag::TYPE;
-      value.dataTag = tag.decode(buffer, size);
+      value.dataTag = tag.decode(buffer, _size);
+      value.dataTag.buffer = make_shared<Buffer>();
       break;
     }
     default:
       return TagValue(true);
   }
 
-  value.buffer = make_shared<Buffer>(buffer->slice(size));
+  value.timestamp = _timestamp;
+  value.buffer = make_shared<Buffer>(buffer->slice(_size));
   return value;
 }

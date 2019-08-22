@@ -1,0 +1,2 @@
+C:\softwares\MinGW\mingw64\bin\ar.exe qc ..\..\..\lib\libdemuxer.a  CMakeFiles/demuxer.dir/vars.cpp.obj CMakeFiles/demuxer.dir/audio_tag.cpp.obj CMakeFiles/demuxer.dir/video_tag.cpp.obj CMakeFiles/demuxer.dir/data_tag.cpp.obj CMakeFiles/demuxer.dir/tag.cpp.obj CMakeFiles/demuxer.dir/header.cpp.obj CMakeFiles/demuxer.dir/body.cpp.obj CMakeFiles/demuxer.dir/decoder.cpp.obj
+C:\softwares\MinGW\mingw64\bin\ranlib.exe ..\..\..\lib\libdemuxer.a

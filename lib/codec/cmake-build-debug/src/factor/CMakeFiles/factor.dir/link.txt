@@ -1,0 +1,2 @@
+C:\softwares\MinGW\mingw64\bin\ar.exe qc ..\..\..\lib\libfactor.a  CMakeFiles/factor.dir/codec_factor.cpp.obj
+C:\softwares\MinGW\mingw64\bin\ranlib.exe ..\..\..\lib\libfactor.a

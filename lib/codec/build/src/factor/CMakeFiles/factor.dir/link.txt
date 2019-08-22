@@ -1,0 +1,1 @@
+C:\emsdk\fastcomp\emscripten\emar.bat rc ..\..\..\lib\libfactor.a  @CMakeFiles\factor.dir\objects1.rsp

@@ -14,6 +14,7 @@ struct VideoTagValue {
     uint32_t codecId;
     uint32_t AVCPacketType;
     uint32_t compositionTime;
+    shared_ptr<Buffer> data;
     shared_ptr<Buffer> buffer;
 };
 

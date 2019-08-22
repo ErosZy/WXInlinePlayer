@@ -1,0 +1,4 @@
+"C:\softwares\CLion 2018.3.3\bin\cmake\win\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - MinGW Makefiles" C:\work\WXInlinePlayer\lib\codec
+-- Configuring done
+-- Generating done
+-- Build files have been written to: C:/work/WXInlinePlayer/lib/codec/cmake-build-debug

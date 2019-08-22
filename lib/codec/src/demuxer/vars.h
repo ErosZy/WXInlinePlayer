@@ -3,8 +3,11 @@
 
 #include <stdint.h>
 #include <string>
+#include <sstream>
 #include <memory.h>
+#include <memory>
 #include <vector>
+#include "stream/buffer.h"
 
 using namespace std;
 
@@ -26,6 +29,9 @@ enum VarTypes {
 struct VarsValue {
     explicit VarsValue(bool v = false) : unvalidated(v), type(99), strValue(string("")), numValue(0), boolValue(false),
                                          arrayValue(make_shared<vector<VarsValue>>()) {};
+
+    string to_json();
+
     bool unvalidated;
     uint32_t type;
     string strValue;
@@ -38,8 +44,8 @@ struct VarsValue {
 
 class ScriptDataString {
 public:
-    static const uint32_t MIN_LENGTH;
-    static const uint32_t TYPE;
+    static const uint32_t MIN_LENGTH = 2;
+    static const uint32_t TYPE = 2;
 
     explicit ScriptDataString(bool ignoreTypeCheck = false) :
             _ignoreTypeCheck(ignoreTypeCheck), _data(""),
@@ -75,13 +81,10 @@ private:
     string _data;
 };
 
-const uint32_t ScriptDataString::MIN_LENGTH = 2;
-const uint32_t ScriptDataString::TYPE = 2;
-
 class ScriptDataDate {
 public:
-    static const uint32_t MIN_LENGTH;
-    static const uint32_t TYPE;
+    static const uint32_t MIN_LENGTH = 10;
+    static const uint32_t TYPE = 11;
 
     explicit ScriptDataDate(bool ignoreTypeCheck = false) :
             _ignoreTypeCheck(ignoreTypeCheck), _dateTime(0),
@@ -113,12 +116,9 @@ private:
     int16_t _localDateTimeOffset;
 };
 
-const uint32_t ScriptDataDate::MIN_LENGTH = 10;
-const uint32_t ScriptDataDate::TYPE = 11;
-
 class ScriptDataLongString {
 public:
-    static const uint32_t TYPE;
+    static const uint32_t TYPE = 12;
 
     explicit ScriptDataLongString(bool ignoreTypeCheck = false) :
             _ignoreTypeCheck(ignoreTypeCheck), _data(""),
@@ -154,12 +154,10 @@ private:
     string _data;
 };
 
-const uint32_t ScriptDataLongString::TYPE = 12;
-
 class ScriptDataObjectEnd {
 public:
-    static const uint32_t MIN_LENGTH;
-    static const uint32_t TYPE;
+    static const uint32_t MIN_LENGTH = 3;
+    static const uint32_t TYPE = 9;
 
     explicit ScriptDataObjectEnd() : _ended(false) {};
 
@@ -185,13 +183,10 @@ private:
     bool _ended;
 };
 
-const uint32_t ScriptDataObjectEnd::MIN_LENGTH = 3;
-const uint32_t ScriptDataObjectEnd::TYPE = 9;
-
 class ScriptDataVarEnd {
 public:
-    static const uint32_t MIN_LENGTH;
-    static const uint32_t TYPE;
+    static const uint32_t MIN_LENGTH = 3;
+    static const uint32_t TYPE = 9;
 
     ScriptDataVarEnd() : _ended(false) {};
 
@@ -216,15 +211,12 @@ private:
     bool _ended;
 };
 
-const uint32_t ScriptDataVarEnd::MIN_LENGTH = 3;
-const uint32_t ScriptDataVarEnd::TYPE = 9;
-
 class ScriptDataObject {
 public:
-    static const uint32_t MIN_LENGTH;
-    static const uint32_t TYPE;
+    static const uint32_t MIN_LENGTH = 3;
+    static const uint32_t TYPE = 3;
 
-    ScriptDataObject(bool ignoreTypeCheck = false) : _ignoreTypeCheck(ignoreTypeCheck) {};
+    explicit ScriptDataObject(bool ignoreTypeCheck = false) : _ignoreTypeCheck(ignoreTypeCheck) {};
 
     VarsValue decode(shared_ptr<Buffer> &buffer, uint32_t size = 0);
 
@@ -232,21 +224,17 @@ private:
     bool _ignoreTypeCheck;
 };
 
-const uint32_t ScriptDataObject::MIN_LENGTH = 3;
-const uint32_t ScriptDataObject::TYPE = 3;
-
 class ScriptDataVar {
 public:
-    static const uint32_t MIN_LENGTH;
+    static const uint32_t MIN_LENGTH = 3;
+    static const uint32_t TYPE = 3;
 
     VarsValue decode(shared_ptr<Buffer> &buffer, uint32_t size = 0);
 };
 
-const uint32_t ScriptDataVar::MIN_LENGTH = 3;
-
 class ScriptDataValue {
 public:
-    static const uint32_t MIN_LENGTH;
+    static const uint32_t MIN_LENGTH = 1;
 
     ScriptDataValue() : _type(VarTypes::UNDEFINED) {};
 
@@ -276,28 +264,20 @@ public:
         case VarTypes::OBJECT: {
           buffer = make_shared<Buffer>(buffer->slice(1));
           value.next = make_shared<VarsValue>();
-          VarsValue *ptr = &value;
+          value.arrayValue = make_shared<vector<VarsValue>>();
           for (;;) {
             ScriptDataObject object(true);
             VarsValue ret = object.decode(buffer);
             buffer = ret.buffer;
-            ptr->type = ret.type;
-            ptr->arrayValue = ret.arrayValue;
-            ptr->strValue = ret.strValue;
-            ptr->boolValue = ret.boolValue;
-            ptr->numValue = ret.numValue;
-            ptr->unvalidated = ret.unvalidated;
-            ptr->next = ret.next;
+            value.arrayValue->push_back(ret);
+            ret.buffer = make_shared<Buffer>();
 
             ScriptDataObjectEnd objectEnd;
             ret = objectEnd.decode(buffer);
             buffer = ret.buffer;
             if (ret.boolValue) {
               break;
-            } else {
-              ptr->next->next = make_shared<VarsValue>();
-              ptr = ptr->next->next.get();
-            }
+            };
           }
           value.buffer = buffer;
           break;
@@ -356,6 +336,8 @@ public:
           value = longstr.decode(buffer);
           break;
         }
+        default:
+          break;
       }
 
       return value;
@@ -364,47 +346,5 @@ public:
 private:
     uint32_t _type;
 };
-
-const uint32_t ScriptDataValue::MIN_LENGTH = 1;
-
-VarsValue ScriptDataVar::decode(shared_ptr<Buffer> &buffer, uint32_t size) {
-  VarsValue value;
-  ScriptDataString varName(true);
-  VarsValue ret = varName.decode(buffer);
-  value.strValue = ret.strValue;
-
-  ScriptDataValue varData;
-  ret = varData.decode(ret.buffer);
-  value.next = make_shared<VarsValue>();
-  value.next->type = ret.type;
-  value.next->unvalidated = ret.unvalidated;
-  value.next->arrayValue = ret.arrayValue;
-  value.next->boolValue = ret.boolValue;
-  value.next->numValue = ret.numValue;
-  value.next->strValue = ret.strValue;
-  value.buffer = ret.buffer;
-  return value;
-}
-
-VarsValue ScriptDataObject::decode(shared_ptr<Buffer> &buffer, uint32_t size) {
-  VarsValue value;
-  value.type = ScriptDataObject::TYPE;
-  ScriptDataString dataName(_ignoreTypeCheck);
-  VarsValue ret = dataName.decode(buffer);
-  value.strValue = ret.strValue;
-
-  ScriptDataValue dataValue;
-  ret = dataValue.decode(ret.buffer);
-  value.next = make_shared<VarsValue>();
-  value.next->type = ret.type;
-  value.next->unvalidated = ret.unvalidated;
-  value.next->arrayValue = ret.arrayValue;
-  value.next->boolValue = ret.boolValue;
-  value.next->numValue = ret.numValue;
-  value.next->strValue = ret.strValue;
-  value.buffer = ret.buffer;
-  return value;
-}
-
 
 #endif //CODEC_VARS_H

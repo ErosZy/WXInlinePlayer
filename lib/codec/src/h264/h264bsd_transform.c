@@ -370,7 +370,6 @@ void h264bsdProcessChromaDc(i32 *data, u32 qp)
 
     qpDiv = qpDiv6[qp];
     levScale = levelScale[ qpMod6[qp] ][0];
-
     if (qp >= 6)
     {
         levScale <<= (qpDiv-1);
