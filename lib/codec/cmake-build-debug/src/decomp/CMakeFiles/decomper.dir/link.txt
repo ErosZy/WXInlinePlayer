@@ -1,2 +1,0 @@
-C:\softwares\MinGW\mingw64\bin\ar.exe qc libdecomper.a  CMakeFiles/decomper.dir/factor.cpp.obj CMakeFiles/decomper.dir/decomp.cpp.obj
-C:\softwares\MinGW\mingw64\bin\ranlib.exe libdecomper.a

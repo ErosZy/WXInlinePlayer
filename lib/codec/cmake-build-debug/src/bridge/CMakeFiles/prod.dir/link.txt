@@ -1,3 +1,0 @@
-"C:\softwares\CLion 2018.3.3\bin\cmake\win\bin\cmake.exe" -E remove -f CMakeFiles\prod.dir/objects.a
-C:\softwares\MinGW\mingw64\bin\ar.exe cr CMakeFiles\prod.dir/objects.a @CMakeFiles\prod.dir\objects1.rsp
-C:\softwares\MinGW\mingw64\bin\g++.exe -g   -Wl,--whole-archive CMakeFiles\prod.dir/objects.a -Wl,--no-whole-archive  -o prod.exe -Wl,--out-implib,libprod.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\prod.dir\linklibs.rsp

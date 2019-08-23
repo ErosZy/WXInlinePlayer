@@ -30,6 +30,7 @@
     "@babel/preset-env": "^7.5.5",
     "babel-plugin-transform-es2015-destructuring": "^6.23.0",
     "babel-plugin-transform-es2015-parameters": "^6.24.1",
-    "babel-plugin-transform-runtime": "^6.23.0"
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "uglify-js": "^3.6.0"
   }
 }

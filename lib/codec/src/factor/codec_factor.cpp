@@ -4,7 +4,8 @@
 void CodecFactor::recvHeaderValue(HeaderValue &value) {
 #ifdef __EMSCRIPTEN__
   EM_ASM({
-    var bridge = (window || self)[UTF8ToString($0)];
+    var isWorker = typeof importScripts == "function";
+    var bridge = (isWorker ? self : window)[UTF8ToString($0)];
     if(bridge && typeof bridge["onHeader"] == "function"){
       bridge["onHeader"]({
         "hasAudio": $1,
@@ -36,7 +37,8 @@ void CodecFactor::_handleDataTag(DataTagValue &tag) const {
     string jsonstr = tag.objects->at(0).to_json();
 #ifdef __EMSCRIPTEN__
     EM_ASM({
-      var bridge = (window || self)[UTF8ToString($0)];
+      var isWorker = typeof importScripts == "function";
+      var bridge = (isWorker ? self : window)[UTF8ToString($0)];
       var json = JSON.parse(UTF8ToString($1));
       if(bridge && typeof bridge["onMediaInfo"] == 'function'){
         bridge["onMediaInfo"](json);
@@ -78,7 +80,8 @@ void CodecFactor::_handleAudioTag(AudioTagValue &tag, uint32_t timestamp) const 
     adtsBody = make_shared<Buffer>(*adtsHeader + *adtsBody);
 #ifdef __EMSCRIPTEN__
     EM_ASM({
-      var bridge = (window || self)[UTF8ToString($0)];
+      var isWorker = typeof importScripts == "function";
+      var bridge = (isWorker ? self : window)[UTF8ToString($0)];
       if(bridge && typeof bridge["onAudioDataSize"] == "function"){
         bridge["onAudioDataSize"]({
           "size": $1,
@@ -89,7 +92,8 @@ void CodecFactor::_handleAudioTag(AudioTagValue &tag, uint32_t timestamp) const 
     if(_codec->audioBuffer != nullptr){
       memcpy(_codec->audioBuffer, adtsBody->get_buf_ptr(), adtsBody->get_length());
       EM_ASM({
-        var bridge = (window || self)[UTF8ToString($0)];
+        var isWorker = typeof importScripts == "function";
+        var bridge = (isWorker ? self : window)[UTF8ToString($0)];
         if(bridge && typeof bridge["onAudioData"] == "function"){
           bridge["onAudioData"]({
             "timestamp": $1,
@@ -151,7 +155,8 @@ void CodecFactor::_handleVideoTag(VideoTagValue &tag, uint32_t timestamp) const 
       uint32_t totalSize = (width * height) * 3 / 2;
 #ifdef __EMSCRIPTEN__
       EM_ASM({
-        var bridge = (window || self)[UTF8ToString($0)];
+        var isWorker = typeof importScripts == "function";
+        var bridge = (isWorker ? self : window)[UTF8ToString($0)];
         if(bridge && typeof bridge["onVideoDataSize"] == "function"){
           bridge["onVideoDataSize"]({
             "size": $1,
@@ -162,7 +167,8 @@ void CodecFactor::_handleVideoTag(VideoTagValue &tag, uint32_t timestamp) const 
       if(_codec->videoBuffer != nullptr){
         memcpy(_codec->videoBuffer, picPtr, totalSize);
         EM_ASM({
-          var bridge = (window || self)[UTF8ToString($0)];
+          var isWorker = typeof importScripts == "function";
+          var bridge = (isWorker ? self : window)[UTF8ToString($0)];
           if(bridge && typeof bridge["onVideoData"] == "function"){
             bridge["onVideoData"]({
               "timestamp": $1,
@@ -177,7 +183,8 @@ void CodecFactor::_handleVideoTag(VideoTagValue &tag, uint32_t timestamp) const 
   } else if (tag.AVCPacketType == 2) {
 #ifdef __EMSCRIPTEN__
     EM_ASM({
-      var bridge = (window || self)[UTF8ToString($0)];
+      var isWorker = typeof importScripts == "function";
+      var bridge = (isWorker ? self : window)[UTF8ToString($0)];
       if(bridge && typeof bridge["onComplete"] == "function"){
         bridge["onComplete"]();
       }

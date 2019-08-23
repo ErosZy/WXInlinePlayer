@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script src="./prod.wasm.combine.js"></script>
+    <script>
+      alert(window.navigator.userAgent);
+      window.onerror = function(e) {
+        alert(e);
+      };
+
+      var timestamp = 0;
+      var buffer = null;
+      var codec = new H264Codec();
+      codec.onmessage = function(data) {
+        var type = data.type;
+        if (type == "complete") {
+          alert(+new Date() - timestamp);
+          codec.destroy();
+          codec = null;
+        }
+        if (type == "ready") {
+          alert('ready');
+          var xhr = new XMLHttpRequest();
+          xhr.open("GET", "https://static.petera.cn/1-1-1.flv");
+          xhr.responseType = "arraybuffer";
+          xhr.onreadystatechange = function() {
+            if (xhr.readyState == 4) {
+              var resp = xhr.response;
+              var body = new Uint8Array(resp);
+              timestamp = +new Date();
+              decodeChunk(body);
+            }
+          };
+          xhr.send();
+        }
+      };
+
+      var MAX_SUB_COUNT = 1024 * 256;
+      function decodeChunk(buffer) {
+        var endIndex =
+          buffer.length > MAX_SUB_COUNT ? MAX_SUB_COUNT : buffer.length;
+        var subarray = buffer.subarray(0, endIndex);
+        codec.decode(subarray);
+
+        buffer = buffer.subarray(endIndex);
+        if (buffer.length) {
+          setTimeout(function() {
+            decodeChunk(buffer);
+          }, 2000);
+        }
+      }
+    </script>
+  </body>
+</html>
