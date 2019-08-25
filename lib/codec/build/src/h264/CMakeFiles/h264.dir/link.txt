@@ -1,1 +1,0 @@
-C:\emsdk\fastcomp\emscripten\emar.bat rc ..\..\..\lib\libh264.a  @CMakeFiles\h264.dir\objects1.rsp

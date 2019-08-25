@@ -1,2 +1,0 @@
-C:\softwares\MinGW\mingw64\bin\ar.exe qc ..\..\..\lib\libcodec.a  CMakeFiles/codec.dir/codec.cpp.obj
-C:\softwares\MinGW\mingw64\bin\ranlib.exe ..\..\..\lib\libcodec.a

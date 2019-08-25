@@ -323,7 +323,7 @@ double Buffer::to_double(uint32_t x0, uint32_t x1) {
     if (frac == 0) return DBL_MAX;
     return DBL_MIN;
   }
-  return sign * pow(2, expt - 1023) * (1 + frac * pow(2, -52));
+  return sign * pow(2, (int64_t)(expt - 1023)) * (1 + frac * pow(2, -52));
 }
 
 float Buffer::to_float(uint32_t x) {

@@ -1,1 +1,0 @@
-C:\emsdk\fastcomp\emscripten\emar.bat rc ..\..\..\lib\libstream.a  @CMakeFiles\stream.dir\objects1.rsp

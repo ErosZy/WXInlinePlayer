@@ -39,9 +39,8 @@ void CodecFactor::_handleDataTag(DataTagValue &tag) const {
     EM_ASM({
       var isWorker = typeof importScripts == "function";
       var bridge = (isWorker ? self : window)[UTF8ToString($0)];
-      var json = JSON.parse(UTF8ToString($1));
       if(bridge && typeof bridge["onMediaInfo"] == 'function'){
-        bridge["onMediaInfo"](json);
+        bridge["onMediaInfo"](UTF8ToString($1));
       }
     }, _codec->bridgeName.c_str(), jsonstr.c_str());
 #endif

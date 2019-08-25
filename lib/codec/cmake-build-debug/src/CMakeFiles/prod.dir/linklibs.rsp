@@ -1,1 +1,0 @@
-../../lib/libstream.a ../../lib/libdemuxer.a ../../lib/libfactor.a ../../lib/libh264.a ../../lib/libcodec.a ../../lib/libfactor.a ../../lib/libdemuxer.a ../../lib/libstream.a -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 

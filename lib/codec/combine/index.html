@@ -7,53 +7,102 @@
     <title>Document</title>
   </head>
   <body>
+    <p></p>
+    <script src="//lib.baomitu.com/FileSaver.js/2014-11-29/FileSaver.min.js"></script>
     <script src="./prod.wasm.combine.js"></script>
     <script>
-      alert(window.navigator.userAgent);
-      window.onerror = function(e) {
-        alert(e);
+      window.onerror = function() {
+        var content = '';
+        for (var i = 0; i < arguments.length; i++) {
+          content += arguments[i] + ' ';
+        }
+        alert(content);
       };
 
+      var t = 0;
+      var $p = document.querySelector('p');
+      var reader = null;
+      var context = new (window.AudioContext || window.webkitAudioContext)();
+      var consume = 0;
+      var duration = 0;
+      var video = [];
+      var audio = [];
       var timestamp = 0;
-      var buffer = null;
+      var _buffer = null;
       var codec = new H264Codec();
       codec.onmessage = function(data) {
         var type = data.type;
-        if (type == "complete") {
-          alert(+new Date() - timestamp);
+        if (type == 'mediaInfo') {
+          console.log(data.data);
+        } else if (type == 'ready') {
+          fetch('https://static.petera.cn/mm.flv').then(resp => {
+            reader = resp.body.getReader();
+            decodeChunk();
+          });
+        } else if (type == 'video') {
+          var buffer = new Uint8Array(data.data.buffer);
+        } else if (type == 'audio') {
+          var buffer = new Uint8Array(data.data.buffer);
+          audio.push(buffer);
+        } else if (type == 'decode') {
+          var consume = data.data.consume;
+          if (consume == 0) {
+            consume = data.data.consume;
+          } else {
+            consume = (data.data.consume + consume) / 2;
+          }
+          var audioBuffer = audio.reduce((i, j) => {
+            var buffer = new Uint8Array(i.length + j.length);
+            buffer.set(i, 0);
+            buffer.set(j, i.length);
+            return buffer;
+          }, new Uint8Array(0));
+
+          if (audioBuffer.length) {
+            context.decodeAudioData(
+              audioBuffer.buffer,
+              function(data) {
+                duration += data.duration;
+                console.log(duration);
+                // if (duration == 0) {
+                //   duration = data.duration * 1000;
+                // } else {
+                //   duration = (duration + data.duration * 1000) / 2;
+                // }
+                // $p.innerHTML += `consume: ${consume}, duration:${Math.ceil(duration)}<br/>`;
+                audio = [];
+                decodeChunk();
+              },
+              function(e) {
+                console.log(e);
+                decodeChunk();
+              }
+            );
+          } else {
+            decodeChunk();
+          }
+        } else if (type == 'complete') {
           codec.destroy();
           codec = null;
-        }
-        if (type == "ready") {
-          alert('ready');
-          var xhr = new XMLHttpRequest();
-          xhr.open("GET", "https://static.petera.cn/1-1-1.flv");
-          xhr.responseType = "arraybuffer";
-          xhr.onreadystatechange = function() {
-            if (xhr.readyState == 4) {
-              var resp = xhr.response;
-              var body = new Uint8Array(resp);
-              timestamp = +new Date();
-              decodeChunk(body);
-            }
-          };
-          xhr.send();
         }
       };
 
       var MAX_SUB_COUNT = 1024 * 256;
-      function decodeChunk(buffer) {
-        var endIndex =
-          buffer.length > MAX_SUB_COUNT ? MAX_SUB_COUNT : buffer.length;
-        var subarray = buffer.subarray(0, endIndex);
-        codec.decode(subarray);
-
-        buffer = buffer.subarray(endIndex);
-        if (buffer.length) {
-          setTimeout(function() {
-            decodeChunk(buffer);
-          }, 2000);
-        }
+      function decodeChunk() {
+        reader
+          .read()
+          .then(_buffer => {
+            if (_buffer.done) {
+              return;
+            }
+            $p.innerHTML = _buffer.value.length / (1024*1024) + 'm';
+            setTimeout(() => {
+              codec.decode(_buffer.value);
+              // decodeChunk();
+              _buffer = null;
+            }, 1000 / 24);
+          })
+          .catch(console.log);
       }
     </script>
   </body>
