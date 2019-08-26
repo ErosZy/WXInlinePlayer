@@ -28,7 +28,10 @@ class Sound extends EventEmitter {
       const { timestamp } = this.audioSrcNodes[i];
       if (currTime <= timestamp * 1000) {
         const nodes = this.audioSrcNodes.splice(0, !i ? 0 : i - 1);
-        nodes.forEach(({ source }) => source.disconnect());
+        nodes.forEach(({ source }) => {
+          source.onended = null;
+          source.disconnect();
+        });
         break;
       }
     }
@@ -40,12 +43,18 @@ class Sound extends EventEmitter {
     }
 
     this.state = 'running';
+    this.context.resume();
     this.setBlockedCurrTime(offset);
+
     this.playStartedAt = 0;
     this.totalTimeScheduled = 0;
     for (let i = 0; i < this.audioSrcNodes.length; i++) {
       const { source, timestamp, duration } = this.audioSrcNodes[i];
+      source.onended = null;
+      source.disconnect();
+
       const audioSrc = this.context.createBufferSource();
+      audioSrc.onended = this._onAudioBufferEnded.bind(this);
       if (!this.playStartedAt) {
         const { currentTime, baseLatency, sampleRate } = this.context;
         const startDelay = duration + (baseLatency || 128 / sampleRate);
@@ -53,18 +62,18 @@ class Sound extends EventEmitter {
       }
 
       audioSrc.buffer = source.buffer;
-      audioSrc.connect(this.gainNode);
-      audioSrc.start(
-        this.totalTimeScheduled + this.playStartedAt,
-        !i ? offset / 1000 - timestamp : 0
-      );
+      try {
+        audioSrc.connect(this.gainNode);
+        audioSrc.start(
+          this.totalTimeScheduled + this.playStartedAt,
+          !i ? offset / 1000 - timestamp + this.playStartedAt : 0
+        );
+      } catch (e) {}
 
       this.audioSrcNodes[i].source = audioSrc;
       this.audioSrcNodes[i].timestamp = this.totalTimeScheduled;
       this.totalTimeScheduled += duration;
     }
-
-    this.context.resume();
   }
 
   getAvaiableDuration() {
@@ -145,10 +154,7 @@ class Sound extends EventEmitter {
 
   _onDecodeSuccess(audioBuffer) {
     const audioSrc = this.context.createBufferSource();
-    audioSrc.onended = this._onAudioBufferEnded.bind(
-      this,
-      this.audioSrcNodes.length
-    );
+    audioSrc.onended = this._onAudioBufferEnded.bind(this);
 
     if (!this.playStartedAt) {
       const { duration } = audioBuffer;
@@ -159,8 +165,10 @@ class Sound extends EventEmitter {
 
     audioSrc.buffer = audioBuffer;
     if (this.state == 'running') {
-      audioSrc.connect(this.gainNode);
-      audioSrc.start(this.totalTimeScheduled + this.playStartedAt);
+      try {
+        audioSrc.connect(this.gainNode);
+        audioSrc.start(this.totalTimeScheduled + this.playStartedAt);
+      } catch (e) {}
     }
 
     this.audioSrcNodes.push({
