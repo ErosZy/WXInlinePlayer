@@ -1,10 +1,14 @@
 import { Buffer } from 'buffer';
 import EventEmitter from 'eventemitter3';
 const AudioContext = window.webkitAudioContext || window.AudioContext;
+
 class Sound extends EventEmitter {
   constructor() {
     super();
-    this.index = 0;
+    this.duration = 0;
+    this.state = 'blocked';
+    this.blockedCurrTime = 0;
+
     this.vol = 1.0;
     this.muted = false;
     this.context = new AudioContext();
@@ -18,13 +22,60 @@ class Sound extends EventEmitter {
     this.data = Buffer.alloc(0);
   }
 
+  setBlockedCurrTime(currTime = 0) {
+    this.blockedCurrTime = currTime;
+    for (let i = 0; i < this.audioSrcNodes.length; i++) {
+      const { timestamp } = this.audioSrcNodes[i];
+      if (currTime <= timestamp * 1000) {
+        const nodes = this.audioSrcNodes.splice(0, !i ? 0 : i - 1);
+        nodes.forEach(({ source }) => source.disconnect());
+        break;
+      }
+    }
+  }
+
+  unblock(offset) {
+    if (this.state != 'blocked') {
+      return;
+    }
+
+    this.state = 'running';
+    this.setBlockedCurrTime(offset);
+    this.playStartedAt = 0;
+    this.totalTimeScheduled = 0;
+    for (let i = 0; i < this.audioSrcNodes.length; i++) {
+      const { source, timestamp, duration } = this.audioSrcNodes[i];
+      const audioSrc = this.context.createBufferSource();
+      if (!this.playStartedAt) {
+        const { currentTime, baseLatency, sampleRate } = this.context;
+        const startDelay = duration + (baseLatency || 128 / sampleRate);
+        this.playStartedAt = currentTime + startDelay;
+      }
+
+      audioSrc.buffer = source.buffer;
+      audioSrc.connect(this.gainNode);
+      audioSrc.start(
+        this.totalTimeScheduled + this.playStartedAt,
+        !i ? offset / 1000 - timestamp : 0
+      );
+
+      this.audioSrcNodes[i].source = audioSrc;
+      this.audioSrcNodes[i].timestamp = this.totalTimeScheduled;
+      this.totalTimeScheduled += duration;
+    }
+
+    this.context.resume();
+  }
+
   getAvaiableDuration() {
-    return this.totalTimeScheduled;
+    return this.duration;
   }
 
   getCurrentTime() {
     if (this.context) {
-      return this.context.currentTime;
+      return this.state == 'blocked'
+        ? this.blockedCurrTime
+        : this.context.currentTime;
     }
     return 0.0;
   }
@@ -63,17 +114,37 @@ class Sound extends EventEmitter {
     data = Buffer.from(data);
     this.data = Buffer.concat([this.data, data]);
     if (this.context) {
-      this.context.decodeAudioData(
-        this.data.buffer,
-        this._onDecodeSuccess.bind(this),
-        this._onDecodeError.bind(this)
-      );
+      return new Promise(resolve => {
+        this.context.decodeAudioData(
+          this.data.buffer,
+          buffer => {
+            this._onDecodeSuccess(buffer);
+            resolve();
+          },
+          e => {
+            this._onDecodeError(e);
+            resolve();
+          }
+        );
+      });
     }
+    return Promise.resolve();
+  }
+
+  destroy() {
+    if (this.context) {
+      this.context.close();
+      this.context = null;
+    }
+
+    this.data = null;
+    this.gainNode = null;
+    this.audioSrcNodes = [];
+    this.state = 'destroy';
   }
 
   _onDecodeSuccess(audioBuffer) {
     const audioSrc = this.context.createBufferSource();
-    audioSrc.index = this.audioSrcNodes.length;
     audioSrc.onended = this._onAudioBufferEnded.bind(
       this,
       this.audioSrcNodes.length
@@ -81,20 +152,25 @@ class Sound extends EventEmitter {
 
     if (!this.playStartedAt) {
       const { duration } = audioBuffer;
-      const { baseLatency, sampleRate, currentTime } = this.context;
-      const delay = duration + (baseLatency || 128 / sampleRate);
-      this.playStartedAt = currentTime + delay;
+      const { currentTime, baseLatency, sampleRate } = this.context;
+      const startDelay = duration + (baseLatency || 128 / sampleRate);
+      this.playStartedAt = currentTime + startDelay;
     }
 
     audioSrc.buffer = audioBuffer;
-    audioSrc.connect(this.gainNode);
-    audioSrc.start(this.playStartedAt + this.totalTimeScheduled);
-    this.totalTimeScheduled += audioBuffer.duration;
+    if (this.state == 'running') {
+      audioSrc.connect(this.gainNode);
+      audioSrc.start(this.totalTimeScheduled + this.playStartedAt);
+    }
 
     this.audioSrcNodes.push({
       source: audioSrc,
-      timestamp: this.playStartedAt + this.totalTimeScheduled
+      duration: audioBuffer.duration,
+      timestamp: this.totalTimeScheduled
     });
+
+    this.totalTimeScheduled += audioBuffer.duration;
+    this.duration += audioBuffer.duration;
 
     this.data = Buffer.alloc(0);
     this.emit('decode:success');
@@ -104,13 +180,10 @@ class Sound extends EventEmitter {
     this.emit('decode:error', e);
   }
 
-  _onAudioBufferEnded(index) {
-    this.index = index;
+  _onAudioBufferEnded() {
     const { source } = this.audioSrcNodes.shift();
     source.disconnect();
   }
 }
 
-window.Buffer = Buffer;
-window.Sound = Sound;
-// export default Sound;
+export default Sound;

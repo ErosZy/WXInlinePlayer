@@ -148,8 +148,7 @@ void CodecFactor::_handleVideoTag(VideoTagValue &tag, uint32_t timestamp) const 
       size -= _codec->lengthSizeMinusOne + naluLen;
     }
 
-    uint32_t retCode = h264bsdDecode(_codec->storage, nalus->get_buf_ptr(), nalus->get_length(), &picPtr, &width,
-                                     &height);
+    uint32_t retCode = h264bsdDecode(_codec->storage, nalus->get_buf_ptr(), nalus->get_length(), &picPtr, &width, &height);
     if (retCode == H264BSD_PIC_RDY) {
       uint32_t totalSize = (width * height) * 3 / 2;
 #ifdef __EMSCRIPTEN__

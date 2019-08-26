@@ -35,7 +35,7 @@
         if (type == 'mediaInfo') {
           console.log(data.data);
         } else if (type == 'ready') {
-          fetch('https://static.petera.cn/mm.flv').then(resp => {
+          fetch('https://tx.flv.huya.com/backsrc/1447437389-1447437389-6216696248762630144-4907962912-10057-A-0-1.flv?wsSecret=22ca323fc07995777d4bde5366cfd320&wsTime=5d625626&fs=bgct&u=240&t=100&sv=1908071436').then(resp => {
             reader = resp.body.getReader();
             decodeChunk();
           });
