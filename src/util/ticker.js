@@ -1,10 +1,14 @@
 import raf from 'raf';
-const SMOOTH_INTERVAL = 1000 / 60;
 class Ticker {
   constructor() {
+    this.interval = 1000 / 60;
     this.timestamp = 0;
     this.callbacks = [];
     this.handler = raf(this._tick.bind(this));
+  }
+
+  setFps(fps) {
+    this.interval = 1000 / fps;
   }
 
   add(func) {
@@ -30,7 +34,7 @@ class Ticker {
     const now = this._now();
     if (!this.timestamp) {
       this.timestamp = now;
-      loop = Math.floor((now - this.timestamp) / SMOOTH_INTERVAL);
+      loop = Math.floor((now - this.timestamp) / this.interval);
     }
 
     for (let i = 0; i < this.callbacks.length; i++) {
@@ -44,12 +48,11 @@ class Ticker {
   }
 
   _now() {
-    // if (window.performance && window.performance.now) {
-    //   return window.performance.now();
-    // }
+    if (window.performance && window.performance.now) {
+      return window.performance.now();
+    }
     return +new Date();
   }
 }
 
-window.Ticker = Ticker;
 export default Ticker;

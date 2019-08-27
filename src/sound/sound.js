@@ -6,7 +6,4 @@ function Sound(opt) {
   return Util.isWeChat() ? new WeChatSound(opt) : new BrowserSound(opt);
 }
 
-window.Buffer = require('buffer').Buffer;
-window.Sound = Sound;
-
 export default Sound;
