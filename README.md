@@ -3,13 +3,13 @@ WXInlinePlayer
 
 ## 0.背景
 国内的各个浏览器厂商对于Video都有着各种技术上的限制和管控，例如腾讯系的X5引擎对Video进行了大量的魔改，其中包括：
-1. 所谓的同层播放层（？？）
+1. 所谓的同层播放层
 2. 无法正常playsinline
 3. 即使静音也无法自动播放
 4. 各种播放前后的广告
 5. 纯Native组件，无法很好的进行触摸事件交互
 
-## 1.示例
+## 1.示例（720P视频，文件较大请耐心等待）
 https://qiaozi-tech.github.io/WXInlinePlayer/example/index.html
 
 ## 2.兼容性
@@ -33,7 +33,7 @@ https://qiaozi-tech.github.io/WXInlinePlayer/example/index.html
 ffmpeg -i <your file> -vcodec h264 -acodec aac -profile:v baseline -vf scale=640:-1 mtv.flv
 ```
 
-2. 目前没有对视频进行流式加载与解析，因此播放1080P会导致大量的内存占用，推荐附加参数：
+2. 1080P视频软解效率不高，会出现卡顿的情况，推荐增加转码参数：
 * 分辨率: -vf scale=-1:360
 * fps: -r 25
 * 码率：-b:v 1200K
@@ -118,9 +118,11 @@ ffmpeg -i <your file> -vcodec h264 -acodec aac -profile:v baseline -vf scale=640
 ```
 
 ## 6.TODO
+0. flv-demux替换为wasm实现，整合demux + h264codec，大幅度降低内存使用
 1. 流式解析，提高首帧显示和内存占用情况
 2. 进一步提升H264解析性能
 3. 支持FLV直播流播放
+4. 多worker线程解码支持
 
 ## 7. 其余问题
 * 如何获取播放器的当前进度？
@@ -129,4 +131,4 @@ ffmpeg -i <your file> -vcodec h264 -acodec aac -profile:v baseline -vf scale=640
 
  * 为什么在部分低端机器上有音画不同步的情况
   
-WXInlinePlayer的音画同步依靠音频时间戳，浏览器目前没有非常底层的方式控制音频buffer，同时由于此实现是CPU软解H264，低端机CPU性能羸弱，解析一帧H264的时间会比较长（大约30-50ms），而音频大部分是24ms左右，因此很容易出现音画不同步的情况。你可以尝试降低视频码率试一试是否有缓解。
+WXInlinePlayer的音画同步依靠音频时间戳，浏览器目前没有非常底层的方式控制音频buffer，同时由于此实现是CPU软解H264，低端机CPU性能羸弱，解析一帧H264的时间会比较长（大约30-50ms），而音频大部分是24ms左右，因此很容易出现音画不同步的情况。你可以尝试降低视频码率试一试是否有缓解。（目前已进行强制追帧，低端机画面可能会有跳跃，但如果失败仍然会有不同步情况）

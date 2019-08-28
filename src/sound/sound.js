@@ -1,14 +1,9 @@
-import HWAudio from "./hwaudio";
-import WXAudio from "./wxaudio";
+import Util from '../util/util';
+import BrowserSound from './browser';
+import WeChatSound from './wechat';
 
-class Sound {
-  constructor(opt) {
-    if (/MicroMessenger/i.test(window.navigator.userAgent)) {
-      return new WXAudio(opt);
-    } else {
-      return new HWAudio(opt);
-    }
-  }
+function Sound(opt) {
+  return Util.isWeChat() ? new WeChatSound(opt) : new BrowserSound(opt);
 }
 
 export default Sound;

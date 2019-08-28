@@ -2,43 +2,176 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=0.5" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>WXInlinePlayer Demo Page</title>
+    <title>Document</title>
     <style>
-      * {
-        margin: 0;
-        padding: 0;
+      html,
+      body {
+        width: 100%;
+        height: 100%;
       }
-      #container {
-        width: 1280px;
-        height: 720px;
+      #wrapper {
+        width: 800px;
+        height: 500px;
         position: absolute;
         top: 50%;
         left: 50%;
-        margin-left: -640px;
-        margin-top: -360px;
+        margin-left: -400px;
+        margin-top: -250px;
       }
     </style>
   </head>
   <body>
-    <div id="container"></div>
-    <script src="../dist/index.js"></script>
+    <div id="wrapper">
+      <div style="margin-bottom: 10px">
+        <button id="normal">普通Video</button>
+        <button id="picture">纯视频（动画）</button>
+        <button id="music">纯音频</button>
+      </div>
+      <canvas
+        id="canvas"
+        width="800"
+        height="450"
+        style="background: black;"
+      ></canvas>
+      <div style="margin-bottom: 10px">
+        <span id="status">状态：等待播放</span>
+        <span id="duration" style="display: inline-block; margin-left: 50px;"
+          >可播放时长: 0s</span
+        >
+        <span id="time" style="display:inline-block; margin-left: 50px;"
+          >进度：0s</span
+        >
+      </div>
+      <button id="playBtn">播放</button>
+      <button id="stopBtn">停止</button>
+      <button id="pauseBtn">暂停</button>
+      <button id="resumeBtn">恢复</button>
+      <button id="muteBtn">静音切换</button>
+
+      <input
+        type="number"
+        name="volume"
+        step="0.1"
+        max="1.0"
+        min="0.0"
+        value="1.0"
+        style="width: 100px;"
+      />
+      <span>音量设置</span>
+    </div>
+    <script src="index.js"></script>
     <script>
-      if (WXInlinePlayer && WXInlinePlayer.isSupport()) {
+      const VIDEO_URL = 'https://static.petera.cn/mm.flv';
+      const PIC_URL = 'https://static.petera.cn/mm1.flv';
+      const MUSIC_URL = 'https://static.petera.cn/mm2.flv';
+
+      let chunkSize = 128 * 1024;
+      let url = VIDEO_URL;
+
+      const href = location.href;
+      const qsIndex = href.lastIndexOf('?');
+      if (qsIndex > -1) {
+        type = href.slice(qsIndex + 1).split('=')[1];
+        if (type == 1) {
+          url = PIC_URL;
+        } else if (type == 2) {
+          url = MUSIC_URL;
+          chunkSize = 64 * 1024;
+        }
+      }
+
+      document.getElementById('normal').addEventListener('click', () => {
+        location.href = location.origin + '?t=0';
+      });
+
+      document.getElementById('picture').addEventListener('click', () => {
+        location.href = location.origin + '?t=1';
+      });
+
+      document.getElementById('music').addEventListener('click', () => {
+        location.href = location.origin + '?t=2';
+      });
+
+      console.log('>>>>>>>> load: ' + url);
+
+      const $status = document.getElementById('status');
+      const $time = document.getElementById('time');
+      const $duration = document.getElementById('duration');
+
+      if (WXInlinePlayer.isSupport()) {
         WXInlinePlayer.init({
-          asmUrl: "../dist/TinyH264.asm.js",
-          wasmUrl: "../dist/TinyH264.wasm.js"
+          asmUrl: './prod.asm.combine.js',
+          wasmUrl: './prod.wasm.combine.js'
         });
 
         WXInlinePlayer.ready().then(() => {
-          let player = new WXInlinePlayer({
-            url: "https://static.petera.cn/mayday_roses_boy.flv?_=" + Math.random(),
-            $container: document.getElementById("container"),
-            volume: 1.0, // iOS不允许代码调节声量，请注意兼容
-            muted: false, // iOS和Android均支持代码控制静音
+          const player = new WXInlinePlayer({
+            url: url,
+            $container: document.getElementById('canvas'),
+            volume: 1.0,
+            muted: false,
             autoplay: true,
-            loop: true
+            loop: true,
+            isLive: false,
+            chunkSize: chunkSize,
+            preloadTime: 1e3,
+            bufferingTime: 3e3,
+            cacheSegmentCount: 128,
+            cacheInMemory: false
+          });
+
+          document.getElementById('playBtn').addEventListener('click', () => {
+            player.play();
+          });
+
+          document.getElementById('stopBtn').addEventListener('click', () => {
+            player.stop();
+          });
+
+          document.getElementById('pauseBtn').addEventListener('click', () => {
+            player.pause();
+          });
+
+          document.getElementById('resumeBtn').addEventListener('click', () => {
+            player.resume();
+          });
+
+          document.getElementById('muteBtn').addEventListener('click', () => {
+            player.mute(!player.mute());
+          });
+
+          document
+            .querySelector('input[name=volume]')
+            .addEventListener('change', ev => {
+              player.volume(ev.target.value);
+            });
+
+          player.on('mediaInfo', console.log);
+
+          player.on('buffering', () => {
+            $status.innerHTML = '状态: 等待加载';
+          });
+
+          player.on('playing', () => {
+            $status.innerHTML = '状态: 正在播放';
+          });
+
+          player.on('stopped', () => {
+            $status.innerHTML = '状态：已停止';
+          });
+
+          player.on('end', () => {
+            $status.innerHTML = '状态：播放结束';
+          });
+
+          player.on('timeUpdate', timestamp => {
+            $time.innerHTML = '进度：' + Math.floor(timestamp / 1000) + 's';
+            $duration.innerHTML =
+              '可播放时长: ' +
+              Math.ceil(player.getAvaiableDuration() / 1000) +
+              's';
           });
         });
       }
