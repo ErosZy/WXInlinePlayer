@@ -83,15 +83,15 @@
       }
 
       document.getElementById('normal').addEventListener('click', () => {
-        location.href = location.origin + '?t=0';
+        location.href = location.origin + location.pathname + '?t=0';
       });
 
       document.getElementById('picture').addEventListener('click', () => {
-        location.href = location.origin + '?t=1';
+        location.href = location.origin + location.pathname + '?t=1';
       });
 
       document.getElementById('music').addEventListener('click', () => {
-        location.href = location.origin + '?t=2';
+        location.href = location.origin + location.pathname + '?t=2';
       });
 
       console.log('>>>>>>>> load: ' + url);
