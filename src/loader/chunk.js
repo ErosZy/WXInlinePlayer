@@ -3,8 +3,9 @@ import { Buffer } from 'buffer';
 
 const MAX_REQ_RETRY = 3;
 class ChunkLoader {
-  constructor({ url, chunkSize = 256 * 1024 }) {
+  constructor({ url, chunkSize = 256 * 1024, cacheInMemory = false }) {
     this.url = url;
+    this.cacheInMemory = cacheInMemory;
     this.chunkSize = chunkSize;
     this.startIndex = 0;
     this.fileSize = 0;
@@ -33,7 +34,7 @@ class ChunkLoader {
 
   cancel() {
     if (this.xhr) {
-      this.xhr.cancel();
+      this.xhr.abort();
       this.xhr = null;
     }
     this.done = true;

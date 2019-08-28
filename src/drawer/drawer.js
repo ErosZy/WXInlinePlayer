@@ -16,6 +16,33 @@ class Drawer {
     }
   }
 
+  static isSupport() {
+    const canvas = document.createElement('canvas');
+    const validContextNames = [
+      'webgl',
+      'experimental-webgl',
+      'moz-webgl',
+      'webkit-3d'
+    ];
+
+    let gl = null;
+    let nameIndex = 0;
+    while (!gl && nameIndex < validContextNames.length) {
+      var contextName = validContextNames[nameIndex];
+      try {
+        gl = canvas.getContext(contextName);
+      } catch (e) {
+        gl = null;
+      }
+      if (!gl || typeof gl.getParameter !== 'function') {
+        gl = null;
+      }
+      ++nameIndex;
+    }
+
+    return !!gl;
+  }
+
   drawNextOutputPicture(width, height, data) {
     const { yTextureRef, uTextureRef, vTextureRef } = this;
     const gl = this.contextGL;
@@ -82,7 +109,7 @@ class Drawer {
       this.contextGL.getExtension('WEBGL_lose_context').loseContext();
     } catch (e) {}
 
-    this.$canvas = $canvas;
+    this.$canvas = null;
     this.contextGL = null;
     this.shaderProgram = null;
     this.texturePosBuffer = null;

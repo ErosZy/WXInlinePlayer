@@ -37,13 +37,16 @@ class Ticker {
       loop = Math.floor((now - this.timestamp) / this.interval);
     }
 
-    for (let i = 0; i < this.callbacks.length; i++) {
-      for (let j = 0; j < loop; j++) {
-        this.callbacks[i](now - this.timestamp);
+    const diff = now - this.timestamp;
+    if (diff >= this.interval) {
+      for (let i = 0; i < this.callbacks.length; i++) {
+        for (let j = 0; j < loop; j++) {
+          this.callbacks[i](now - this.timestamp);
+        }
       }
+      this.timestamp = now;
     }
 
-    this.timestamp = now;
     this.handler = raf(this._tick.bind(this));
   }
 

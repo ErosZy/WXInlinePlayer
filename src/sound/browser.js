@@ -3,14 +3,15 @@ import EventEmitter from 'eventemitter3';
 const AudioContext = window.webkitAudioContext || window.AudioContext;
 
 class BrowserSound extends EventEmitter {
-  constructor() {
+  constructor({ volume, muted }) {
     super();
     this.duration = 0;
     this.state = 'blocked';
     this.blockedCurrTime = 0;
+    this.skimmedTime = 0;
 
-    this.vol = 1.0;
-    this.muted = false;
+    this.vol = volume;
+    this.muted = muted;
     this.context = new AudioContext();
     this.gainNode = this.context.createGain();
     this.gainNode.gain.value = this.muted ? 0.0 : this.vol;
@@ -45,7 +46,6 @@ class BrowserSound extends EventEmitter {
     this.state = 'running';
     this.context.resume();
     this.setBlockedCurrTime(offset);
-
     this.playStartedAt = 0;
     this.totalTimeScheduled = 0;
     for (let i = 0; i < this.audioSrcNodes.length; i++) {
@@ -66,7 +66,7 @@ class BrowserSound extends EventEmitter {
         audioSrc.connect(this.gainNode);
         audioSrc.start(
           this.totalTimeScheduled + this.playStartedAt,
-          !i ? offset / 1000 - timestamp + this.playStartedAt : 0
+          !i ? offset / 1000 - timestamp : 0
         );
       } catch (e) {}
 
@@ -84,13 +84,13 @@ class BrowserSound extends EventEmitter {
     if (this.context) {
       return this.state == 'blocked'
         ? this.blockedCurrTime
-        : this.context.currentTime - this.playStartedAt;
+        : this.context.currentTime - this.playStartedAt + this.skimmedTime;
     }
     return 0.0;
   }
 
   volume(vol) {
-    if (vol) {
+    if (vol != null) {
       this.vol = vol;
       this.gainNode.gain.value = this.muted ? 0.0 : vol;
     }
@@ -141,6 +141,7 @@ class BrowserSound extends EventEmitter {
   }
 
   destroy() {
+    this.removeAllListeners();
     if (this.context) {
       this.context.close();
       this.context = null;

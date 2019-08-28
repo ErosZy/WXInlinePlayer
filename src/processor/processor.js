@@ -2,34 +2,59 @@ import { Buffer } from 'buffer';
 import EventEmitter from 'eventemitter3';
 import Ticker from '../util/ticker';
 import Sound from '../sound/sound';
+import Util from '../util/util';
 
 class Processor extends EventEmitter {
-  constructor({ minBufferingTime = 3000, minCacheSegments = 128 }) {
+  constructor({
+    volume = 1.0,
+    muted = false,
+    preloadTime = 1000,
+    bufferingTime = 3000,
+    cacheSegmentCount = 128
+  }) {
     super();
     this.state = 'created';
     this.baseTime = 0;
-    this.hasVideo = 1;
-    this.hasAudio = 1;
+    this.blocked = !Util.isWeChat();
+    this.hasVideo = true;
+    this.hasAudio = true;
     this.frames = [];
     this.audios = [];
     this.currentTime = 0;
-    this.bufferingFactor = 1;
     this.bufferingIndex = -1;
-    this.minBufferingTime = minBufferingTime;
-    this.minCacheSegments = minCacheSegments;
+    this.minBufferingTime = preloadTime;
+    this.bufferingTime = bufferingTime;
+    this.cacheSegmentCount = cacheSegmentCount;
     this.ticker = new Ticker();
-    this.sound = new Sound();
+    this.sound = new Sound({ volume, muted });
     this.codec = new H264Codec();
 
-    this.ticker.add(this._onTickHandler.bind(this));
+    this.tickHandler = this._onTickHandler.bind(this);
+    this.ticker.add(this.tickHandler);
     this.codec.onmessage = this._onCodecMsgHandler.bind(this);
   }
 
-  getCurrentTime() {
+  getAvaiableDuration() {
+    if (this.hasAudio) {
+      if (this.sound) {
+        return this.sound.getAvaiableDuration() * 1000;
+      }
+    }
+
     if (this.hasVideo) {
+      if (this.frames.length) {
+        return this.frames[this.frames.length - 1].timestamp;
+      }
+    }
+
+    return 0;
+  }
+
+  getCurrentTime() {
+    if (this.hasAudio) {
+      return this.sound ? this.sound.getCurrentTime() * 1000 : 0.0;
+    } else if (this.hasVideo) {
       return this.currentTime;
-    } else if (this.hasAudio) {
-      return this.sound.getCurrentTime() * 1000;
     } else {
       return 0;
     }
@@ -42,18 +67,69 @@ class Processor extends EventEmitter {
   }
 
   unblock() {
-    if (this.sound) {
+    if (Util.isWeChat()) {
+      /*--------Dont Need To Implemented-------*/
+    } else if (this.sound) {
+      this.blocked = false;
       this.sound.unblock(0);
     }
   }
 
-  pause() {}
+  volume(volume) {
+    if (volume == null) {
+      return this.sound ? this.sound.volume() : 0.0;
+    } else {
+      if (this.sound) {
+        this.sound.volume(volume);
+      }
+    }
+  }
 
-  resume() {}
+  mute(muted) {
+    if (muted == null) {
+      return this.sound ? this.sound.mute() : true;
+    } else {
+      if (this.sound) {
+        this.sound.mute(muted);
+      }
+    }
+  }
+
+  pause() {
+    if (this.state == 'pasued') {
+      return;
+    }
+
+    if (this.sound) {
+      this.sound.pause();
+    }
+
+    if (this.ticker) {
+      this.ticker.remove(this.tickHandler);
+    }
+    this.state = 'paused';
+  }
+
+  resume() {
+    if (this.state == 'playing') {
+      return;
+    }
+
+    this.state = 'playing';
+    if (this.sound) {
+      this.sound.resume();
+    }
+
+    if (this.ticker) {
+      this.ticker.add(this.tickHandler);
+    }
+  }
 
   destroy() {
+    this.removeAllListeners();
     if (this.ticker) {
       this.ticker.destroy();
+      this.tickHandler = null;
     }
 
     if (this.sound) {
@@ -73,23 +149,27 @@ class Processor extends EventEmitter {
   }
 
   _onTickHandler() {
-    if (!this.frames.length) {
+    if (this.state == 'created') {
       return;
     }
 
-    if (this.hasAudio) {
-      this.currentTime = this.sound.getCurrentTime() * 1000;
-      const lastIndex = this.frames.length - 1;
-      const lastFrameTimestamp = this.frames[lastIndex].timestamp;
+    if (this.hasAudio && this.hasVideo) {
       let diff = 0;
-      if (this.bufferingIndex == -1) {
-        this.bufferingIndex = lastIndex;
-        diff = lastFrameTimestamp - this.currentTime;
-      } else {
-        diff = lastFrameTimestamp - this.frames[this.bufferingIndex].timestamp;
+      let lastIndex = 0;
+      this.currentTime = this.getCurrentTime();
+      if (this.frames.length) {
+        lastIndex = this.frames.length - 1;
+        const { timestamp: lastFrameTimestamp } = this.frames[lastIndex];
+        if (this.bufferingIndex == -1) {
+          this.bufferingIndex = lastIndex;
+          diff = lastFrameTimestamp - this.currentTime;
+        } else {
+          const { timestamp } = this.frames[this.bufferingIndex];
+          diff = lastFrameTimestamp - timestamp;
+        }
       }
 
-      if (diff < this.minBufferingTime * this.bufferingFactor) {
+      if (!this.frames.length || (diff && diff < this.minBufferingTime)) {
         if (this.state != 'buffering' && this.state != 'preload') {
           this.sound.pause();
           this.emit('buffering');
@@ -97,8 +177,14 @@ class Processor extends EventEmitter {
         this.state = 'buffering';
         return;
       } else {
+        if (this.currentTime) {
+          this.minBufferingTime = this.bufferingTime;
+        }
         this.bufferingIndex = -1;
         this.sound.resume();
+        if (this.blocked || !this.currentTime) {
+          return;
+        }
       }
 
       for (let i = 0; i < this.frames.length; i++) {
@@ -110,18 +196,37 @@ class Processor extends EventEmitter {
           break;
         }
       }
-
+    } else if (this.hasAudio) {
+      const duration = this.sound.getAvaiableDuration() * 1000;
+      const bufferTime = this.bufferingTime;
+      this.currentTime = this.getCurrentTime();
       if (
         this.state != 'preload' &&
-        this.frames.length < this.minCacheSegments
+        this.currentTime > 0 &&
+        duration - this.currentTime < bufferTime
       ) {
         this.state = 'preload';
         this.emit('preload');
       }
-    } else {
+    } else if (this.hasVideo) {
       const frame = this.frames.shift();
-      this.currentTime = frame.timestamp;
-      this.emit('frame', frame);
+      if (frame) {
+        this.currentTime = frame.timestamp;
+        this.emit('frame', frame);
+        if (this.sound) {
+          this.sound.setBlockedCurrTime(this.currentTime);
+        }
+      }
+    }
+
+    if (
+      this.hasVideo &&
+      this.state != 'preload' &&
+      this.state != 'buffering' &&
+      this.frames.length < this.cacheSegmentCount
+    ) {
+      this.state = 'preload';
+      this.emit('preload');
     }
   }
 
@@ -141,17 +246,12 @@ class Processor extends EventEmitter {
           this.sound.destroy();
           this.sound = null;
         }
-        if (!this.hasVideo) {
-          this.ticker.destroy();
-          this.ticker = null;
-        }
         break;
       }
       case 'mediaInfo': {
         try {
           msg.data = JSON.parse(msg.data);
         } catch (e) {}
-
         const info = msg.data['onMetaData'] || [];
         if (this.ticker) {
           for (let i = 0; i < info.length; i++) {
@@ -188,14 +288,24 @@ class Processor extends EventEmitter {
         break;
       }
       case 'decode': {
-        this.currentTime = this.sound.getCurrentTime() * 1000;
-        const buffer = Buffer.concat(this.audios);
-        this.sound.decode(buffer);
-        this.audios = [];
+        if (
+          this.state == 'buffering' ||
+          (!this.hasVideo && this.hasAudio && this.state != 'playing')
+        ) {
+          this.emit('playing');
+        }
+
         this.state = 'playing';
+        if (this.hasAudio) {
+          this.currentTime = this.getCurrentTime();
+          const buffer = Buffer.concat(this.audios);
+          this.sound.decode(buffer);
+          this.audios = [];
+        }
         break;
       }
       case 'complete': {
+        this.state = 'end';
         this.emit('end');
         break;
       }
@@ -206,5 +316,4 @@ class Processor extends EventEmitter {
   }
 }
 
-window.Processor = Processor;
 export default Processor;

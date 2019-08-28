@@ -66,7 +66,7 @@ class StreamLoader {
     } else {
       return fetch(this.url, {
         method: 'GET',
-        signal: this.abortController.signal
+        signal: this.abortController ? this.abortController.signal : null
       }).then(resp => {
         this.reader = resp.body.getReader();
         return this._request();
