@@ -61,12 +61,13 @@
       />
       <span>音量设置</span>
     </div>
-    <script src="index.js"></script>
+    <script src="./index.js"></script>
     <script>
       const VIDEO_URL = 'https://static.petera.cn/mm.flv';
       const PIC_URL = 'https://static.petera.cn/mm1.flv';
       const MUSIC_URL = 'https://static.petera.cn/mm2.flv';
 
+      let type = 0;
       let chunkSize = 128 * 1024;
       let url = VIDEO_URL;
 
@@ -78,7 +79,7 @@
           url = PIC_URL;
         } else if (type == 2) {
           url = MUSIC_URL;
-          chunkSize = 64 * 1024;
+          chunkSize = 32 * 1024;
         }
       }
 
@@ -107,9 +108,12 @@
         });
 
         WXInlinePlayer.ready().then(() => {
+          type = parseInt(type) || 0;
           const player = new WXInlinePlayer({
             url: url,
             $container: document.getElementById('canvas'),
+            hasVideo: true,
+            hasAudio: !type || type == 2,
             volume: 1.0,
             muted: false,
             autoplay: true,
@@ -119,7 +123,7 @@
             preloadTime: 1e3,
             bufferingTime: 3e3,
             cacheSegmentCount: 128,
-            cacheInMemory: false
+            customLoader: null
           });
 
           document.getElementById('playBtn').addEventListener('click', () => {
