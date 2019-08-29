@@ -3,9 +3,9 @@ import { Buffer } from 'buffer';
 
 const MAX_REQ_RETRY = 3;
 class ChunkLoader {
-  constructor({ url, chunkSize = 256 * 1024, cacheInMemory = false }) {
+  constructor({ url, chunkSize = 256 * 1024/*, cacheInMemory = false*/ }) {
     this.url = url;
-    this.cacheInMemory = cacheInMemory;
+  /*this.cacheInMemory = cacheInMemory;*/
     this.chunkSize = chunkSize;
     this.startIndex = 0;
     this.downloadSize = 0;

@@ -20,7 +20,7 @@ class WXInlinePlayer extends EventEmitter {
     preloadTime = 1e3,
     bufferingTime = 3e3,
     cacheSegmentCount = 128,
-    cacheInMemory = false,
+    /*cacheInMemory = false,*/
     customLoader = null
   }) {
     super();
@@ -36,7 +36,7 @@ class WXInlinePlayer extends EventEmitter {
     this.preloadTime = preloadTime;
     this.bufferingTime = bufferingTime;
     this.cacheSegmentCount = cacheSegmentCount;
-    this.cacheInMemory = cacheInMemory;
+    /*this.cacheInMemory = cacheInMemory;*/
     this.customLoader = customLoader;
     this.timeUpdateTimer = null;
     this.isInitlize = false;
@@ -187,8 +187,8 @@ class WXInlinePlayer extends EventEmitter {
           (this.processor.hasVideo && !this.processor.frames.length)
         ) {
           this.emit('end');
+          this.stop();
           if (this.loop) {
-            this.stop();
             this.play();
           }
         }
@@ -201,8 +201,8 @@ class WXInlinePlayer extends EventEmitter {
       type: this.isLive ? 'stream' : 'chunk',
       opt: {
         url: this.url,
-        chunkSize: this.chunkSize,
-        cacheInMemory: this.cacheInMemory
+        chunkSize: this.chunkSize
+        /*cacheInMemory: this.cacheInMemory*/
       }
     });
 
