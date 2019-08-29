@@ -7,7 +7,7 @@ Doc need to rewriting, you can see example code to learn and use now.
 
 ## License
 
-Copyright (c) <2019> <copyright ErosZy>
+Copyright (c) <2019> < copyright ErosZy >
 
 "Anti 996" License Version 1.0 (Draft)
 
