@@ -96,15 +96,3 @@ void codecFree() {
   }
 }
 }
-
-//#include <fstream>
-//#include <vector>
-//
-//int main() {
-//  std::ifstream stream("C:\\work\\WXInlinePlayer\\lib\\codec\\bin\\mtv.flv", std::ios::in | std::ios::binary);
-//  std::vector<uint8_t> data((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
-//  shared_ptr<Buffer> buffer = make_shared<Buffer>(data.data(), data.size());
-//  buffer = make_shared<Buffer>(buffer->slice(0, 1024 * 1024));
-//  Codec codec1;
-//  codec1.decode(buffer->get_buf_ptr(), buffer->get_length());
-//}
