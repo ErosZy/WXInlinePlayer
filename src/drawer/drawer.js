@@ -275,6 +275,4 @@ class Drawer {
   }
 }
 
-window.Drawer = Drawer;
-
 export default Drawer;

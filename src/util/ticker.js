@@ -1,4 +1,11 @@
-import raf from 'raf';
+const raf = callback => {
+  return setTimeout(callback, 1000 / 60);
+};
+
+raf.cancel = handler => {
+  clearTimeout(handler);
+};
+
 class Ticker {
   constructor() {
     this.interval = 1000 / 60;

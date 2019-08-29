@@ -5,5 +5,4 @@ function Loader({ type = 'chunk', opt }) {
   return type == 'chunk' ? new ChunkLoader(opt) : new StreamLoader(opt);
 }
 
-window.Loader = Loader;
 export default Loader;

@@ -3,7 +3,6 @@ import Promise from 'promise-polyfill';
 import Processor from './processor/processor';
 import Loader from './loader/loader';
 import Drawer from './drawer/drawer';
-import Util from './util/util';
 
 class WXInlinePlayer extends EventEmitter {
   static initPromise = null;
@@ -21,7 +20,8 @@ class WXInlinePlayer extends EventEmitter {
     preloadTime = 1e3,
     bufferingTime = 3e3,
     cacheSegmentCount = 128,
-    cacheInMemory = false
+    cacheInMemory = false,
+    customLoader = null
   }) {
     super();
     this.url = url;
@@ -37,12 +37,13 @@ class WXInlinePlayer extends EventEmitter {
     this.bufferingTime = bufferingTime;
     this.cacheSegmentCount = cacheSegmentCount;
     this.cacheInMemory = cacheInMemory;
+    this.customLoader = customLoader;
     this.timeUpdateTimer = null;
     this.isInitlize = false;
     this.isEnd = false;
     this.state = 'created';
 
-    if (Util.isWeChat() && this.autoplay) {
+    if (this.autoplay) {
       this._initlize();
       this.processor.unblock(0);
     }
@@ -196,7 +197,7 @@ class WXInlinePlayer extends EventEmitter {
 
     this.isEnd = false;
     this.drawer = new Drawer(this.$container);
-    this.loader = new Loader({
+    this.loader = new (this.customLoader ? this.customLoader : Loader)({
       type: this.isLive ? 'stream' : 'chunk',
       opt: {
         url: this.url,

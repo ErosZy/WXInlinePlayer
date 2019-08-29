@@ -8,7 +8,6 @@ class ChunkLoader {
     this.cacheInMemory = cacheInMemory;
     this.chunkSize = chunkSize;
     this.startIndex = 0;
-    this.fileSize = 0;
     this.downloadSize = 0;
     this.done = false;
     this.xhr = null;
@@ -19,12 +18,6 @@ class ChunkLoader {
   }
 
   read() {
-    if (!this.fileSize) {
-      return this._getFileSize().then(() => {
-        return this._request();
-      });
-    }
-
     if (!this.done) {
       return this._request();
     }
@@ -49,7 +42,7 @@ class ChunkLoader {
           if (!isSuccess) {
             isSuccess = true;
             this.downloadSize += buffer.length;
-            if (this.downloadSize >= this.fileSize) {
+            if (buffer.length < this.chunkSize) {
               this.done = true;
             }
           }
@@ -68,11 +61,7 @@ class ChunkLoader {
 
   _fetch() {
     return new Promise((resolve, reject) => {
-      let endIndex = this.startIndex + this.chunkSize;
-      if (this.fileSize && this.fileSize - this.downloadSize < this.chunkSize) {
-        endIndex = this.fileSize;
-      }
-
+      const endIndex = this.startIndex + this.chunkSize;
       this.xhr = new XMLHttpRequest();
       this.xhr.open('GET', this.url);
       this.xhr.responseType = 'arraybuffer';
@@ -92,26 +81,6 @@ class ChunkLoader {
         }
       };
       this.xhr.send();
-    });
-  }
-
-  _getFileSize() {
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open('HEAD', this.url);
-      xhr.error = reject;
-      xhr.onload = () => {
-        if (xhr.readyState == 4) {
-          if (xhr.status >= 200 && xhr.status <= 299) {
-            this.fileSize = xhr.getResponseHeader('Content-Length');
-            this.fileSize = parseInt(this.fileSize);
-            resolve();
-          } else {
-            reject(new Error(`get file size error: ${xhr.status}`));
-          }
-        }
-      };
-      xhr.send();
     });
   }
 }

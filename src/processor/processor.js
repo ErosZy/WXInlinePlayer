@@ -246,6 +246,7 @@ class Processor extends EventEmitter {
           this.sound.destroy();
           this.sound = null;
         }
+        this.emit('header', msg.data);
         break;
       }
       case 'mediaInfo': {
