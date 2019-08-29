@@ -1,9 +1,11 @@
 WXInlinePlayer
 ------------------
 
+## Introduce
+
 Doc need to rewriting, you can see example code to learn and use now.
 
-## > LICENSE
+## License
 
 Copyright (c) <2019> <copyright ErosZy>
 
