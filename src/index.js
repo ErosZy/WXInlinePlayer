@@ -52,6 +52,7 @@ import Promise from 'promise-polyfill';
 import Processor from './processor/processor';
 import Loader from './loader/loader';
 import Drawer from './drawer/drawer';
+import Util from './util/util';
 
 class WXInlinePlayer extends EventEmitter {
   static initPromise = null;
@@ -60,6 +61,8 @@ class WXInlinePlayer extends EventEmitter {
   constructor({
     url = '',
     $container,
+    hasVideo = true,
+    hasAudio = true,
     volume = 1.0,
     muted = false,
     autoplay = false,
@@ -92,7 +95,7 @@ class WXInlinePlayer extends EventEmitter {
     this.isEnd = false;
     this.state = 'created';
 
-    if (this.autoplay) {
+    if (((hasVideo && !hasAudio) || Util.isWeChat()) && this.autoplay) {
       this._initlize();
       this.processor.unblock(0);
     }
