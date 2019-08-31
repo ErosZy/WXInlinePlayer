@@ -49,9 +49,12 @@ LICENSED WORK OR THE USE OR OTHER DEALINGS IN THE LICENSED WORK.
 
 import StreamLoader from './stream';
 import ChunkLoader from './chunk';
+import Util from '../util/util';
 
 function Loader({ type = 'chunk', opt }) {
-  return type == 'chunk' ? new ChunkLoader(opt) : new StreamLoader(opt);
+  return type == 'chunk'
+    ? new ChunkLoader(opt)
+    : new (Util.workerify(StreamLoader, ['read', 'cancel', 'hasData']))(opt);
 }
 
 export default Loader;

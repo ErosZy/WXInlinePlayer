@@ -47,29 +47,36 @@ OTHERWISE, ARISING FROM, OUT OF OR IN ANY WAY CONNECTION WITH THE
 LICENSED WORK OR THE USE OR OTHER DEALINGS IN THE LICENSED WORK.
 *********************************************************/
 
-import Promise from 'promise-polyfill';
-import { Buffer } from 'buffer';
 
-class StreamLoader {
-  constructor({ url, chunkSize = 256 * 1024 }) {
+// see: https://github.com/qiaozi-tech/WXInlinePlayer/issues/8
+export default function() {
+  function concat(i, j) {
+    const buffer = new Uint8Array(i.length + j.length);
+    buffer.set(new Uint8Array(i), 0);
+    buffer.set(new Uint8Array(j), i.length);
+    return buffer;
+  }
+
+  function slice(buffer, startIndex, endIndex) {
+    if (!endIndex || endIndex - startIndex > buffer.length) {
+      endIndex = buffer.length;
+    }
+    return buffer.subarray(startIndex, endIndex);
+  }
+
+  function StreamLoader({ url, chunkSize = 256 * 1024 }) {
     this.url = url;
     this.done = false;
     this.reader = null;
     this.chunkSize = chunkSize;
-    this.data = new Buffer(0);
-    this.abortController = null;
-    try {
-      this.abortController = new AbortController();
-    } catch (e) {
-      // not support, ignore it.
-    }
+    this.data = new Uint8Array(0);
   }
 
-  hasData() {
+  StreamLoader.prototype.hasData = function() {
     return !this.done || (this.done && this.data.length);
-  }
+  };
 
-  read() {
+  StreamLoader.prototype.read = function() {
     if (this.data.length < this.chunkSize) {
       if (this.done) {
         return this._getChunk();
@@ -79,33 +86,28 @@ class StreamLoader {
       });
     }
     return this._getChunk();
-  }
+  };
 
-  cancel() {
-    if (this.abortController) {
-      this.abortController.abort();
-    }
-
+  StreamLoader.prototype.cancel = function() {
     this.data = null;
     this.reader = null;
     this.done = true;
-    this.abortController = null;
-  }
+  };
 
-  _getChunk() {
+  StreamLoader.prototype._getChunk = function() {
     return new Promise(resolve => {
-      const buffer = this.data.slice(0, this.chunkSize);
-      this.data = this.data.slice(this.chunkSize);
+      const buffer = slice(this.data, 0, this.chunkSize);
+      this.data = slice(this.data, this.chunkSize);
       resolve(buffer);
     });
-  }
+  };
 
-  _request() {
+  StreamLoader.prototype._request = function() {
     if (this.reader) {
       return this.reader.read().then(result => {
         let { value, done } = result;
-        value = Buffer.from(value ? value : new Uint8Array(0));
-        this.data = Buffer.concat([this.data, value]);
+        value = new Uint8Array(value ? value : 0);
+        this.data = concat(this.data, value);
         if (done) {
           this.done = true;
         } else if (this.data.length < this.chunkSize) {
@@ -114,14 +116,39 @@ class StreamLoader {
       });
     } else {
       return fetch(this.url, {
-        method: 'GET',
-        signal: this.abortController ? this.abortController.signal : null
+        method: 'GET'
       }).then(resp => {
         this.reader = resp.body.getReader();
         return this._request();
       });
     }
-  }
-}
+  };
 
-export default StreamLoader;
+  let loader = null;
+  self.onmessage = message => {
+    const { type, id, data } = message.data;
+    if (type == 'constructor') {
+      loader = new StreamLoader(data);
+      self.postMessage({ id });
+    } else if (type == 'hasData') {
+      self.postMessage({
+        id,
+        data: !loader ? false : loader.hasData()
+      });
+    } else if (type == 'read') {
+      if (loader) {
+        loader.read().then(data => {
+          data = new Uint8Array(data);
+          self.postMessage({ id, data }, [data.buffer]);
+        });
+      } else {
+        self.postMessage({ id, data: new Uint8Array(0) });
+      }
+    } else if (type == 'cancel') {
+      if (loader) {
+        loader.cancel();
+      }
+      self.postMessage({ id, destroy: true });
+    }
+  };
+}

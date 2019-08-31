@@ -48,7 +48,6 @@ LICENSED WORK OR THE USE OR OTHER DEALINGS IN THE LICENSED WORK.
 *********************************************************/
 
 import EventEmitter from 'eventemitter3';
-import Promise from 'promise-polyfill';
 import Processor from './processor/processor';
 import Loader from './loader/loader';
 import Drawer from './drawer/drawer';
@@ -121,6 +120,9 @@ class WXInlinePlayer extends EventEmitter {
 
   static isSupport() {
     return !!(
+      window.fetch &&
+      window.ReadableStream &&
+      window.Promise &&
       window.URL &&
       window.URL.createObjectURL &&
       window.Blob &&

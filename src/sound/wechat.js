@@ -47,7 +47,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN ANY WAY CONNECTION WITH THE
 LICENSED WORK OR THE USE OR OTHER DEALINGS IN THE LICENSED WORK.
 *********************************************************/
 
-import Promise from 'promise-polyfill';
 import BrowserSound from './browser';
 
 const calls = [];
