@@ -49,7 +49,6 @@ LICENSED WORK OR THE USE OR OTHER DEALINGS IN THE LICENSED WORK.
 
 #include "body.h"
 
-int i = 0;
 shared_ptr<BodyValue> Body::decode(shared_ptr<Buffer> &buffer) {
   Tag tag;
   shared_ptr<BodyValue> value = make_shared<BodyValue>();

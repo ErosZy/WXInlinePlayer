@@ -78,6 +78,8 @@ class WXInlinePlayer extends EventEmitter {
     super();
     this.url = url;
     this.$container = $container;
+    this.width = $container.width;
+    this.height = $container.height;
     this.vol = volume;
     this.muted = muted;
     this.duration = 0;
@@ -281,15 +283,18 @@ class WXInlinePlayer extends EventEmitter {
     for (let i = 0; i < onMetaData.length; i++) {
       if ('duration' in onMetaData[i]) {
         this.duration = onMetaData[i].duration * 1000;
-        break;
+      } else if ('width' in onMetaData[i]) {
+        this.width = onMetaData[i].width;
+      } else if ('height' in onMetaData[i]) {
+        this.height = onMetaData[i].height;
       }
     }
     this.emit('mediaInfo', mediaInfo);
   }
 
-  _onFrameHandler({ width, height, data }) {
+  _onFrameHandler({ width, height, stride0, stride1, data }) {
     if (this.drawer) {
-      this.drawer.drawNextOutputPicture(width, height, data);
+      this.drawer.drawNextOutputPicture(width, height, stride0, stride1, data);
     }
   }
 

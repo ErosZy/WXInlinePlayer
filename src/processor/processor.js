@@ -317,15 +317,18 @@ class Processor extends EventEmitter {
         break;
       }
       case 'video': {
-        const { timestamp, width, height, buffer } = msg.data;
+        const { timestamp, width, height, stride0, stride1, buffer } = msg.data;
         if (!this.baseTime) {
           this.baseTime = timestamp;
         }
+
         this.frames.push({
           data: Buffer.from(new Uint8Array(buffer)),
           timestamp: timestamp - this.baseTime,
           width,
-          height
+          height,
+          stride0,
+          stride1
         });
         break;
       }

@@ -51,55 +51,86 @@ LICENSED WORK OR THE USE OR OTHER DEALINGS IN THE LICENSED WORK.
 #define CODEC_CODEC_H
 
 #include <string>
+#include "config.h"
 #include "factor/codec_factor.h"
 #include "demuxer/decoder.h"
-#include "h264/tinyh264.h"
+
+#ifdef USE_OPEN_H264
+#include "openh264/codec/api/svc/codec_api.h"
+#else
+#include "tinyh264/tinyh264.h"
+#endif
 
 using namespace std;
 
 class Codec {
 public:
-    Codec() : _decoder(make_shared<Decoder>()), _factor(make_shared<CodecFactor>(this)),
-              adtsHeader(make_shared<Buffer>()), sps(make_shared<Buffer>()), pps(make_shared<Buffer>()),
-              audioBuffer(nullptr), videoBuffer(nullptr) {
-      storage = h264bsdAlloc();
-      h264bsdInit(storage, 0);
-      _decoder->setFactor(_factor);
-    };
+  Codec() : _decoder(make_shared<Decoder>()), _factor(make_shared<CodecFactor>(this)),
+            adtsHeader(make_shared<Buffer>()), sps(make_shared<Buffer>()), pps(make_shared<Buffer>()),
+            audioBuffer(nullptr), videoBuffer(nullptr) {
+#ifdef USE_OPEN_H264
+    SDecodingParam sDecParam = {0};
+    sDecParam.uiTargetDqLayer = (uint8_t) -1;
+    sDecParam.sVideoProperty.size = sizeof(sDecParam.sVideoProperty);
+    sDecParam.eEcActiveIdc = ERROR_CON_SLICE_COPY;
+    sDecParam.sVideoProperty.eVideoBsType = VIDEO_BITSTREAM_DEFAULT;
 
-    void decode(uint8_t *bytes, uint32_t byteLen);
+    WelsCreateDecoder(&storage);
+    storage->Initialize(&sDecParam);
+#else
+    storage = h264bsdAlloc();
+    h264bsdInit(storage, 0);
+#endif
+    _decoder->setFactor(_factor);
+  };
 
-    void setBridgeName(string bridge) {
-      bridgeName = bridge;
-    }
+  void decode(uint8_t *bytes, uint32_t byteLen);
 
-    void setAudioBuffer(uint8_t *ptr) {
-      audioBuffer = ptr;
-    }
+  void setBridgeName(string bridge) {
+    bridgeName = bridge;
+  }
 
-    void setVideoBuffer(uint8_t *ptr) {
-      videoBuffer = ptr;
-    }
+  void setAudioBuffer(uint8_t *ptr) {
+    audioBuffer = ptr;
+  }
 
-    uint32_t try2seek(uint8_t *bytes, uint32_t byteLen);
+  void setVideoBuffer(uint8_t *ptr) {
+    videoBuffer = ptr;
+  }
 
-    ~Codec() {
-      h264bsdShutdown(storage);
-      h264bsdFree(storage);
-      storage = nullptr;
-    }
+  uint32_t try2seek(uint8_t *bytes, uint32_t byteLen);
 
-    storage_t *storage;
-    string bridgeName;
-    uint8_t *audioBuffer;
-    uint8_t *videoBuffer;
-    shared_ptr<Buffer> adtsHeader;
-    shared_ptr<Buffer> sps;
-    shared_ptr<Buffer> pps;
-    int lengthSizeMinusOne;
+  ~Codec() {
+#ifdef USE_OPEN_H264
+    storage->Uninitialize();
+    WelsDestroyDecoder(storage);
+    storage = nullptr;
+#else
+    h264bsdShutdown(storage);
+    h264bsdFree(storage);
+    storage = nullptr;
+#endif
+  }
+
+  string bridgeName;
+  uint8_t *audioBuffer;
+  uint8_t *videoBuffer;
+  shared_ptr<Buffer> adtsHeader;
+  shared_ptr<Buffer> sps;
+  shared_ptr<Buffer> pps;
+  int lengthSizeMinusOne;
 private:
-    shared_ptr<Decoder> _decoder;
-    shared_ptr<DecoderFactor> _factor;
+  shared_ptr<DecoderFactor> _factor;
+  shared_ptr<Decoder> _decoder;
+
+
+#ifdef USE_OPEN_H264
+public:
+  ISVCDecoder *storage;
+#else
+  public:
+    storage_t *storage;
+#endif
 };
 
 #endif //CODEC_CODEC_H
