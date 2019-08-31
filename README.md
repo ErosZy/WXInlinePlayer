@@ -5,4 +5,7 @@ WXInlinePlayer
 
 ## Introduce
 
-Doc need to rewriting, you can see example code to learn and use now.
+The document need to rewritten, you can see example code to learn and use now.
+
+## QQ Group
+![QQ群](./images/qq.jpeg "QQ群")
