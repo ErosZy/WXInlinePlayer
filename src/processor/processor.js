@@ -62,6 +62,8 @@ class Processor extends EventEmitter {
     cacheSegmentCount = 128
   }) {
     super();
+    this.framerate = 1000 / 24;
+    this.isEnded = false;
     this.state = 'created';
     this.baseTime = 0;
     this.blocked = !Util.isWeChat();
@@ -258,6 +260,9 @@ class Processor extends EventEmitter {
         this.emit('preload');
       }
     } else if (this.hasVideo) {
+      if (this.frames.length < this.cacheSegmentCount && !this.isEnded) {
+        this.ticker.setFps(this.framerate / 2);
+      }
       const frame = this.frames.shift();
       if (frame) {
         this.currentTime = frame.timestamp;
@@ -307,6 +312,7 @@ class Processor extends EventEmitter {
           for (let i = 0; i < info.length; i++) {
             const { framerate } = info[i];
             if (framerate) {
+              this.framerate = framerate;
               this.ticker.setFps(framerate);
               break;
             }
@@ -348,6 +354,7 @@ class Processor extends EventEmitter {
           this.emit('playing');
         }
 
+        this.ticker.setFps(this.framerate);
         this.state = 'playing';
         if (this.hasAudio) {
           this.currentTime = this.getCurrentTime();
@@ -358,6 +365,7 @@ class Processor extends EventEmitter {
         break;
       }
       case 'complete': {
+        this.isEnded = true;
         this.state = 'end';
         this.emit('end');
         break;

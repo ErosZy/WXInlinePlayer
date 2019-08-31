@@ -98,7 +98,7 @@ class Ticker {
     const diff = now - this.timestamp + extra;
     let loop = Math.floor(diff / this.interval);
     extra = diff - this.interval * loop;
-    if (extra >= this.interval / 2) {
+    if (extra >= this.interval / 1.5) {
       loop = Math.ceil(diff / this.interval);
       extra = 0;
     }
