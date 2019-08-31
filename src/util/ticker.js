@@ -86,19 +86,16 @@ class Ticker {
   }
 
   _tick() {
-    let loop = 1;
     const now = this._now();
     if (!this.timestamp) {
       this.timestamp = now;
-      loop = Math.floor((now - this.timestamp) / this.interval);
     }
 
     const diff = now - this.timestamp;
-    if (diff >= this.interval) {
-      for (let i = 0; i < this.callbacks.length; i++) {
-        for (let j = 0; j < loop; j++) {
-          this.callbacks[i](now - this.timestamp);
-        }
+    const loop = Math.ceil(diff / this.interval) || 1;
+    for (let i = 0; i < this.callbacks.length; i++) {
+      for (let j = 0; j < loop; j++) {
+        this.callbacks[i](now - this.timestamp);
       }
       this.timestamp = now;
     }
