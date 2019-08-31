@@ -52,6 +52,7 @@ LICENSED WORK OR THE USE OR OTHER DEALINGS IN THE LICENSED WORK.
 
 #include <string>
 #include "factor_impl.h"
+
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
 #endif

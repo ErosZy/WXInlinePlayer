@@ -103,8 +103,10 @@
 
       if (WXInlinePlayer.isSupport()) {
         WXInlinePlayer.init({
-          asmUrl: './prod.asm.combine.js',
-          wasmUrl: './prod.wasm.combine.js'
+          // asmUrl: './prod.baseline.asm.combine.js',
+          // wasmUrl: './prod.baseline.wasm.combine.js'
+          asmUrl: './prod.all.asm.combine.js',
+          wasmUrl: './prod.all.wasm.combine.js'
         });
 
         WXInlinePlayer.ready().then(() => {
@@ -118,10 +120,10 @@
             muted: false,
             autoplay: true,
             loop: true,
-            isLive: false,
+            isLive: true,
             chunkSize: chunkSize,
-            preloadTime: 1e3,
-            bufferingTime: 3e3,
+            preloadTime: 1e2,
+            bufferingTime: 1e3,
             cacheSegmentCount: 128,
             customLoader: null
           });

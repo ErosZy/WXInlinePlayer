@@ -109,8 +109,10 @@ void CodecFactor::_handleAudioTag(AudioTagValue &tag, uint32_t timestamp) const 
     uint8_t adts[7] = {
             0xff,
             0xf0 | (0 << 3) | (0 << 1) | 1,
-            (uint8_t) (((audioObjectType - 1) << 6) | ((samplingFrequencyIndex & 0x0f) << 2) | (0 << 1) | ((channelConfig & 0x04) >> 2)),
-            (uint8_t) (((channelConfig & 0x03) << 6) | (0 << 5) | (0 << 4) | (0 << 3) | (0 << 2) | ((7 & 0x1800) >> 11)),
+            (uint8_t) (((audioObjectType - 1) << 6) | ((samplingFrequencyIndex & 0x0f) << 2) | (0 << 1) |
+                       ((channelConfig & 0x04) >> 2)),
+            (uint8_t) (((channelConfig & 0x03) << 6) | (0 << 5) | (0 << 4) | (0 << 3) | (0 << 2) |
+                       ((7 & 0x1800) >> 11)),
             (uint8_t) ((7 & 0x7f8) >> 3),
             (uint8_t) (((7 & 0x7) << 5) | 0x1f),
             0xfc,
@@ -156,7 +158,14 @@ void CodecFactor::_handleAudioTag(AudioTagValue &tag, uint32_t timestamp) const 
 void CodecFactor::_handleVideoTag(VideoTagValue &tag, uint32_t timestamp) const {
   uint32_t width = 0;
   uint32_t height = 0;
+  uint32_t stride0 = 0;
+  uint32_t stride1 = 0;
   uint8_t *picPtr = nullptr;
+
+#ifdef USE_OPEN_H264
+  unsigned char *pDst[3] = {0};
+  SBufferInfo sDstInfo = {0};
+#endif
 
   if (tag.AVCPacketType == 0) {
     shared_ptr<Buffer> unit = tag.data;
@@ -170,15 +179,23 @@ void CodecFactor::_handleVideoTag(VideoTagValue &tag, uint32_t timestamp) const 
     int sequenceParameterSetLength = unit->read_uint16_be(6);
     _codec->sps = make_shared<Buffer>(unit->slice(8, 8 + (uint32_t) sequenceParameterSetLength));
     _codec->sps = make_shared<Buffer>(*_mask + *_codec->sps);
+#ifdef USE_OPEN_H264
+    _codec->storage->DecodeFrame2(_codec->sps->get_buf_ptr(), _codec->sps->get_length(), &pDst[0], &sDstInfo);
+#else
     h264bsdDecode(_codec->storage, _codec->sps->get_buf_ptr(), _codec->sps->get_length(), &picPtr, &width, &height);
-
+#endif
     int numOfPictureParameterSets = unit->read_uint8(8 + (uint32_t) sequenceParameterSetLength);
     int pictureParameterSetLength = unit->read_uint16_be(8 + (uint32_t) sequenceParameterSetLength + 1);
     _codec->pps = make_shared<Buffer>(unit->slice(
             8 + (uint32_t) sequenceParameterSetLength + 3,
             8 + (uint32_t) sequenceParameterSetLength + 3 + pictureParameterSetLength
     ));
+    _codec->pps = make_shared<Buffer>(*_mask + *_codec->pps);
+#ifdef USE_OPEN_H264
+    _codec->storage->DecodeFrame2(_codec->pps->get_buf_ptr(), _codec->pps->get_length(), &pDst[0], &sDstInfo);
+#else
     h264bsdDecode(_codec->storage, _codec->pps->get_buf_ptr(), _codec->pps->get_length(), &picPtr, &width, &height);
+#endif
   } else if (tag.AVCPacketType == 1) {
     uint32_t size = tag.data->get_length();
     shared_ptr<Buffer> unit = tag.data;
@@ -197,9 +214,23 @@ void CodecFactor::_handleVideoTag(VideoTagValue &tag, uint32_t timestamp) const 
       size -= _codec->lengthSizeMinusOne + naluLen;
     }
 
-    uint32_t retCode = h264bsdDecode(_codec->storage, nalus->get_buf_ptr(), nalus->get_length(), &picPtr, &width, &height);
-    if (retCode == H264BSD_PIC_RDY) {
-      uint32_t totalSize = (width * height) * 3 / 2;
+
+#ifdef USE_OPEN_H264
+    uint32_t retCode = _codec->storage->DecodeFrame2(nalus->get_buf_ptr(), nalus->get_length(), &pDst[0], &sDstInfo);
+    if (retCode == 0 && sDstInfo.iBufferStatus == 1) {
+      width = (uint32_t) sDstInfo.UsrData.sSystemBuffer.iWidth;
+      height = (uint32_t) sDstInfo.UsrData.sSystemBuffer.iHeight;
+      stride0 = (uint32_t) sDstInfo.UsrData.sSystemBuffer.iStride[0];
+      stride1 = (uint32_t) sDstInfo.UsrData.sSystemBuffer.iStride[1];
+#else
+      uint32_t retCode = h264bsdDecode(_codec->storage, nalus->get_buf_ptr(), nalus->get_length(), &picPtr, &width, &height);
+      if (retCode == H264BSD_PIC_RDY) {
+        stride0 = width;
+        stride1 = height;
+#endif
+
+      uint32_t totalSize = (stride0 * stride1) * 3 / 2;
+
 #ifdef __EMSCRIPTEN__
       EM_ASM({
         var isWorker = typeof importScripts == "function";
@@ -212,7 +243,20 @@ void CodecFactor::_handleVideoTag(VideoTagValue &tag, uint32_t timestamp) const 
       }, _codec->bridgeName.c_str(), totalSize);
 
       if(_codec->videoBuffer != nullptr){
-        memcpy(_codec->videoBuffer, picPtr, totalSize);
+#ifdef USE_OPEN_H264
+      uint32_t yDataLength = stride0 * stride1;
+      uint32_t cbDataLength = yDataLength / 4;
+      uint32_t crDataLength = cbDataLength;
+
+      uint32_t startIndex = 0;
+      memcpy(_codec->videoBuffer + startIndex, pDst[0], yDataLength);
+      startIndex += yDataLength;
+      memcpy(_codec->videoBuffer + startIndex, pDst[1], cbDataLength);
+      startIndex += cbDataLength;
+      memcpy(_codec->videoBuffer + startIndex, pDst[2], crDataLength);
+#else
+      memcpy(_codec->videoBuffer, picPtr, totalSize);
+#endif
         EM_ASM({
           var isWorker = typeof importScripts == "function";
           var bridge = (isWorker ? self : window)[UTF8ToString($0)];
@@ -221,9 +265,11 @@ void CodecFactor::_handleVideoTag(VideoTagValue &tag, uint32_t timestamp) const 
               "timestamp": $1,
               "width": $2,
               "height": $3,
+              "stride0": $4,
+              "stride1": $5
             });
           }
-        }, _codec->bridgeName.c_str(), timestamp, width, height);
+        }, _codec->bridgeName.c_str(), timestamp, width, height, stride0, stride1);
       }
 #endif
     }
