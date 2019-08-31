@@ -47,8 +47,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN ANY WAY CONNECTION WITH THE
 LICENSED WORK OR THE USE OR OTHER DEALINGS IN THE LICENSED WORK.
 *********************************************************/
 
-const raf = callback => {
-  return setTimeout(callback, 1000 / 60);
+const raf = (callback, delay) => {
+  return setTimeout(callback, delay);
 };
 
 raf.cancel = handler => {
@@ -59,12 +59,15 @@ class Ticker {
   constructor() {
     this.interval = 1000 / 60;
     this.timestamp = 0;
+    this.extra = 0;
     this.callbacks = [];
-    this.handler = raf(this._tick.bind(this));
+    this.handler = raf(this._tick.bind(this), this.interval);
   }
 
   setFps(fps) {
-    this.interval = 1000 / fps;
+    if (fps) {
+      this.interval = 1000 / fps;
+    }
   }
 
   add(func) {
@@ -91,16 +94,26 @@ class Ticker {
       this.timestamp = now;
     }
 
-    const diff = now - this.timestamp;
-    const loop = Math.ceil(diff / this.interval) || 1;
-    for (let i = 0; i < this.callbacks.length; i++) {
-      for (let j = 0; j < loop; j++) {
-        this.callbacks[i](now - this.timestamp);
+    let extra = this.extra;
+    const diff = now - this.timestamp + extra;
+    let loop = Math.floor(diff / this.interval);
+    extra = diff - this.interval * loop;
+    if (extra >= this.interval / 2) {
+      loop = Math.ceil(diff / this.interval);
+      extra = 0;
+    }
+    
+    if (loop) {
+      for (let i = 0; i < this.callbacks.length; i++) {
+        for (let j = 0; j < loop; j++) {
+          this.callbacks[i](now - this.timestamp);
+        }
       }
+      this.extra = extra;
       this.timestamp = now;
     }
 
-    this.handler = raf(this._tick.bind(this));
+    this.handler = raf(this._tick.bind(this), this.interval);
   }
 
   _now() {
