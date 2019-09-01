@@ -238,6 +238,13 @@ class Processor extends EventEmitter {
         }
       }
 
+      // simple solution to delay accumulation
+      if(this.frames.length >= this.cacheSegmentCount * 1.5){
+        this.ticker.setFps(this.framerate * 2);
+      }else{
+        this.ticker.setFps(this.framerate);
+      }
+
       for (let i = 0; i < this.frames.length; i++) {
         const { timestamp } = this.frames[i];
         const diff = this.currentTime - timestamp;
