@@ -71,8 +71,6 @@ public:
 #ifdef USE_OPEN_H264
     SDecodingParam sDecParam = {0};
     sDecParam.uiTargetDqLayer = (uint8_t) -1;
-    sDecParam.sVideoProperty.size = sizeof(sDecParam.sVideoProperty);
-    sDecParam.eEcActiveIdc = ERROR_CON_SLICE_COPY;
     sDecParam.sVideoProperty.eVideoBsType = VIDEO_BITSTREAM_DEFAULT;
 
     WelsCreateDecoder(&storage);
