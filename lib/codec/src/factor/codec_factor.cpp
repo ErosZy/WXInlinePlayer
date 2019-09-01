@@ -229,7 +229,7 @@ void CodecFactor::_handleVideoTag(VideoTagValue &tag, uint32_t timestamp) const 
         stride1 = height;
 #endif
 
-      uint32_t totalSize = (stride0 * stride1) * 3 / 2;
+      uint32_t totalSize = (width * height) * 3 / 2;
 
 #ifdef __EMSCRIPTEN__
       EM_ASM({
@@ -244,16 +244,36 @@ void CodecFactor::_handleVideoTag(VideoTagValue &tag, uint32_t timestamp) const 
 
       if(_codec->videoBuffer != nullptr){
 #ifdef USE_OPEN_H264
-      uint32_t yDataLength = stride0 * stride1;
-      uint32_t cbDataLength = yDataLength / 4;
-      uint32_t crDataLength = cbDataLength;
-
       uint32_t startIndex = 0;
-      memcpy(_codec->videoBuffer + startIndex, pDst[0], yDataLength);
-      startIndex += yDataLength;
-      memcpy(_codec->videoBuffer + startIndex, pDst[1], cbDataLength);
-      startIndex += cbDataLength;
-      memcpy(_codec->videoBuffer + startIndex, pDst[2], crDataLength);
+      uint8_t *ptr = pDst[0];
+      uint32_t iWidth = width;
+      uint32_t iHeight = height;
+      for (uint32_t i = 0; i < iHeight; i++) {
+        memcpy(_codec->videoBuffer + startIndex, ptr, iWidth);
+        ptr += stride0;
+        startIndex += iWidth;
+      }
+
+      ptr = pDst[1];
+      iWidth = width / 2;
+      iHeight = height / 2;
+      for (uint32_t i = 0; i < iHeight; i++) {
+        memcpy(_codec->videoBuffer + startIndex, ptr, iWidth);
+        ptr += stride1;
+        startIndex += iWidth;
+      }
+
+      ptr = pDst[2];
+      iWidth = width / 2;
+      iHeight = height / 2;
+      for (uint32_t i = 0; i < iHeight; i++) {
+        memcpy(_codec->videoBuffer + startIndex, ptr, iWidth);
+        ptr += stride1;
+        startIndex += iWidth;
+      }
+
+      stride0 = width;
+      stride1 = height;
 #else
       memcpy(_codec->videoBuffer, picPtr, totalSize);
 #endif

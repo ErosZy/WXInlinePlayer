@@ -109,11 +109,12 @@
           wasmUrl: './prod.all.wasm.combine.js'
         });
 
+        const $canvas = document.getElementById('canvas');
         WXInlinePlayer.ready().then(() => {
           type = parseInt(type) || 0;
           const player = new WXInlinePlayer({
             url: url,
-            $container: document.getElementById('canvas'),
+            $container: $canvas,
             hasVideo: true,
             hasAudio: !type || type == 2,
             volume: 1.0,
@@ -154,7 +155,18 @@
               player.volume(ev.target.value);
             });
 
-          player.on('mediaInfo', console.log);
+          player.on('mediaInfo', mediaInfo => {
+            const { onMetaData } = mediaInfo;
+            $canvas.height = onMetaData.height;
+            $canvas.width = onMetaData.width;
+            for (let i = 0; i < onMetaData.length; i++) {
+              if ('height' in onMetaData[i]) {
+                $canvas.height = onMetaData[i].height;
+              } else if ('width' in onMetaData[i]) {
+                $canvas.width = onMetaData[i].width;
+              }
+            }
+          });
 
           player.on('buffering', () => {
             $status.innerHTML = '状态: 等待加载';

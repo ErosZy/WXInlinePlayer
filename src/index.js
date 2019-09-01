@@ -119,7 +119,8 @@ class WXInlinePlayer extends EventEmitter {
   }
 
   static isSupport() {
-    return !!(
+    return !!
+    (
       // UC and Quark browser (iOS/Android) support wasm/asm limited,
       // its iOS version make wasm/asm performance very slow （maybe hook something）
       // its Android version removed support for wasm/asm, it just run pure javascript codes,
@@ -299,9 +300,9 @@ class WXInlinePlayer extends EventEmitter {
     this.emit('mediaInfo', mediaInfo);
   }
 
-  _onFrameHandler({ width, height, stride0, stride1, data }) {
+  _onFrameHandler({ width, height, data }) {
     if (this.drawer) {
-      this.drawer.drawNextOutputPicture(width, height, stride0, stride1, data);
+      this.drawer.drawNextOutputPicture(width, height, data);
     }
   }
 
