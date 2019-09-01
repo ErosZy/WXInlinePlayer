@@ -120,6 +120,11 @@ class WXInlinePlayer extends EventEmitter {
 
   static isSupport() {
     return !!(
+      // UC and Quark browser (iOS/Android) support wasm/asm limited,
+      // its iOS version make wasm/asm performance very slow （maybe hook something）
+      // its Android version removed support for wasm/asm, it just run pure javascript codes,
+      // so it is very easy to cause memory leaks
+      !/UCBrowser|Quark/.test(window.navigator.userAgent) &&
       window.fetch &&
       window.ReadableStream &&
       window.Promise &&
