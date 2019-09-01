@@ -223,9 +223,9 @@ class Processor extends EventEmitter {
 
       if (!this.frames.length || (diff && diff < this.minBufferingTime)) {
         if (this.state != 'buffering' && this.state != 'preload') {
-          this.sound.pause();
           this.emit('buffering');
         }
+        this.sound.pause();
         this.state = 'buffering';
         return;
       } else {
@@ -233,7 +233,9 @@ class Processor extends EventEmitter {
           this.minBufferingTime = this.bufferingTime;
         }
         this.bufferingIndex = -1;
-        this.sound.resume();
+        if (this.state != 'buffering') {
+          this.sound.resume();
+        }
         if (this.blocked || !this.currentTime) {
           return;
         }
