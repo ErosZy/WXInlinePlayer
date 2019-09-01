@@ -169,22 +169,24 @@ class BrowserSound extends EventEmitter {
   }
 
   decode(data) {
-    data = Buffer.from(data);
-    this.data = Buffer.concat([this.data, data]);
-    if (this.context) {
-      return new Promise(resolve => {
-        this.context.decodeAudioData(
-          this.data.buffer,
-          buffer => {
-            this._onDecodeSuccess(buffer);
-            resolve();
-          },
-          error => {
-            this._onDecodeError(error);
-            resolve();
-          }
-        );
-      });
+    if (data.length) {
+      data = Buffer.from(data);
+      this.data = Buffer.concat([this.data, data]);
+      if (this.context) {
+        return new Promise(resolve => {
+          this.context.decodeAudioData(
+            this.data.buffer,
+            buffer => {
+              this._onDecodeSuccess(buffer);
+              resolve();
+            },
+            error => {
+              this._onDecodeError(error);
+              resolve();
+            }
+          );
+        });
+      }
     }
     return Promise.resolve();
   }

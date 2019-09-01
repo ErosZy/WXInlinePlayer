@@ -57,11 +57,12 @@ raf.cancel = handler => {
 
 class Ticker {
   constructor() {
+    this.ticks = 0;
     this.interval = 1000 / 60;
-    this.timestamp = 0;
-    this.extra = 0;
+    this.lastTime = 0;
     this.callbacks = [];
-    this.handler = raf(this._tick.bind(this), this.interval);
+    this.handler = null;
+    this._setup();
   }
 
   setFps(fps) {
@@ -88,35 +89,25 @@ class Ticker {
     this.callbacks = [];
   }
 
-  _tick() {
-    const now = this._now();
-    if (!this.timestamp) {
-      this.timestamp = now;
+  _setup() {
+    raf.cancel(this.handler);
+    this.handler = raf(this._setup.bind(this), this.interval);
+    if (this._getTime() - this.lastTime >= (this.interval - 1) * 0.97) {
+      this._tick();
     }
-
-    let extra = this.extra;
-    const diff = now - this.timestamp + extra;
-    let loop = Math.floor(diff / this.interval);
-    extra = diff - this.interval * loop;
-    if (extra >= this.interval / 1.5) {
-      loop = Math.ceil(diff / this.interval);
-      extra = 0;
-    }
-    
-    if (loop) {
-      for (let i = 0; i < this.callbacks.length; i++) {
-        for (let j = 0; j < loop; j++) {
-          this.callbacks[i](now - this.timestamp);
-        }
-      }
-      this.extra = extra;
-      this.timestamp = now;
-    }
-
-    this.handler = raf(this._tick.bind(this), this.interval);
   }
 
-  _now() {
+  _tick() {
+    this.lastTime = this._getTime();
+    this.ticks++;
+    if (this.callbacks.length) {
+      for (let i = 0; i < this.callbacks.length; i++) {
+        this.callbacks[i]();
+      }
+    }
+  }
+
+  _getTime() {
     if (window.performance && window.performance.now) {
       return window.performance.now();
     }

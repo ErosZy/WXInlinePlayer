@@ -62,6 +62,7 @@ class Processor extends EventEmitter {
     cacheSegmentCount = 128
   }) {
     super();
+    this.soundHeadSliced = false;
     this.framerate = 1000 / 24;
     this.isEnded = false;
     this.state = 'created';
@@ -239,16 +240,16 @@ class Processor extends EventEmitter {
       }
 
       // simple solution to delay accumulation
-      if(this.frames.length >= this.cacheSegmentCount * 1.5){
+      if (this.frames.length >= this.cacheSegmentCount * 1.5) {
         this.ticker.setFps(this.framerate * 2);
-      }else{
+      } else {
         this.ticker.setFps(this.framerate);
       }
 
       for (let i = 0; i < this.frames.length; i++) {
         const { timestamp } = this.frames[i];
         const diff = this.currentTime - timestamp;
-        if ((diff > 0 && diff <= 25) || (diff < 0 && diff >= -100)) {
+        if (Math.abs(diff) <= this.framerate) {
           this.emit('frame', this.frames[i]);
           this.frames.splice(0, i);
           break;
@@ -361,12 +362,20 @@ class Processor extends EventEmitter {
           this.emit('playing');
         }
 
-        this.ticker.setFps(this.framerate);
         this.state = 'playing';
+        this.ticker.setFps(this.framerate);
+
         if (this.hasAudio) {
           this.currentTime = this.getCurrentTime();
-          const buffer = Buffer.concat(this.audios);
-          this.sound.decode(buffer);
+          if (!this.soundHeadSliced) {
+            this.soundHeadSliced = true;
+            if (this.frames.length) {
+              const frame = this.frames.shift();
+              this.emit('frame', frame);
+            }
+            this.sound.decode(Buffer.concat(this.audios.splice(0, 32)));
+          }
+          this.sound.decode(Buffer.concat(this.audios));
           this.audios = [];
         }
         break;
