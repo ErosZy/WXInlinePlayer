@@ -254,7 +254,7 @@ class Processor extends EventEmitter {
       for (let i = 0; i < this.frames.length; i++) {
         const { timestamp } = this.frames[i];
         const diff = this.currentTime - timestamp;
-        if (Math.abs(diff) <= this.framerate) {
+        if (Math.abs(diff) <= 25) {
           this.emit('frame', this.frames[i]);
           this.frames.splice(0, i);
           break;
