@@ -215,7 +215,7 @@ class Processor extends EventEmitter {
         if (this.bufferingIndex == -1) {
           this.bufferingIndex = lastIndex;
           diff = lastFrameTimestamp - this.currentTime;
-        } else {
+        } else if(this.frames[this.bufferingIndex]){
           const { timestamp } = this.frames[this.bufferingIndex];
           diff = lastFrameTimestamp - timestamp;
         }
@@ -243,7 +243,9 @@ class Processor extends EventEmitter {
 
       // simple solution to delay accumulation
       if (this.frames.length >= this.cacheSegmentCount * 1.5) {
-        this.ticker.setFps(this.framerate * 2);
+        this.ticker.setFps(this.framerate * 3);
+      }else if(this.frames.length < this.cacheSegmentCount / 3){
+        this.ticker.setFps(this.framerate / 1.5);
       } else {
         this.ticker.setFps(this.framerate);
       }
@@ -270,8 +272,8 @@ class Processor extends EventEmitter {
         this.emit('preload');
       }
     } else if (this.hasVideo) {
-      if (this.frames.length < this.cacheSegmentCount && !this.isEnded) {
-        this.ticker.setFps(this.framerate / 2);
+      if (!this.isEnded && this.frames.length < this.cacheSegmentCount / 3) {
+        this.ticker.setFps(this.framerate / 1.5);
       }
       const frame = this.frames.shift();
       if (frame) {
