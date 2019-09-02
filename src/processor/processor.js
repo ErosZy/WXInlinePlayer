@@ -223,7 +223,7 @@ class Processor extends EventEmitter {
       }
 
       if (!this.frames.length || (diff && diff < this.minBufferingTime)) {
-        if (this.state != 'buffering' && this.state != 'preload') {
+        if (this.state != 'buffering') {
           this.emit('buffering');
         }
         this.sound.pause();
@@ -292,12 +292,13 @@ class Processor extends EventEmitter {
       const currentTime = this.currentTime;
       diff = this.frames[lastIndex].timestamp - currentTime;
     }
+
     if (
       this.hasVideo &&
       this.state != 'preload' &&
       this.state != 'buffering' &&
       (this.frames.length < this.cacheSegmentCount ||
-        diff < this.averageDecodeCost)
+        diff < this.averageDecodeCost * 1.3)
     ) {
       this.state = 'preload';
       this.emit('preload');
@@ -376,10 +377,12 @@ class Processor extends EventEmitter {
 
         this.state = 'playing';
         this.ticker.setFps(this.framerate);
+
+        const { consume } = msg.data;
         if (!this.averageDecodeCost) {
-          this.averageDecodeCost = msg.data.duration;
+          this.averageDecodeCost = consume;
         } else {
-          this.averageDecodeCost += msg.data.duration;
+          this.averageDecodeCost += consume;
           this.averageDecodeCost /= 2.0;
         }
 

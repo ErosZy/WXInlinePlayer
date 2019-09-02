@@ -95,6 +95,7 @@ class Drawer {
   drawNextOutputPicture(width, height, data) {
     const { yTextureRef, uTextureRef, vTextureRef } = this;
     const gl = this.contextGL;
+    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
     gl.viewport(0, 0, width, height);
 
     const i420Data = data;
