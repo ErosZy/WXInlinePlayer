@@ -62,6 +62,7 @@ class Processor extends EventEmitter {
     cacheSegmentCount = 128
   }) {
     super();
+    this.averageDecodeCost = 0;
     this.soundHeadSliced = false;
     this.framerate = 1000 / 24;
     this.isEnded = false;
@@ -215,7 +216,7 @@ class Processor extends EventEmitter {
         if (this.bufferingIndex == -1) {
           this.bufferingIndex = lastIndex;
           diff = lastFrameTimestamp - this.currentTime;
-        } else if(this.frames[this.bufferingIndex]){
+        } else if (this.frames[this.bufferingIndex]) {
           const { timestamp } = this.frames[this.bufferingIndex];
           diff = lastFrameTimestamp - timestamp;
         }
@@ -244,7 +245,7 @@ class Processor extends EventEmitter {
       // simple solution to delay accumulation
       if (this.frames.length >= this.cacheSegmentCount * 1.5) {
         this.ticker.setFps(this.framerate * 3);
-      }else if(this.frames.length < this.cacheSegmentCount / 3){
+      } else if (this.frames.length < this.cacheSegmentCount / 3) {
         this.ticker.setFps(this.framerate / 1.5);
       } else {
         this.ticker.setFps(this.framerate);
@@ -285,11 +286,18 @@ class Processor extends EventEmitter {
       }
     }
 
+    let diff = Number.MAX_SAFE_INTEGER;
+    if (this.frames.length) {
+      const lastIndex = this.frames.length - 1;
+      const currentTime = this.currentTime;
+      diff = this.frames[lastIndex].timestamp - currentTime;
+    }
     if (
       this.hasVideo &&
       this.state != 'preload' &&
       this.state != 'buffering' &&
-      this.frames.length < this.cacheSegmentCount
+      (this.frames.length < this.cacheSegmentCount ||
+        diff < this.averageDecodeCost)
     ) {
       this.state = 'preload';
       this.emit('preload');
@@ -368,6 +376,12 @@ class Processor extends EventEmitter {
 
         this.state = 'playing';
         this.ticker.setFps(this.framerate);
+        if (!this.averageDecodeCost) {
+          this.averageDecodeCost = msg.data.duration;
+        } else {
+          this.averageDecodeCost += msg.data.duration;
+          this.averageDecodeCost /= 2.0;
+        }
 
         if (this.hasAudio) {
           this.currentTime = this.getCurrentTime();
