@@ -182,7 +182,6 @@ class Processor extends EventEmitter {
     this.removeAllListeners();
     if (this.ticker) {
       this.ticker.destroy();
-      this.tickHandler = null;
     }
 
     if (this.sound) {
