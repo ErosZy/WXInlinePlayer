@@ -6,12 +6,13 @@ WXInlinePlayer (Version 1.2)
 * [简介](https://github.com/qiaozi-tech/WXInlinePlayer#%E7%AE%80%E4%BB%8B)
 * [特性](https://github.com/qiaozi-tech/WXInlinePlayer#%E7%89%B9%E6%80%A7)
 * [示例](https://github.com/qiaozi-tech/WXInlinePlayer#%E7%A4%BA%E4%BE%8B)
+* [如何编译](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E7%BC%96%E8%AF%91)
 * [快速开始](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B)
 * [API](https://github.com/qiaozi-tech/WXInlinePlayer#api)
 * [事件](https://github.com/qiaozi-tech/WXInlinePlayer#%E4%BA%8B%E4%BB%B6)
 * [初始化参数](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%88%9D%E5%A7%8B%E5%8C%96%E5%8F%82%E6%95%B0)
 * [如何选择解码依赖](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E8%A7%A3%E7%A0%81%E4%BE%9D%E8%B5%96)
-* [如何降低卡顿和延迟](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E8%A7%A3%E7%A0%81%E4%BE%9D%E8%B5%96)
+* [如何降低卡顿和延迟](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%99%8D%E4%BD%8E%E5%8D%A1%E9%A1%BF%E5%92%8C%E5%BB%B6%E8%BF%9F)
 * [其他问题](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%85%B6%E4%BB%96%E9%97%AE%E9%A2%98)
 * [项目计划](https://github.com/qiaozi-tech/WXInlinePlayer#%E9%A1%B9%E7%9B%AE%E8%AE%A1%E5%88%92)
 * [已知使用的产品](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%B7%B2%E7%9F%A5%E4%BD%BF%E7%94%A8%E7%9A%84%E4%BA%A7%E5%93%81)
@@ -31,7 +32,7 @@ WXInlinePlayer (Version 1.2)
 
 为了解决这些问题，我们通过软解FLV的方式实现了WXInlinePlayer，其用的第三方技术和平台API如下：
 1. [OpenH264](https://github.com/cisco/openh264)/[TinyH264](https://github.com/udevbe/tinyh264)；
-2. [Emscripten](https://github.com/emscripten-core/emscripten)
+2. [emscripten](https://github.com/emscripten-core/emscripten)
 3. [WebGL](https://developer.mozilla.org/zh-CN/docs/Web/API/WebGL_API)
 4. [Web Audio Api](https://developer.mozilla.org/zh-CN/docs/Web/API/Web_Audio_API)
 
@@ -42,7 +43,7 @@ WXInlinePlayer (Version 1.2)
 1. FLV点播/直播全支持
 2. 自由选择H264解码依赖，Tinyh264只需gzip ~180k，OpenH264依赖gzip ~260k （[如何选择解码依赖](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E8%A7%A3%E7%A0%81%E4%BE%9D%E8%B5%96)）
 3. 专为移动端优化性能，内存和CPU占用稳定
-4. 直播延迟优化，比MSE的原生Video实现低1-2s（[如何降低卡顿和延迟](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E8%A7%A3%E7%A0%81%E4%BE%9D%E8%B5%96)）
+4. 直播延迟优化，比MSE的原生Video实现低1-2s（[如何降低卡顿和延迟](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%99%8D%E4%BD%8E%E5%8D%A1%E9%A1%BF%E5%92%8C%E5%BB%B6%E8%BF%9F)）
 5. 音频/视频全支持
 6. 微信WebView自动播放
 7. 无音频动画自动播放
@@ -50,6 +51,14 @@ WXInlinePlayer (Version 1.2)
 
 ## 示例
 > https://qiaozi-tech.github.io/WXInlinePlayer/example/index.html
+
+## 如何编译
+
+请确保你安装过[parcel](https://parceljs.org/)及[emscripten](https://github.com/emscripten-core/emscripten)，然后直接执行build.sh文件即可：
+```shell
+bash build.sh
+```
+最终产物会在example文件夹中
 
 ## 快速开始
 ```html
@@ -336,13 +345,13 @@ WXInlinePlayer的我们常用的低延迟配置参数如下：
 ```
 
 ## 其他问题
-1. 为什么不对FFmpeg精简后Emscripten编译？
+1. 为什么不对FFmpeg精简后emscripten编译？
 
 FFmpeg方案目前有几个比较大的问题，第一个是解码库的大小，精简后2M左右，gzip大约600k，这对于在意依赖库大小的产品是不可接受的。其次FFmpeg的方案难以被自己优化，比如WXInlinePlayer在2.0时会做多Worker的解码，这对于此类方案的修改成本是非常大的。
 
 2. 为什么有些机器播放点播/直播会频繁卡顿，如何解决？
 
-卡顿和延迟的原因比较复杂，对于WXInlinePlayer来说一般情况是解码速度跟不上播放速度，请参考[如何降低卡顿和延迟](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E8%A7%A3%E7%A0%81%E4%BE%9D%E8%B5%96)进行优化。
+卡顿和延迟的原因比较复杂，对于WXInlinePlayer来说一般情况是解码速度跟不上播放速度，请参考[如何降低卡顿和延迟](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%99%8D%E4%BD%8E%E5%8D%A1%E9%A1%BF%E5%92%8C%E5%BB%B6%E8%BF%9F)进行优化。
 
 3. 为什么不对UC浏览器（iOS/Android）进行支持？
 
