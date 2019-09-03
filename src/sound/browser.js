@@ -93,8 +93,9 @@ class BrowserSound extends EventEmitter {
     }
 
     this.state = 'running';
-    this.context.resume();
+    this.resume();
     this.setBlockedCurrTime(offset);
+
     this.playStartedAt = 0;
     this.totalTimeScheduled = 0;
     for (let i = 0; i < this.audioSrcNodes.length; i++) {
@@ -155,6 +156,11 @@ class BrowserSound extends EventEmitter {
   }
 
   pause() {
+    if(this.state == 'paused'){
+      return;
+    }
+    this.state = 'paused';
+
     if (this.context) {
       return this.context.suspend();
     }
@@ -162,6 +168,11 @@ class BrowserSound extends EventEmitter {
   }
 
   resume() {
+    if(this.state == 'running'){
+      return;
+    }
+    this.state = 'running';
+
     if (this.context) {
       return this.context.resume();
     }

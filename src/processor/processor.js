@@ -308,7 +308,6 @@ class Processor extends EventEmitter {
     const { type } = msg;
     switch (type) {
       case 'ready': {
-        this.state = 'buffering';
         this.emit('buffering');
         break;
       }

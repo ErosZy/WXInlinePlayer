@@ -61,7 +61,7 @@
       />
       <span>音量设置</span>
     </div>
-    <script src="https://static.petera.cn/index.js"></script>
+    <script src="./index.js"></script>
     <script>
       const VIDEO_URL = 'https://static.petera.cn/mm.flv';
       const PIC_URL = 'https://static.petera.cn/mm1.flv';
@@ -105,8 +105,8 @@
         WXInlinePlayer.init({
           // asmUrl: './prod.baseline.asm.combine.js?v=201908311154',
           // wasmUrl: './prod.baseline.wasm.combine.js?v=201908311154'
-          asmUrl: 'https://static.petera.cn/prod.all.asm.combine.js',
-          wasmUrl: 'https://static.petera.cn/prod.all.wasm.combine.js'
+          asmUrl: './prod.all.asm.combine.js',
+          wasmUrl: './prod.all.wasm.combine.js'
         });
 
         const $canvas = document.getElementById('canvas');
