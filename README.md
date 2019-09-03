@@ -345,19 +345,19 @@ WXInlinePlayer的我们常用的低延迟配置参数如下：
 ```
 
 ## 其他问题
-1. 为什么不对FFmpeg精简后emscripten编译？
+1. **为什么不对FFmpeg精简后emscripten编译？**
 
 FFmpeg方案目前有几个比较大的问题，第一个是解码库的大小，精简后2M左右，gzip大约600k，这对于在意依赖库大小的产品是不可接受的。其次FFmpeg的方案难以被自己优化，比如WXInlinePlayer在2.0时会做多Worker的解码，这对于此类方案的修改成本是非常大的。
 
-2. 为什么有些机器播放点播/直播会频繁卡顿，如何解决？
+2. **为什么有些机器播放点播/直播会频繁卡顿，如何解决？**
 
 卡顿和延迟的原因比较复杂，对于WXInlinePlayer来说一般情况是解码速度跟不上播放速度，请参考[如何降低卡顿和延迟](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%99%8D%E4%BD%8E%E5%8D%A1%E9%A1%BF%E5%92%8C%E5%BB%B6%E8%BF%9F)进行优化。
 
-3. 为什么不对UC浏览器（iOS/Android）进行支持？
+3. **为什么不对UC浏览器（iOS/Android）进行支持？**
 
 UC不管是iOS还是Android的WebAssembly/Asm.js进行了阉割，没有很完好的支持，因此索性不支持了。
 
-4. 如何将现有视频文件转换成WXInlinePlayer可播放的文件？
+4. **如何将现有视频文件转换成WXInlinePlayer可播放的文件？**
 
 请使用FFmpeg或是其他类似的工具，这里给出一个简单的命令示例：
 ```shell
