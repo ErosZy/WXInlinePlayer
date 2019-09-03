@@ -173,7 +173,7 @@ WXInlinePlayer.ready().then(()=>{
 
 ### void WXInlinePlayerInstance.play(void)
 
-进行视频播放。需要注意的是由于浏览器限制（不包含微信），高版本已经禁用了音频自动播放，因此直接调用此方法可能并不会有作用，请在click/touchstart/touchend/touchmove等事件中让用户主动触发。
+进行视频播放。需要注意的是由于浏览器限制（不包含微信及Chrome 66版本以下），高版本已经禁用了音频自动播放，因此直接调用此方法可能并不会有作用，请在click/touchstart/touchend/touchmove等事件中让用户主动触发。
 
 ```javascript
 const player = new WXInlinePlayer({/*...*/});
@@ -312,7 +312,7 @@ WXInlinePlayer的卡顿和延迟主要来自于3个地方：
 3. 视频码率：码率越高，视频富含的细节越多，也越清晰，但是会消耗更多的解码性能，可以试着降低码率
 4. 视频分辨率：过高的视频会造成单帧传递的数量极大
 
-目前WXInlinePlayer在中端机上解1280x720，码率1024，帧率24fps的视频比较流畅。
+目前WXInlinePlayer在中高端机上解1280x720，码率1024，帧率24fps的视频比较流畅。
 
 关于以上提到的视频参数你可以通过FFmpeg查看：
 ```shell
@@ -336,7 +336,7 @@ ffmpeg -i "your.flv"
 1. 如果你想能够覆盖更多的机型，那么奇秀标清或是高清的配置适合你
 2. 如果你想只支持Android中高端机和iPhone6+，那么虎牙高清的配置适合你
 
-WXInlinePlayer的我们常用的低延迟配置参数如下：
+WXInlinePlayer的我们常用的低延迟配置参数如下，仅供参考，实际请根据你的直播流/点播文件配置调整：
 ```javascript
 {
   chunkSize: 128 * 1024,
