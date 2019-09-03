@@ -325,6 +325,16 @@ ffmpeg -i "your.flv"
 1. 如果你想能够覆盖更多的机型，那么奇秀标清或是高清的配置适合你
 2. 如果你想只支持Android中端机和iPhone6+，那么虎牙高清的配置适合你
 
+WXInlinePlayer的我们常用的低延迟配置参数如下：
+```javascript
+{
+  chunkSize: 128 * 1024,
+  preloadTime: 5e2,
+  bufferingTime: 1e3,
+  cacheSegmentCount: 64,
+}
+```
+
 ## 其他问题
 1. 为什么不对FFmpeg精简后Emscripten编译？
 
