@@ -3,19 +3,19 @@ WXInlinePlayer (Version 1.2)
 [![LICENSE](https://img.shields.io/badge/license-Anti%20996-blue.svg)](https://github.com/996icu/996.ICU/blob/master/LICENSE)
 [![996.icu](https://img.shields.io/badge/link-996.icu-red.svg)](https://996.icu)
 
-* [简介]()
-* [特性]()
-* [示例]()
-* [快速开始]()
-* [API]()
-* [事件]()
-* [初始化参数]()
-* [如何选择解码依赖]()
-* [如何降低卡顿和延迟]()
-* [其他问题]()
-* [项目计划]()
-* [已知使用的产品]()
-* [QQ技术支持群]()
+* [简介](https://github.com/qiaozi-tech/WXInlinePlayer#%E7%AE%80%E4%BB%8B)
+* [特性](https://github.com/qiaozi-tech/WXInlinePlayer#%E7%89%B9%E6%80%A7)
+* [示例](https://github.com/qiaozi-tech/WXInlinePlayer#%E7%A4%BA%E4%BE%8B)
+* [快速开始](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B)
+* [API](https://github.com/qiaozi-tech/WXInlinePlayer#api)
+* [事件](https://github.com/qiaozi-tech/WXInlinePlayer#%E4%BA%8B%E4%BB%B6)
+* [初始化参数](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%88%9D%E5%A7%8B%E5%8C%96%E5%8F%82%E6%95%B0)
+* [如何选择解码依赖](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E8%A7%A3%E7%A0%81%E4%BE%9D%E8%B5%96)
+* [如何降低卡顿和延迟](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E8%A7%A3%E7%A0%81%E4%BE%9D%E8%B5%96)
+* [其他问题](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%85%B6%E4%BB%96%E9%97%AE%E9%A2%98)
+* [项目计划](https://github.com/qiaozi-tech/WXInlinePlayer#%E9%A1%B9%E7%9B%AE%E8%AE%A1%E5%88%92)
+* [已知使用的产品](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%B7%B2%E7%9F%A5%E4%BD%BF%E7%94%A8%E7%9A%84%E4%BA%A7%E5%93%81)
+* [QQ技术支持群](https://github.com/qiaozi-tech/WXInlinePlayer#qq%E6%8A%80%E6%9C%AF%E6%94%AF%E6%8C%81%E7%BE%A4)
 
 ## 简介
 
@@ -327,9 +327,23 @@ ffmpeg -i "your.flv"
 
 ## 其他问题
 1. 为什么不对FFmpeg精简后Emscripten编译？
+
+FFmpeg方案目前有几个比较大的问题，第一个是解码库的大小，精简后2M左右，gzip大约600k，这对于在意依赖库大小的产品是不可接受的。其次FFmpeg的方案难以被自己优化，比如WXInlinePlayer在2.0时会做多Worker的解码，这对于此类方案的修改成本是非常大的。
+
 2. 为什么有些机器播放点播/直播会频繁卡顿，如何解决？
+
+卡顿和延迟的原因比较复杂，对于WXInlinePlayer来说一般情况是解码速度跟不上播放速度，请参考[如何降低卡顿和延迟](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E8%A7%A3%E7%A0%81%E4%BE%9D%E8%B5%96)进行优化。
+
 3. 为什么不对UC浏览器（iOS/Android）进行支持？
+
+UC不管是iOS还是Android的WebAssembly/Asm.js进行了阉割，没有很完好的支持，因此索性不支持了。
+
 4. 如何将现有视频文件转换成WXInlinePlayer可播放的文件？
+
+请使用FFmpeg或是其他类似的工具，这里给出一个简单的命令示例：
+```shell
+ffmpeg -i "your.mp4" -vcodec libx264 -acodec aac out.flv
+```
 
 ## 项目计划
 1. <del>V1.1 支持HTTP-FLV及流式解码</del>
