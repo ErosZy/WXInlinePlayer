@@ -275,7 +275,7 @@ player.on('timeUpdate', ()=>{
   volume: Number, // 音量，范围0~1，默认1.0
   muted: Boolean, // 是否静音，默认false
   autoplay: Boolean, // 是否自动播放，微信WebView/无音频视频设置此参数有效
-  loop: Boolean, // 循环播放，默认false
+  loop: Boolean, // 循环播放，默认false，请注意处理Safari及其WebView（不包含微信）每次播放都需要人主动触发的限制
   isLive: Boolean, // 是否是直播流，默认false
   chunkSize: Number, // 加载/解析块大小，默认256 * 1024
   preloadTime: Number, // 预加载时间，默认1000ms
