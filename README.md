@@ -332,7 +332,7 @@ ffmpeg -i "your.flv"
 
 我们建议你：
 1. 如果你想能够覆盖更多的机型，那么奇秀标清或是高清的配置适合你
-2. 如果你想只支持Android中端机和iPhone6+，那么虎牙高清的配置适合你
+2. 如果你想只支持Android中高端机和iPhone6+，那么虎牙高清的配置适合你
 
 WXInlinePlayer的我们常用的低延迟配置参数如下：
 ```javascript
