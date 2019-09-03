@@ -40,9 +40,9 @@ WXInlinePlayer (Version 1.2)
 ## 特性
 
 1. FLV点播/直播全支持
-2. 自由选择H264解码依赖，Tinyh264只需gzip ~180k，OpenH264依赖gzip ~260k （[如何选择解码依赖]()）
+2. 自由选择H264解码依赖，Tinyh264只需gzip ~180k，OpenH264依赖gzip ~260k （[如何选择解码依赖](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E8%A7%A3%E7%A0%81%E4%BE%9D%E8%B5%96)）
 3. 专为移动端优化性能，内存和CPU占用稳定
-4. 直播延迟优化，比MSE的原生Video实现低1-2s（[如何降低卡顿和延迟]()）
+4. 直播延迟优化，比MSE的原生Video实现低1-2s（[如何降低卡顿和延迟](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E8%A7%A3%E7%A0%81%E4%BE%9D%E8%B5%96)）
 5. 音频/视频全支持
 6. 微信WebView自动播放
 7. 无音频动画自动播放
@@ -127,7 +127,7 @@ if(WXInlinePlayer.isSupport()){
 
 ### Promise WXInlinePlayer.init(Object)
 
-初始化WXInlinePlayer，需要传入加载的H264解码库的具体地址，关于解码库的选择，请参考：[如何选择解码依赖]()。
+初始化WXInlinePlayer，需要传入加载的H264解码库的具体地址，关于解码库的选择，请参考：[如何选择解码依赖](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E8%A7%A3%E7%A0%81%E4%BE%9D%E8%B5%96)。
 ```javascript
 if(WXInlinePlayer.isSupport()){
   WXInlinePlayer.init({
@@ -154,7 +154,7 @@ if(WXInlinePlayer.isSupport()){
 
 ### WXInlinePlayerInstance WXInlinePlayer(Object)
 
-WXInlinePlayer构造函数，相关初始化参数请参考：[初始化参数]()。
+WXInlinePlayer构造函数，相关初始化参数请参考：[初始化参数](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%88%9D%E5%A7%8B%E5%8C%96%E5%8F%82%E6%95%B0)。
 
 ```javascript
 WXInlinePlayer.ready().then(()=>{
