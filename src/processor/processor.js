@@ -221,7 +221,7 @@ class Processor extends EventEmitter {
         }
       }
 
-      if (!this.frames.length || (diff && diff < this.minBufferingTime)) {
+      if (!this.frames.length || (!this.isEnded && diff && diff < this.minBufferingTime)) {
         if (this.state != 'buffering') {
           this.emit('buffering');
         }
