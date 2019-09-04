@@ -5,6 +5,7 @@ WXInlinePlayer (Version 1.2)
 
 * [简介](https://github.com/qiaozi-tech/WXInlinePlayer#%E7%AE%80%E4%BB%8B)
 * [特性](https://github.com/qiaozi-tech/WXInlinePlayer#%E7%89%B9%E6%80%A7)
+* [兼容性](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%85%BC%E5%AE%B9%E6%80%A7)
 * [示例](https://github.com/qiaozi-tech/WXInlinePlayer#%E7%A4%BA%E4%BE%8B)
 * [如何编译](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E7%BC%96%E8%AF%91)
 * [快速开始](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B)
@@ -41,13 +42,22 @@ WXInlinePlayer (Version 1.2)
 ## 特性
 
 1. FLV点播/直播全支持
-2. 自由选择H264解码依赖，Tinyh264只需gzip ~180k，OpenH264依赖gzip ~260k （[如何选择解码依赖](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E8%A7%A3%E7%A0%81%E4%BE%9D%E8%B5%96)）
-3. 专为移动端优化性能，内存和CPU占用稳定
+2. 自由选择解码依赖，在实际gzip中，Tinyh264只需 ~180k，OpenH264 ~260k （[如何选择解码依赖](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E8%A7%A3%E7%A0%81%E4%BE%9D%E8%B5%96)）
+3. 专为移动端性能优化，内存和CPU占用稳定
 4. 直播延迟优化，比MSE的原生Video实现低1-2s（[如何降低卡顿和延迟](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%99%8D%E4%BD%8E%E5%8D%A1%E9%A1%BF%E5%92%8C%E5%BB%B6%E8%BF%9F)）
-5. 音频/视频全支持
+5. 音频/视频独立支持
 6. 微信WebView自动播放
 7. 无音频动画自动播放
 8. 良好的移动端WebView兼容性
+
+## 兼容性
+兼容测试使用BrowserStack服务提供的相关机型，仅供参考：
+* Android 5+
+* iOS 10+ （含Safari及WebView）
+* Chrome 25+
+* Firefox 57+
+* Edge 15+
+* Safari 10.1+
 
 ## 示例
 > https://qiaozi-tech.github.io/WXInlinePlayer/example/index.html
@@ -357,9 +367,9 @@ FFmpeg方案目前有几个比较大的问题，第一个是解码库的大小�
 
 3. **为什么不对UC浏览器（iOS/Android）进行支持？**
 
-UC不管是iOS还是Android的WebAssembly/Asm.js进行了阉割，没有很完好的支持，因此索性不支持了。
+UC不管是iOS还是Android都对WebAssembly/ASM.js进行了阉割，因此索性不支持了。
 
-4. **如何将现有视频文件转换成WXInlinePlayer可播放的文件？**
+1. **如何将现有视频文件转换成WXInlinePlayer可播放的文件？**
 
 请使用FFmpeg或是其他类似的工具，这里给出一个简单的命令示例：
 ```shell
