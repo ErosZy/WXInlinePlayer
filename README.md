@@ -54,11 +54,11 @@ WXInlinePlayer (Version 1.2)
 
 ## 如何编译
 
-请确保你安装过[parcel](https://parceljs.org/)及[emscripten](https://github.com/emscripten-core/emscripten)，然后直接执行build.sh文件即可：
+请确保你安装过[parcel](https://parceljs.org/) / [emscripten](https://github.com/emscripten-core/emscripten) / [cmake](https://cmake.org/) 以及 [make](http://www.gnu.org/software/make/)，然后直接执行build.sh文件即可：
 ```shell
 bash build.sh
 ```
-最终产物会在example文件夹中
+最终产物会在example文件夹中。请注意，请在*nix环境下进行build，Windows暂时不支持OpenH264的编译。
 
 ## 快速开始
 ```html
