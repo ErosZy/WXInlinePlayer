@@ -380,7 +380,10 @@ ffmpeg -i "your.mp4" -vcodec libx264 -acodec aac out.flv
 1. <del>V1.1 支持HTTP-FLV及流式解码</del>
 2. <del>V1.1 支持音视频独立播放</del>
 3. <del>V1.2 降低直播流延迟</del>
-4. V1.3 重构解码器，精确缓存帧数据
+4. V1.3
+   * 重构解码器，精确缓存帧数据
+   * 增加首帧逻辑
+   * 增加poster参数
 5. V1.4
    * 增加H265支持
    * 提供默认的播放器UI
