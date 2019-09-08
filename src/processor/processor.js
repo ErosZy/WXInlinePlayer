@@ -221,7 +221,10 @@ class Processor extends EventEmitter {
         }
       }
 
-      if (!this.frames.length || (!this.isEnded && diff && diff < this.minBufferingTime)) {
+      if (
+        !this.frames.length ||
+        (!this.isEnded && diff && diff < this.minBufferingTime)
+      ) {
         if (this.state != 'buffering') {
           this.emit('buffering');
         }
@@ -272,6 +275,10 @@ class Processor extends EventEmitter {
         this.emit('preload');
       }
     } else if (this.hasVideo) {
+      if (!this.isEnded && this.state == 'buffering') {
+        return;
+      }
+
       if (!this.isEnded && this.frames.length < this.cacheSegmentCount / 3) {
         this.ticker.setFps(this.framerate / 1.5);
       }
@@ -286,10 +293,21 @@ class Processor extends EventEmitter {
     }
 
     let diff = Number.MAX_SAFE_INTEGER;
-    if (this.frames.length) {
+    if (this.hasVideo && this.frames.length) {
       const lastIndex = this.frames.length - 1;
       const currentTime = this.currentTime;
       diff = this.frames[lastIndex].timestamp - currentTime;
+    }
+
+    if (
+      !this.isEnded &&
+      this.state != 'buffering' &&
+      (this.hasVideo && !this.hasAudio) &&
+      diff < this.bufferingTime
+    ) {
+      this.state = 'buffering';
+      this.emit('buffering');
+      return;
     }
 
     if (
@@ -368,6 +386,7 @@ class Processor extends EventEmitter {
       case 'decode': {
         if (
           this.state == 'buffering' ||
+          (this.hasVideo && this.state != 'playing') ||
           (!this.hasVideo && this.hasAudio && this.state != 'playing')
         ) {
           this.emit('playing');
