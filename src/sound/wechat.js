@@ -66,7 +66,6 @@ document.addEventListener(
 class WeChatSound extends BrowserSound {
   constructor(opt) {
     super(opt);
-    this.state = 'running';
     this.resume();
   }
 
