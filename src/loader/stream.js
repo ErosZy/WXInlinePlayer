@@ -47,7 +47,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN ANY WAY CONNECTION WITH THE
 LICENSED WORK OR THE USE OR OTHER DEALINGS IN THE LICENSED WORK.
 *********************************************************/
 
-
 // see: https://github.com/qiaozi-tech/WXInlinePlayer/issues/8
 export default function() {
   function concat(i, j) {
@@ -117,10 +116,34 @@ export default function() {
     } else {
       return fetch(this.url, {
         method: 'GET'
-      }).then(resp => {
-        this.reader = resp.body.getReader();
-        return this._request();
-      });
+      })
+        .then(resp => {
+          const { status, statusText } = resp;
+          if (status < 200 || status > 299) {
+            return resp.text().then(text => {
+              self.postMessage({
+                type: 'event',
+                data: {
+                  type: 'loadError',
+                  data: { status, statusText, detail: text }
+                }
+              });
+            });
+          }
+
+          self.postMessage({ type: 'event', data: { type: 'loadSuccess' } });
+          this.reader = resp.body.getReader();
+          return this._request();
+        })
+        .catch(e => {
+          self.postMessage({
+            type: 'event',
+            data: {
+              type: 'loadError',
+              data: { status: -1, statusText: 'unknown error', detail: e }
+            }
+          });
+        });
     }
   };
 

@@ -119,12 +119,11 @@ class WXInlinePlayer extends EventEmitter {
   }
 
   static isSupport() {
-    return !!
+    return !!// UC and Quark browser (iOS/Android) support wasm/asm limited,
+    // its iOS version make wasm/asm performance very slow （maybe hook something）
+    // its Android version removed support for wasm/asm, it just run pure javascript codes,
+    // so it is very easy to cause memory leaks
     (
-      // UC and Quark browser (iOS/Android) support wasm/asm limited,
-      // its iOS version make wasm/asm performance very slow （maybe hook something）
-      // its Android version removed support for wasm/asm, it just run pure javascript codes,
-      // so it is very easy to cause memory leaks
       !/UCBrowser|Quark/.test(window.navigator.userAgent) &&
       window.fetch &&
       window.ReadableStream &&
@@ -169,6 +168,7 @@ class WXInlinePlayer extends EventEmitter {
     }
 
     if (this.loader) {
+      this.loader.removeAllListeners();
       this.loader.cancel();
     }
 
@@ -267,6 +267,9 @@ class WXInlinePlayer extends EventEmitter {
         /*cacheInMemory: this.cacheInMemory*/
       }
     });
+
+    this.loader.on('loadError', error => this.emit('loadError', error));
+    this.loader.on('loadSuccess', () => this.emit('loadSuccess'));
 
     this.processor = new Processor({
       volume: this.vol,

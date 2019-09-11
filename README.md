@@ -274,6 +274,8 @@ player.on('timeUpdate', ()=>{
 * stopped(void) - 停止播放
 * end(void) - 播放结束
 * timeUpdate(currentTime:Number) - 当前播放的进度，250ms进行一次触发
+* loadError({status:Number, statusText:String, detail:Object}) - 加载失败
+* loadSuccess(void) - 加载成功
 
 ## 初始化参数
 ```javascript

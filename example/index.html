@@ -155,6 +155,14 @@
               player.volume(ev.target.value);
             });
 
+          player.on('loadError', e => {
+            console.log('>>>>> load error happend: ', e);
+          });
+
+          player.on('loadSuccess', () => {
+            console.log('>>>>> load success');
+          });
+
           player.on('mediaInfo', mediaInfo => {
             const { onMetaData } = mediaInfo;
             $canvas.height = onMetaData.height;

@@ -48,17 +48,20 @@ LICENSED WORK OR THE USE OR OTHER DEALINGS IN THE LICENSED WORK.
 *********************************************************/
 
 import { Buffer } from 'buffer';
+import EventEmitter from 'eventemitter3';
 
 const MAX_REQ_RETRY = 3;
-class ChunkLoader {
-  constructor({ url, chunkSize = 256 * 1024/*, cacheInMemory = false*/ }) {
+class ChunkLoader extends EventEmitter {
+  constructor({ url, chunkSize = 256 * 1024 /*, cacheInMemory = false*/ }) {
+    super();
     this.url = url;
-  /*this.cacheInMemory = cacheInMemory;*/
+    /*this.cacheInMemory = cacheInMemory;*/
     this.chunkSize = chunkSize;
     this.startIndex = 0;
     this.downloadSize = 0;
     this.done = false;
     this.xhr = null;
+    this.emitted = false;
   }
 
   hasData() {
@@ -98,6 +101,10 @@ class ChunkLoader {
         })
         .catch(e => {
           if (i >= MAX_REQ_RETRY - 1) {
+            if (!this.emitted) {
+              this.emitted = true;
+              this.emit('loadError', e);
+            }
             throw e;
           } else {
             return this._fetch();
@@ -117,14 +124,33 @@ class ChunkLoader {
         'Range',
         `bytes=${this.startIndex}-${endIndex}`
       );
-      this.xhr.onerror = reject;
+
+      this.xhr.onerror = e => {
+        reject({
+          status: -1,
+          statusText: 'unknown error',
+          detail: e
+        });
+      };
+
       this.xhr.onload = () => {
         if (this.xhr.readyState == 4) {
           if (this.xhr.status >= 200 && this.xhr.status <= 299) {
+            if (!this.emitted) {
+              this.emitted = true;
+              this.emit('loadSuccess');
+            }
             this.startIndex = endIndex + 1;
             resolve(new Uint8Array(this.xhr.response));
           } else {
-            reject(new Error(`error status: ${this.xhr.status}`));
+            reject({
+              status: this.xhr.status,
+              statusText: this.xhr.statusText,
+              detail: String.fromCharCode.apply(
+                null,
+                new Uint8Array(this.xhr.response)
+              )
+            });
           }
         }
       };
