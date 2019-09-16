@@ -72,7 +72,9 @@ WXInlinePlayer (Version 1.2)
 ```shell
 bash build.sh
 ```
-最终产物会在example文件夹中。请注意，请在*nix环境下进行build，Windows暂时不支持OpenH264的编译。
+最终产物会在example文件夹中。
+
+> 请注意：请在*nix环境下进行build，并不保证Windows下的OpenH264的编译
 
 ## 快速开始
 ```html
