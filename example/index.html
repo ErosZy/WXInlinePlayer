@@ -10,6 +10,7 @@
       body {
         width: 100%;
         height: 100%;
+        font-size: 14px;
       }
       #wrapper {
         width: 800px;
@@ -25,9 +26,21 @@
   <body>
     <div id="wrapper">
       <div style="margin-bottom: 10px">
-        <button id="normal">普通Video</button>
-        <button id="picture">纯视频（动画）</button>
-        <button id="music">纯音频</button>
+        <input
+          type="text"
+          id="iUrl"
+          value="https://static.petera.cn/mm.flv"
+          style="width:786px;height:10px;margin:0;padding:5px;margin-bottom:5px;"
+        />
+        <input type="number" id="iChunkSize" value="64"/> chunkSize&nbsp;&nbsp;&nbsp;
+        <input type="number" id="iBuffer" value="1000"/> bufferingTime&nbsp;&nbsp;&nbsp;
+        <input type="number" id="iPreload" value="500"/> preloadTime&nbsp;&nbsp;&nbsp;
+        <div style="margin-right:1000px;margin-bottom:5px;"></div>
+        <input type="checkbox" id="iIsLive" /> isLive
+        <input type="checkbox" id="iHasAudio" checked /> hasAudio
+        <input type="checkbox" id="iHasVideo" checked /> hasVideo
+        <input type="checkbox" id="iLoop" checked /> loop
+        <input type="checkbox" id="iAutoPlay" checked/> autoplay
       </div>
       <canvas
         id="canvas"
@@ -66,40 +79,6 @@
     </div>
     <script src="./index.js"></script>
     <script>
-      const VIDEO_URL = 'https://static.petera.cn/mm.flv';
-      const PIC_URL = 'https://static.petera.cn/mm1.flv';
-      const MUSIC_URL = 'https://static.petera.cn/mm2.flv';
-
-      let type = 0;
-      let chunkSize = 128 * 1024;
-      let url = VIDEO_URL;
-
-      const href = location.href;
-      const qsIndex = href.lastIndexOf('?');
-      if (qsIndex > -1) {
-        type = href.slice(qsIndex + 1).split('=')[1];
-        if (type == 1) {
-          url = PIC_URL;
-        } else if (type == 2) {
-          url = MUSIC_URL;
-          chunkSize = 32 * 1024;
-        }
-      }
-
-      document.getElementById('normal').addEventListener('click', () => {
-        location.href = location.origin + location.pathname + '?t=0';
-      });
-
-      document.getElementById('picture').addEventListener('click', () => {
-        location.href = location.origin + location.pathname + '?t=1';
-      });
-
-      document.getElementById('music').addEventListener('click', () => {
-        location.href = location.origin + location.pathname + '?t=2';
-      });
-
-      console.log('>>>>>>>> load: ' + url);
-
       const $status = document.getElementById('status');
       const $time = document.getElementById('time');
       const $duration = document.getElementById('duration');
@@ -115,30 +94,90 @@
 
         const $canvas = document.getElementById('canvas');
         WXInlinePlayer.ready().then(() => {
-          type = parseInt(type) || 0;
-          const player = new WXInlinePlayer({
-            url: url,
-            $container: $canvas,
-            hasVideo: true,
-            hasAudio: !type || type == 2,
-            volume: 1.0,
-            muted: false,
-            autoplay: true,
-            loop: true,
-            isLive: false,
-            chunkSize: chunkSize,
-            preloadTime: 5e2,
-            bufferingTime: 1e3,
-            cacheSegmentCount: 64,
-            customLoader: null
-          });
-
+          let player = null;
           document.getElementById('playBtn').addEventListener('click', () => {
+            if (!player) {
+              player = new WXInlinePlayer({
+                url: document.getElementById('iUrl').value,
+                $container: $canvas,
+                hasVideo: document.getElementById('iHasVideo').checked,
+                hasAudio: document.getElementById('iHasAudio').checked,
+                volume: 1.0,
+                muted: false,
+                autoplay: document.getElementById('iAutoPlay').checked,
+                loop: document.getElementById('iLoop').checked,
+                isLive: document.getElementById('iIsLive').checked,
+                chunkSize: parseInt(document.getElementById('iChunkSize').value) * 1024,
+                preloadTime: parseInt(document.getElementById('iPreload').value),
+                bufferingTime: parseInt(document.getElementById('iBuffer').value),
+                cacheSegmentCount: 64,
+                customLoader: null
+              });
+
+              player.on('loadError', e => {
+                console.log('>>>>> load error happend: ', e);
+              });
+
+              player.on('loadSuccess', () => {
+                console.log('>>>>> load success');
+              });
+
+              player.on('mediaInfo', mediaInfo => {
+                const { onMetaData } = mediaInfo;
+                $canvas.height = onMetaData.height;
+                $canvas.width = onMetaData.width;
+                for (let i = 0; i < onMetaData.length; i++) {
+                  if ('height' in onMetaData[i]) {
+                    $canvas.height = onMetaData[i].height;
+                  } else if ('width' in onMetaData[i]) {
+                    $canvas.width = onMetaData[i].width;
+                  }
+                }
+              });
+
+              player.on('buffering', () => {
+                $status.innerHTML = '状态: 等待加载';
+              });
+
+              player.on('playing', () => {
+                $status.innerHTML = '状态: 正在播放';
+              });
+
+              player.on('stopped', () => {
+                $status.innerHTML = '状态：已停止';
+              });
+
+              player.on('end', () => {
+                $status.innerHTML = '状态：播放结束';
+              });
+
+              player.on('timeUpdate', timestamp => {
+                $time.innerHTML = '进度：' + Math.floor(timestamp / 1000) + 's';
+                $duration.innerHTML =
+                  '可播放时长: ' +
+                  Math.ceil(player.getAvaiableDuration() / 1000) +
+                  's';
+              });
+
+              player.on(
+                'performance',
+                ({ averageDecodeCost, averageUnitDuration }) => {
+                  $performance.innerHTML =
+                    '解码平均：' +
+                    Math.floor(averageDecodeCost) +
+                    'ms, 单元平均：' +
+                    Math.floor(averageUnitDuration) +
+                    'ms';
+                }
+              );
+            }
+
             player.play();
           });
 
           document.getElementById('stopBtn').addEventListener('click', () => {
             player.stop();
+            player = null;
           });
 
           document.getElementById('pauseBtn').addEventListener('click', () => {
@@ -158,63 +197,6 @@
             .addEventListener('change', ev => {
               player.volume(ev.target.value);
             });
-
-          player.on('loadError', e => {
-            console.log('>>>>> load error happend: ', e);
-          });
-
-          player.on('loadSuccess', () => {
-            console.log('>>>>> load success');
-          });
-
-          player.on('mediaInfo', mediaInfo => {
-            const { onMetaData } = mediaInfo;
-            $canvas.height = onMetaData.height;
-            $canvas.width = onMetaData.width;
-            for (let i = 0; i < onMetaData.length; i++) {
-              if ('height' in onMetaData[i]) {
-                $canvas.height = onMetaData[i].height;
-              } else if ('width' in onMetaData[i]) {
-                $canvas.width = onMetaData[i].width;
-              }
-            }
-          });
-
-          player.on('buffering', () => {
-            $status.innerHTML = '状态: 等待加载';
-          });
-
-          player.on('playing', () => {
-            $status.innerHTML = '状态: 正在播放';
-          });
-
-          player.on('stopped', () => {
-            $status.innerHTML = '状态：已停止';
-          });
-
-          player.on('end', () => {
-            $status.innerHTML = '状态：播放结束';
-          });
-
-          player.on('timeUpdate', timestamp => {
-            $time.innerHTML = '进度：' + Math.floor(timestamp / 1000) + 's';
-            $duration.innerHTML =
-              '可播放时长: ' +
-              Math.ceil(player.getAvaiableDuration() / 1000) +
-              's';
-          });
-
-          player.on(
-            'performance',
-            ({ averageDecodeCost, averageUnitDuration }) => {
-              $performance.innerHTML =
-                '解码平均：' +
-                Math.floor(averageDecodeCost) +
-                'ms, 单元平均：' +
-                Math.floor(averageUnitDuration) +
-                'ms';
-            }
-          );
         });
       }
     </script>
