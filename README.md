@@ -363,7 +363,7 @@ WXInlinePlayer的我们常用的低延迟配置参数如下，仅供参考，实
 }
 ```
 
-同时，你可以使用**performance事件**来判断当前的解码性能，然后提示用户并降级到方案：
+同时，你可以使用**performance事件**来判断当前的解码性能，然后提示用户并降级到你的后备方案（例如直接video播放/静态图/序列帧等）：
 ```javascript
 player.on('performance', ({averageDecodeCost, averageUnitDuration})=>{
   const prop = averageUnitDuration / averageDecodeCost;
