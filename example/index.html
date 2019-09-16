@@ -37,12 +37,15 @@
       ></canvas>
       <div style="margin-bottom: 10px">
         <span id="status">状态：等待播放</span>
-        <span id="duration" style="display: inline-block; margin-left: 50px;"
-          >可播放时长: 0s</span
-        >
-        <span id="time" style="display:inline-block; margin-left: 50px;"
-          >进度：0s</span
-        >
+        <span id="duration" style="display: inline-block;margin-left:40px;">
+          可播放时长: 0s
+        </span>
+        <span id="time" style="display:inline-block;margin-left:40px;">
+          进度：0s
+        </span>
+        <span id="performance" style="display:inline-block;margin-left:40px;">
+          解码平均：0ms, 单元平均：0ms 
+        </span>
       </div>
       <button id="playBtn">播放</button>
       <button id="stopBtn">停止</button>
@@ -100,6 +103,7 @@
       const $status = document.getElementById('status');
       const $time = document.getElementById('time');
       const $duration = document.getElementById('duration');
+      const $performance = document.getElementById('performance');
 
       if (WXInlinePlayer.isSupport()) {
         WXInlinePlayer.init({
@@ -199,6 +203,18 @@
               Math.ceil(player.getAvaiableDuration() / 1000) +
               's';
           });
+
+          player.on(
+            'performance',
+            ({ averageDecodeCost, averageUnitDuration }) => {
+              $performance.innerHTML =
+                '解码平均：' +
+                Math.floor(averageDecodeCost) +
+                'ms, 单元平均：' +
+                Math.floor(averageUnitDuration) +
+                'ms';
+            }
+          );
         });
       }
     </script>

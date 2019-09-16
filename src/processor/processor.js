@@ -62,6 +62,7 @@ class Processor extends EventEmitter {
     cacheSegmentCount = 128
   }) {
     super();
+    this.averageUnitDuration = 0;
     this.averageDecodeCost = 0;
     this.soundHeadSliced = false;
     this.framerate = 1000 / 24;
@@ -395,13 +396,26 @@ class Processor extends EventEmitter {
         this.state = 'playing';
         this.ticker.setFps(this.framerate);
 
-        const { consume } = msg.data;
+        const { consume, duration } = msg.data;
+
         if (!this.averageDecodeCost) {
           this.averageDecodeCost = consume;
         } else {
           this.averageDecodeCost += consume;
           this.averageDecodeCost /= 2.0;
         }
+
+        if (!this.averageUnitDuration) {
+          this.averageUnitDuration = duration;
+        } else {
+          this.averageUnitDuration += duration;
+          this.averageUnitDuration /= 2.0;
+        }
+
+        this.emit('performance', {
+          averageDecodeCost: this.averageDecodeCost,
+          averageUnitDuration: this.averageUnitDuration
+        });
 
         if (this.hasAudio) {
           this.currentTime = this.getCurrentTime();

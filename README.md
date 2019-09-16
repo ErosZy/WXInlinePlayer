@@ -280,6 +280,7 @@ player.on('timeUpdate', ()=>{
 * timeUpdate(currentTime:Number) - 当前播放的进度，250ms进行一次触发
 * loadError({status:Number, statusText:String, detail:Object}) - 加载失败
 * loadSuccess(void) - 加载成功
+* performance({averageDecodeCost:Number, averageUnitDuration:Number}) - 编码性能检测事件，averageDecodeCost代表平均的解码消耗的时长，averageUnitDuration代表在averageDecodeCost下解码得到的可播放单元时长
 
 ## 初始化参数
 ```javascript
@@ -360,6 +361,20 @@ WXInlinePlayer的我们常用的低延迟配置参数如下，仅供参考，实
   bufferingTime: 1e3,
   cacheSegmentCount: 64,
 }
+```
+
+同时，你可以使用**performance事件**来判断当前的解码性能，然后提示用户并降级到方案：
+```javascript
+player.on('performance', ({averageDecodeCost, averageUnitDuration})=>{
+  const prop = averageUnitDuration / averageDecodeCost;
+  if(prop >= 2.0){
+    console.log('good performance');
+  }else if(prop < 2.0 && prop >= 1.0){
+    console.log('ok, thats fine');
+  }else{
+    console.log('bad performance');
+  }
+});
 ```
 
 ## 其他问题
