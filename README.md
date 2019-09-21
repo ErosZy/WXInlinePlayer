@@ -404,14 +404,16 @@ ffmpeg -i "your.mp4" -vcodec libx264 -acodec aac out.flv
 2. <del>V1.1 支持音视频独立播放</del>
 3. <del>V1.2 降低直播流延迟</del>
 4. V1.3
+   * 提供默认的播放器UI
+   * 增加OffscreenCanvas的支持，提升性能和减少内存占用（Chrome 69+）
+5. V1.4
    * 重构解码器，精确缓存帧数据
    * 增加首帧逻辑
    * 增加poster参数
-5. V1.4
+6. V1.5
    * 增加H265支持
-   * 提供默认的播放器UI
-6. V1.5 支持FLV Seek操作
-7. V2.0 支持多Worker解码，提升软解性能
+7. V1.6 支持FLV Seek操作
+8. V2.0 支持多Worker的GOP并行解码，提升软解性能
 
 ## 已知使用的产品
 
