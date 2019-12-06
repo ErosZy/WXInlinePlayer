@@ -16,10 +16,9 @@
         width: 1024px;
         height: 500px;
         position: absolute;
-        top: 50%;
+        top: 50px;
         left: 50%;
         margin-left: -400px;
-        margin-top: -250px;
       }
     </style>
   </head>
@@ -29,10 +28,10 @@
         <input
           type="text"
           id="iUrl"
-          value="https://static.petera.cn/music.flv"
+          value="http://static.petera.cn/music.flv"
           style="width:786px;height:10px;margin:0;padding:5px;margin-bottom:5px;display:block"
         />
-        <input type="number" id="iChunkSize" value="256"/> chunkSize&nbsp;&nbsp;&nbsp;
+        <input type="number" id="iChunkSize" value="128"/> chunkSize&nbsp;&nbsp;&nbsp;
         <input type="number" id="iBuffer" value="1000"/> bufferingTime&nbsp;&nbsp;&nbsp;
         <input type="number" id="iPreload" value="1000"/> preloadTime&nbsp;&nbsp;&nbsp;
         <div style="margin-right:1000px;margin-bottom:5px;"></div>
@@ -133,6 +132,7 @@
                     $canvas.width = onMetaData[i].width;
                   }
                 }
+                $canvas.style.marginLeft = (800 - $canvas.width) / 2 + 'px';
               });
 
               player.on('buffering', () => {
@@ -174,6 +174,10 @@
 
             player.play();
           });
+
+          $canvas.onclick = ()=>{
+            $canvas.requestFullscreen();
+          };
 
           document.getElementById('stopBtn').addEventListener('click', () => {
             player.stop();
