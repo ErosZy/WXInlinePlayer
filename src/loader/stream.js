@@ -49,6 +49,13 @@ LICENSED WORK OR THE USE OR OTHER DEALINGS IN THE LICENSED WORK.
 
 // see: https://github.com/qiaozi-tech/WXInlinePlayer/issues/8
 export default function() {
+  let supportSharedBuffer = false;
+  try {
+    supportSharedBuffer = !!new SharedArrayBuffer(0);
+  } catch (e) {
+    // nothing to do...
+  }
+
   function concat(i, j) {
     const buffer = new Uint8Array(i.length + j.length);
     buffer.set(new Uint8Array(i), 0);
@@ -60,7 +67,15 @@ export default function() {
     if (!endIndex || endIndex - startIndex > buffer.length) {
       endIndex = buffer.length;
     }
-    return buffer.subarray(startIndex, endIndex);
+
+    if(supportSharedBuffer){
+      let sharedBuffer = new SharedArrayBuffer(endIndex - startIndex);
+      let result = new Uint8Array(sharedBuffer);
+      result.set(buffer.subarray(startIndex, endIndex));
+      return result;
+    }else{
+      return buffer.subarray(startIndex, endIndex);
+    }
   }
 
   function StreamLoader({ url, chunkSize = 256 * 1024 }) {

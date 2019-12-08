@@ -405,6 +405,7 @@ ffmpeg -i "your.mp4" -vcodec libx264 -acodec aac out.flv
 3. <del>V1.2 降低直播流延迟</del>
 4. V1.3
    * 提供默认的播放器UI
+   * <del>SharedArrayBuffer支持，减少内存占用和CPU的拷贝性能消耗</del>
    * 增加OffscreenCanvas的支持，提升性能和减少内存占用（Chrome 69+）
 5. V1.4
    * 重构解码器，精确缓存帧数据
