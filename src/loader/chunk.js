@@ -51,6 +51,12 @@ import { Buffer } from 'buffer';
 import EventEmitter from 'eventemitter3';
 
 const MAX_REQ_RETRY = 3;
+let supportSharedBuffer = false;
+try {
+  supportSharedBuffer = !!new SharedArrayBuffer(0);
+} catch (e) {
+  // nothing to do...
+}
 class ChunkLoader extends EventEmitter {
   constructor({ url, chunkSize = 256 * 1024 /*, cacheInMemory = false*/ }) {
     super();
@@ -97,6 +103,14 @@ class ChunkLoader extends EventEmitter {
               this.done = true;
             }
           }
+
+          if (supportSharedBuffer) {
+            let sharedBuffer = new SharedArrayBuffer(buffer.byteLength);
+            let result = new Uint8Array(sharedBuffer);
+            result.set(buffer);
+            buffer = result;
+          }
+
           return buffer;
         })
         .catch(e => {
