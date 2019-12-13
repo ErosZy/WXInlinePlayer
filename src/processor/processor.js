@@ -324,6 +324,10 @@ class Processor extends EventEmitter {
   }
 
   _onCodecMsgHandler(msg) {
+    if(this.state == 'destroy'){
+      return;
+    }
+    
     const { type } = msg;
     switch (type) {
       case 'ready': {
