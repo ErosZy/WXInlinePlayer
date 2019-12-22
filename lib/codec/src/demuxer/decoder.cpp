@@ -63,7 +63,9 @@ void Decoder::decode(shared_ptr<Buffer> &buffer) {
           return;
         }
 
-        _factor->recvHeaderValue(value);
+        if (_factor != nullptr) {
+          _factor->recvHeaderValue(value);
+        }
         _buffer = value.buffer;
         _state = Body::STATE;
         break;
@@ -78,7 +80,9 @@ void Decoder::decode(shared_ptr<Buffer> &buffer) {
           return;
         }
 
-        _factor->recvBodyValue(value);
+        if (_factor != nullptr) {
+          _factor->recvBodyValue(value);
+        }
         _buffer = value->buffer;
       }
       default:

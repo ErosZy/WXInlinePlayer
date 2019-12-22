@@ -31,20 +31,24 @@
           value="https://static.petera.cn/music.flv"
           style="width:786px;height:10px;margin:0;padding:5px;margin-bottom:5px;display:block"
         />
-        <input type="number" id="iChunkSize" value="128"/> chunkSize&nbsp;&nbsp;&nbsp;
-        <input type="number" id="iBuffer" value="500"/> bufferingTime&nbsp;&nbsp;&nbsp;
-        <input type="number" id="iPreload" value="500"/> preloadTime&nbsp;&nbsp;&nbsp;
+        <input type="number" id="iChunkSize" value="128" />
+        chunkSize&nbsp;&nbsp;&nbsp;
+        <input type="number" id="iBuffer" value="500" />
+        bufferingTime&nbsp;&nbsp;&nbsp;
+        <input type="number" id="iPreload" value="500" />
+        preloadTime&nbsp;&nbsp;&nbsp;
         <div style="margin-right:1000px;margin-bottom:5px;"></div>
-        <input type="checkbox" id="iIsLive" /> isLive
+        <input type="checkbox" id="iH265" /> isH265
+        <input type="checkbox" id="iIsLive" checked /> isLive
         <input type="checkbox" id="iHasAudio" checked /> hasAudio
         <input type="checkbox" id="iHasVideo" checked /> hasVideo
         <input type="checkbox" id="iLoop" checked /> loop
-        <input type="checkbox" id="iAutoPlay" checked/> autoplay
+        <input type="checkbox" id="iAutoPlay" checked /> autoplay
       </div>
       <canvas
         id="canvas"
-        width="800"
-        height="450"
+        width="810"
+        height="540"
         style="background: black;"
       ></canvas>
       <div style="margin-bottom: 10px">
@@ -83,18 +87,27 @@
       const $duration = document.getElementById('duration');
       const $performance = document.getElementById('performance');
 
-      if (WXInlinePlayer.isSupport()) {
-        WXInlinePlayer.init({
-          // asmUrl: './prod.baseline.asm.combine.js?v=201908311154',
-          // wasmUrl: './prod.baseline.wasm.combine.js?v=201908311154'
-          asmUrl: './prod.all.asm.combine.js',
-          wasmUrl: './prod.all.wasm.combine.js'
-        });
 
+      document.getElementById('iH265').addEventListener('change', (ev)=>{
+        const checked = ev.target.checked;
+        if(checked){
+          document.getElementById('iUrl').value = 'https://static.petera.cn/h265.flv';
+        }else{
+          document.getElementById('iUrl').value ='https://static.petera.cn/music.flv';
+        }
+      });
+
+      if (WXInlinePlayer.isSupport()) {
         const $canvas = document.getElementById('canvas');
-        WXInlinePlayer.ready().then(() => {
-          let player = null;
-          document.getElementById('playBtn').addEventListener('click', () => {
+        let player = null;
+        document.getElementById('playBtn').addEventListener('click', () => {
+          var isH265 = document.getElementById('iH265').checked;
+          WXInlinePlayer.init({
+            asmUrl: './prod.' + (isH265 ? 'h265' : 'all') + '.asm.combine.js',
+            wasmUrl: './prod.' + (isH265 ? 'h265' : 'all') + '.wasm.combine.js'
+          });
+
+          WXInlinePlayer.ready().then(() => {
             if (!player) {
               player = new WXInlinePlayer({
                 url: document.getElementById('iUrl').value,
@@ -106,9 +119,14 @@
                 autoplay: document.getElementById('iAutoPlay').checked,
                 loop: document.getElementById('iLoop').checked,
                 isLive: document.getElementById('iIsLive').checked,
-                chunkSize: parseInt(document.getElementById('iChunkSize').value) * 1024,
-                preloadTime: parseInt(document.getElementById('iPreload').value),
-                bufferingTime: parseInt(document.getElementById('iBuffer').value),
+                chunkSize:
+                  parseInt(document.getElementById('iChunkSize').value) * 1024,
+                preloadTime: parseInt(
+                  document.getElementById('iPreload').value
+                ),
+                bufferingTime: parseInt(
+                  document.getElementById('iBuffer').value
+                ),
                 cacheSegmentCount: 64,
                 customLoader: null
               });
@@ -123,8 +141,8 @@
 
               player.on('mediaInfo', mediaInfo => {
                 const { onMetaData } = mediaInfo;
-                $canvas.height = onMetaData.height;
-                $canvas.width = onMetaData.width;
+                $canvas.height = onMetaData.height || 540;
+                $canvas.width = onMetaData.width || 810;
                 for (let i = 0; i < onMetaData.length; i++) {
                   if ('height' in onMetaData[i]) {
                     $canvas.height = onMetaData[i].height;
@@ -175,7 +193,7 @@
             player.play();
           });
 
-          $canvas.onclick = ()=>{
+          $canvas.onclick = () => {
             $canvas.requestFullscreen();
           };
 

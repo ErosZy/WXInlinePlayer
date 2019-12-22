@@ -49,6 +49,7 @@ LICENSED WORK OR THE USE OR OTHER DEALINGS IN THE LICENSED WORK.
 
 #include "codec_factor.h"
 #include "codec/codec.h"
+#include <iostream>
 
 void CodecFactor::recvHeaderValue(HeaderValue &value) {
 #ifdef __EMSCRIPTEN__
@@ -155,14 +156,15 @@ void CodecFactor::_handleAudioTag(AudioTagValue &tag, uint32_t timestamp) const 
   }
 }
 
-void CodecFactor::_handleVideoTag(VideoTagValue &tag, uint32_t timestamp) const {
+void CodecFactor::_handleVideoTag(VideoTagValue &tag, uint32_t timestamp) {
   uint32_t width = 0;
   uint32_t height = 0;
   uint32_t stride0 = 0;
   uint32_t stride1 = 0;
   uint8_t *picPtr = nullptr;
-
-#ifdef USE_OPEN_H264
+#ifdef USE_OPEN_H265
+  // nothing to do
+#elif defined(USE_OPEN_H264)
   unsigned char *pDst[3] = {0};
   SBufferInfo sDstInfo = {0};
 #endif
@@ -179,7 +181,9 @@ void CodecFactor::_handleVideoTag(VideoTagValue &tag, uint32_t timestamp) const 
     int sequenceParameterSetLength = unit->read_uint16_be(6);
     _codec->sps = make_shared<Buffer>(unit->slice(8, 8 + (uint32_t) sequenceParameterSetLength));
     _codec->sps = make_shared<Buffer>(*_mask + *_codec->sps);
-#ifdef USE_OPEN_H264
+#ifdef USE_OPEN_H265
+    // nothing to do
+#elif defined(USE_OPEN_H264)
     _codec->storage->DecodeFrame2(_codec->sps->get_buf_ptr(), _codec->sps->get_length(), &pDst[0], &sDstInfo);
 #else
     h264bsdDecode(_codec->storage, _codec->sps->get_buf_ptr(), _codec->sps->get_length(), &picPtr, &width, &height);
@@ -191,7 +195,9 @@ void CodecFactor::_handleVideoTag(VideoTagValue &tag, uint32_t timestamp) const 
             8 + (uint32_t) sequenceParameterSetLength + 3 + pictureParameterSetLength
     ));
     _codec->pps = make_shared<Buffer>(*_mask + *_codec->pps);
-#ifdef USE_OPEN_H264
+#ifdef USE_OPEN_H265
+    // nothing to do
+#elif defined(USE_OPEN_H264)
     _codec->storage->DecodeFrame2(_codec->pps->get_buf_ptr(), _codec->pps->get_length(), &pDst[0], &sDstInfo);
 #else
     h264bsdDecode(_codec->storage, _codec->pps->get_buf_ptr(), _codec->pps->get_length(), &picPtr, &width, &height);
@@ -213,9 +219,9 @@ void CodecFactor::_handleVideoTag(VideoTagValue &tag, uint32_t timestamp) const 
       unit = make_shared<Buffer>(unit->slice((uint32_t) _codec->lengthSizeMinusOne + naluLen));
       size -= _codec->lengthSizeMinusOne + naluLen;
     }
-
-
-#ifdef USE_OPEN_H264
+#ifdef USE_OPEN_H265
+    if(true) {
+#elif defined(USE_OPEN_H264)
     uint32_t retCode = _codec->storage->DecodeFrame2(nalus->get_buf_ptr(), nalus->get_length(), &pDst[0], &sDstInfo);
     if (retCode == 0 && sDstInfo.iBufferStatus == 1) {
       width = (uint32_t) sDstInfo.UsrData.sSystemBuffer.iWidth;
@@ -243,7 +249,9 @@ void CodecFactor::_handleVideoTag(VideoTagValue &tag, uint32_t timestamp) const 
       }, _codec->bridgeName.c_str(), totalSize);
 
       if(_codec->videoBuffer != nullptr){
-#ifdef USE_OPEN_H264
+#ifdef USE_OPEN_H265
+  // nothing to do
+#elif defined(USE_OPEN_H264)
       uint32_t startIndex = 0;
       uint8_t *ptr = pDst[0];
       uint32_t iWidth = width;
@@ -286,7 +294,8 @@ void CodecFactor::_handleVideoTag(VideoTagValue &tag, uint32_t timestamp) const 
               "width": $2,
               "height": $3,
               "stride0": $4,
-              "stride1": $5
+              "stride1": $5,
+              "isH265": false,
             });
           }
         }, _codec->bridgeName.c_str(), timestamp, width, height, stride0, stride1);

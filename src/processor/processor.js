@@ -259,7 +259,7 @@ class Processor extends EventEmitter {
         const diff = this.currentTime - timestamp;
         if (Math.abs(diff) <= 25) {
           this.emit('frame', this.frames[i]);
-          this.frames.splice(0, i);
+          this.frames.splice(0, i + 1);
           break;
         }
       }
@@ -324,10 +324,10 @@ class Processor extends EventEmitter {
   }
 
   _onCodecMsgHandler(msg) {
-    if(this.state == 'destroy'){
+    if (this.state == 'destroy') {
       return;
     }
-    
+
     const { type } = msg;
     switch (type) {
       case 'ready': {
@@ -365,7 +365,15 @@ class Processor extends EventEmitter {
         break;
       }
       case 'video': {
-        const { timestamp, width, height, stride0, stride1, buffer } = msg.data;
+        const {
+          timestamp,
+          width,
+          height,
+          stride0,
+          stride1,
+          isH265,
+          buffer
+        } = msg.data;
         if (!this.baseTime) {
           this.baseTime = timestamp;
         }
@@ -376,7 +384,8 @@ class Processor extends EventEmitter {
           width,
           height,
           stride0,
-          stride1
+          stride1,
+          isH265
         });
         break;
       }
