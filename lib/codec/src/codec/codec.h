@@ -80,10 +80,6 @@ public:
     de265_set_parameter_bool(storage, DE265_DECODER_PARAM_SUPPRESS_FAULTY_PICTURES, false);
     de265_set_parameter_bool(storage, DE265_DECODER_PARAM_DISABLE_DEBLOCKING, true);
     de265_set_parameter_bool(storage, DE265_DECODER_PARAM_DISABLE_SAO, true);
-    de265_disable_logging();
-    de265_set_verbosity(0);
-    de265_start_worker_threads(storage, 1);
-    de265_set_limit_TID(storage, 100);
 #elif defined(USE_OPEN_H264)
     SDecodingParam sDecParam = {0};
     sDecParam.uiTargetDqLayer = (uint8_t) -1;
