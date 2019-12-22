@@ -92,7 +92,7 @@ class Drawer {
     return !!gl;
   }
 
-  drawNextOutputPicture(width, height, data) {
+  drawNextOutputPicture(width, height, data, isH265) {
     const { yTextureRef, uTextureRef, vTextureRef } = this;
     const gl = this.contextGL;
     gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
@@ -115,7 +115,7 @@ class Drawer {
       yData
     );
 
-    const cbDataLength = ((width / 2) * height) / 2;
+    const cbDataLength = ((width / 2) * height) / (isH265 ? 1 : 2);
     const cbData = i420Data.subarray(yDataLength, yDataLength + cbDataLength);
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, uTextureRef);

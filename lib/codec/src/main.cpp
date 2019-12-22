@@ -96,3 +96,26 @@ void codecFree() {
   }
 }
 }
+
+// #include <iostream>
+// #include <fstream>
+
+// int main() {
+//   std::ifstream infile("/Users/zhaoyang/Downloads/music.flv", std::ifstream::binary);
+//   if (!infile.is_open()) {
+//     return -1;
+//   }
+
+//   infile.seekg(0, std::ios::end);
+//   size_t length = infile.tellg();
+//   infile.seekg(0, std::ios::beg);
+//   std::cout << "file size: " << length << std::endl;
+
+//   char *bytes = new char[length];
+//   infile.read(bytes, length);
+
+//   Codec codec;
+//   codec.decode((uint8_t *)bytes, length);
+//   delete[] bytes;
+//   return 0;
+// }

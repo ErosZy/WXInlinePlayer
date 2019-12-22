@@ -52,7 +52,7 @@ LICENSED WORK OR THE USE OR OTHER DEALINGS IN THE LICENSED WORK.
 VideoTagValue VideoTag::decode(const shared_ptr<Buffer> &buffer, uint32_t size) {
   _frameType = (uint32_t) ((buffer->read_uint8(0) & 240) >> 4);
   _codecId = (uint32_t) (buffer->read_uint8(0) & 15);
-  if (_codecId != 7) {
+  if (_codecId != 7 && _codecId != 12) {
     return VideoTagValue(false);
   }
 
