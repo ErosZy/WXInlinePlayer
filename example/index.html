@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=0.5" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <style>
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        font-size: 14px;
+      }
+      #wrapper {
+        width: 1024px;
+        height: 500px;
+        position: absolute;
+        top: 50px;
+        left: 50%;
+        margin-left: -400px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="wrapper">
+      <div style="margin-bottom: 10px">
+        <input
+          type="text"
+          id="iUrl"
+          value="http://localhost:9080/music.flv"
+          style="width:786px;height:10px;margin:0;padding:5px;margin-bottom:5px;display:block"
+        />
+        <input type="number" id="iChunkSize" value="128" />
+        chunkSize&nbsp;&nbsp;&nbsp;
+        <input type="number" id="iBuffer" value="500" />
+        bufferingTime&nbsp;&nbsp;&nbsp;
+        <input type="number" id="iPreload" value="500" />
+        preloadTime&nbsp;&nbsp;&nbsp;
+        <div style="margin-right:1000px;margin-bottom:5px;"></div>
+        <input type="checkbox" id="iH265" /> isH265
+        <input type="checkbox" id="iIsLive" checked /> isLive
+        <input type="checkbox" id="iHasAudio" checked /> hasAudio
+        <input type="checkbox" id="iHasVideo" checked /> hasVideo
+        <input type="checkbox" id="iLoop" checked /> loop
+        <input type="checkbox" id="iAutoPlay" checked /> autoplay
+      </div>
+      <canvas
+        id="canvas"
+        width="810"
+        height="540"
+        style="background: black;"
+      ></canvas>
+      <div style="margin-bottom: 10px">
+        <span id="status">状态：等待播放</span>
+        <span id="duration" style="display: inline-block;margin-left:40px;">
+          可播放时长: 0s
+        </span>
+        <span id="time" style="display:inline-block;margin-left:40px;">
+          进度：0s
+        </span>
+        <span id="performance" style="display:inline-block;margin-left:40px;">
+          解码平均：0ms, 单元平均：0ms 
+        </span>
+      </div>
+      <button id="playBtn">播放</button>
+      <button id="stopBtn">停止</button>
+      <button id="pauseBtn">暂停</button>
+      <button id="resumeBtn">恢复</button>
+      <button id="muteBtn">静音切换</button>
+
+      <input
+        type="number"
+        name="volume"
+        step="0.1"
+        max="1.0"
+        min="0.0"
+        value="1.0"
+        style="width: 100px;"
+      />
+      <span>音量设置</span>
+    </div>
+    <script src="./index.js"></script>
+    <script>
+      const $status = document.getElementById('status');
+      const $time = document.getElementById('time');
+      const $duration = document.getElementById('duration');
+      const $performance = document.getElementById('performance');
+
+      if (WXInlinePlayer.isSupport()) {
+        const $canvas = document.getElementById('canvas');
+        let player = null;
+        document.getElementById('playBtn').addEventListener('click', () => {
+          var isH265 = document.getElementById('iH265').checked;
+          WXInlinePlayer.init({
+            asmUrl: './prod.' + (isH265 ? 'h265' : 'all') + '.asm.combine.js',
+            wasmUrl: './prod.' + (isH265 ? 'h265' : 'all') + '.wasm.combine.js'
+          });
+
+          WXInlinePlayer.ready().then(() => {
+            if (!player) {
+              player = new WXInlinePlayer({
+                url: document.getElementById('iUrl').value,
+                $container: $canvas,
+                hasVideo: document.getElementById('iHasVideo').checked,
+                hasAudio: document.getElementById('iHasAudio').checked,
+                volume: 1.0,
+                muted: false,
+                autoplay: document.getElementById('iAutoPlay').checked,
+                loop: document.getElementById('iLoop').checked,
+                isLive: document.getElementById('iIsLive').checked,
+                chunkSize:
+                  parseInt(document.getElementById('iChunkSize').value) * 1024,
+                preloadTime: parseInt(
+                  document.getElementById('iPreload').value
+                ),
+                bufferingTime: parseInt(
+                  document.getElementById('iBuffer').value
+                ),
+                cacheSegmentCount: 64,
+                customLoader: null
+              });
+
+              player.on('loadError', e => {
+                console.log('>>>>> load error happend: ', e);
+              });
+
+              player.on('loadSuccess', () => {
+                console.log('>>>>> load success');
+              });
+
+              player.on('mediaInfo', mediaInfo => {
+                const { onMetaData } = mediaInfo;
+                $canvas.height = onMetaData.height || 540;
+                $canvas.width = onMetaData.width || 810;
+                for (let i = 0; i < onMetaData.length; i++) {
+                  if ('height' in onMetaData[i]) {
+                    $canvas.height = onMetaData[i].height;
+                  } else if ('width' in onMetaData[i]) {
+                    $canvas.width = onMetaData[i].width;
+                  }
+                }
+                $canvas.style.marginLeft = (800 - $canvas.width) / 2 + 'px';
+              });
+
+              player.on('buffering', () => {
+                $status.innerHTML = '状态: 等待加载';
+              });
+
+              player.on('playing', () => {
+                $status.innerHTML = '状态: 正在播放';
+              });
+
+              player.on('stopped', () => {
+                $status.innerHTML = '状态：已停止';
+              });
+
+              player.on('end', () => {
+                $status.innerHTML = '状态：播放结束';
+              });
+
+              player.on('timeUpdate', timestamp => {
+                $time.innerHTML = '进度：' + Math.floor(timestamp / 1000) + 's';
+                $duration.innerHTML =
+                  '可播放时长: ' +
+                  Math.ceil(player.getAvaiableDuration() / 1000) +
+                  's';
+              });
+
+              player.on(
+                'performance',
+                ({ averageDecodeCost, averageUnitDuration }) => {
+                  $performance.innerHTML =
+                    '解码平均：' +
+                    Math.floor(averageDecodeCost) +
+                    'ms, 单元平均：' +
+                    Math.floor(averageUnitDuration) +
+                    'ms';
+                }
+              );
+            }
+
+            player.play();
+          });
+
+          $canvas.onclick = () => {
+            $canvas.requestFullscreen();
+          };
+
+          document.getElementById('stopBtn').addEventListener('click', () => {
+            player.stop();
+            player = null;
+          });
+
+          document.getElementById('pauseBtn').addEventListener('click', () => {
+            player.pause();
+          });
+
+          document.getElementById('resumeBtn').addEventListener('click', () => {
+            player.resume();
+          });
+
+          document.getElementById('muteBtn').addEventListener('click', () => {
+            player.mute(!player.mute());
+          });
+
+          document
+            .querySelector('input[name=volume]')
+            .addEventListener('change', ev => {
+              player.volume(ev.target.value);
+            });
+        });
+      }
+    </script>
+  </body>
+</html>
