@@ -47,8 +47,8 @@
       </div>
       <canvas
         id="canvas"
-        width="810"
-        height="540"
+        width="1080"
+        height="720"
         style="background: black;"
       ></canvas>
       <div style="margin-bottom: 10px">
@@ -141,8 +141,8 @@
 
               player.on('mediaInfo', mediaInfo => {
                 const { onMetaData } = mediaInfo;
-                $canvas.height = onMetaData.height || 540;
-                $canvas.width = onMetaData.width || 810;
+                $canvas.height = onMetaData.height || 720;
+                $canvas.width = onMetaData.width || 1080;
                 for (let i = 0; i < onMetaData.length; i++) {
                   if ('height' in onMetaData[i]) {
                     $canvas.height = onMetaData[i].height;
