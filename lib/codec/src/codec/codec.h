@@ -61,7 +61,7 @@ LICENSED WORK OR THE USE OR OTHER DEALINGS IN THE LICENSED WORK.
 #endif
 
 #ifdef USE_OPEN_H265
-#include "libde265/libde265/de265.h"
+#include "de265/libde265/de265.h"
 #elif defined(USE_OPEN_H264)
 #include "openh264/codec/api/svc/codec_api.h"
 #else
@@ -78,8 +78,12 @@ public:
 #ifdef USE_OPEN_H265
     storage = de265_new_decoder();
     de265_set_parameter_bool(storage, DE265_DECODER_PARAM_SUPPRESS_FAULTY_PICTURES, false);
-    de265_set_parameter_bool(storage, DE265_DECODER_PARAM_DISABLE_DEBLOCKING, false);
-    de265_set_parameter_bool(storage, DE265_DECODER_PARAM_DISABLE_SAO, false);
+    de265_set_parameter_bool(storage, DE265_DECODER_PARAM_DISABLE_DEBLOCKING, true);
+    de265_set_parameter_bool(storage, DE265_DECODER_PARAM_DISABLE_SAO, true);
+    de265_disable_logging();
+    de265_set_verbosity(0);
+    de265_start_worker_threads(storage, 1);
+    de265_set_limit_TID(storage, 100);
 #elif defined(USE_OPEN_H264)
     SDecodingParam sDecParam = {0};
     sDecParam.uiTargetDqLayer = (uint8_t) -1;
