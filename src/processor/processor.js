@@ -371,7 +371,6 @@ class Processor extends EventEmitter {
           height,
           stride0,
           stride1,
-          isH265,
           buffer
         } = msg.data;
         if (!this.baseTime) {
@@ -384,8 +383,7 @@ class Processor extends EventEmitter {
           width,
           height,
           stride0,
-          stride1,
-          isH265
+          stride1
         });
         break;
       }

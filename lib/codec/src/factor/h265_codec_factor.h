@@ -2,7 +2,7 @@
 #define CODEC_H265_CODEC_FACTOR_HPP
 
 #include "codec_factor.h"
-#include "helper/sdl.h"
+//#include "helper/sdl.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>

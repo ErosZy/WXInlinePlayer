@@ -305,9 +305,9 @@ class WXInlinePlayer extends EventEmitter {
     this.emit('mediaInfo', mediaInfo);
   }
 
-  _onFrameHandler({ width, height, data, isH265 }) {
+  _onFrameHandler({ width, height, data }) {
     if (this.drawer) {
-      this.drawer.drawNextOutputPicture(width, height, data, isH265);
+      this.drawer.drawNextOutputPicture(width, height, data);
     }
   }
 

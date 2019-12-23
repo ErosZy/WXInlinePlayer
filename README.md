@@ -37,7 +37,7 @@ WXInlinePlayer (Version 1.3 beta)
 其具体问题可以参考腾讯IMWeb团队编写的[《复杂帧动画之移动端Video采坑实现》](https://juejin.im/post/5d513623e51d453b72147600)。
 
 为了解决这些问题，我们通过软解FLV的方式实现了WXInlinePlayer，其用的第三方技术和平台API如下：
-1. [OpenH264](https://github.com/cisco/openh264)/[TinyH264](https://github.com/udevbe/tinyh264)；
+1. [OpenH264](https://github.com/cisco/openh264)/[TinyH264](https://github.com/udevbe/tinyh264)/[de265](https://github.com/strukturag/libde265)；
 2. [emscripten](https://github.com/emscripten-core/emscripten)
 3. [WebGL](https://developer.mozilla.org/zh-CN/docs/Web/API/WebGL_API)
 4. [Web Audio Api](https://developer.mozilla.org/zh-CN/docs/Web/API/Web_Audio_API)
