@@ -94,7 +94,6 @@ void H265CodecFactor::_handleVideoTag(VideoTagValue &tag, uint32_t timestamp) {
   int height = 0;
   int stridey = 0;
   int strideu = 0;
-  int stridev = 0;
   int totalSize = 0;
 
   if (tag.AVCPacketType == 0) {
@@ -163,8 +162,8 @@ void H265CodecFactor::_handleVideoTag(VideoTagValue &tag, uint32_t timestamp) {
         height = de265_get_image_height(img, 0);
         const uint8_t *y = de265_get_image_plane(img, 0, &stridey);
         const uint8_t *u = de265_get_image_plane(img, 1, &strideu);
-        const uint8_t *v = de265_get_image_plane(img, 2, &stridev);
-        totalSize = (height * (stridey + strideu + stridev));
+        const uint8_t *v = de265_get_image_plane(img, 2, nullptr);
+        totalSize = (height * width) * 3 / 2;
 
 #ifdef __EMSCRIPTEN__
         EM_ASM({
@@ -177,21 +176,42 @@ void H265CodecFactor::_handleVideoTag(VideoTagValue &tag, uint32_t timestamp) {
         }
       }, _codec->bridgeName.c_str(), totalSize);
 #else
-        _codec->videoBuffer = new uint8_t[totalSize]{0};
+//        _codec->videoBuffer = new uint8_t[totalSize]{0};
 #endif
 
         if (_codec->videoBuffer != nullptr) {
-          uint8_t *p = _codec->videoBuffer;
-          int index = 0;
-          memcpy(p + index, y, height * stridey);
-          index += height * stridey;
+          uint32_t startIndex = 0;
+          if (stridey == width && strideu == width / 2) {
+            memcpy(_codec->videoBuffer, y, width * height);
+            startIndex += width * height;
+            memcpy(_codec->videoBuffer + startIndex, u, width * height / 4);
+            startIndex += width * height / 4;
+            memcpy(_codec->videoBuffer + startIndex, v, width * height / 4);
+          } else {
+            uint32_t iWidth = width;
+            uint32_t iHeight = height;
+            for (uint32_t i = 0; i < iHeight; i++) {
+              memcpy(_codec->videoBuffer + startIndex, y, iWidth);
+              y += stridey;
+              startIndex += iWidth;
+            }
 
-          memcpy(p + index, u, height * strideu);
-          index += height * strideu;
+            iWidth = width / 2;
+            iHeight = height / 2;
+            for (uint32_t i = 0; i < iHeight; i++) {
+              memcpy(_codec->videoBuffer + startIndex, u, iWidth);
+              u += strideu;
+              startIndex += iWidth;
+            }
 
-          memcpy(p + index, v, height * stridev);
-
-          width = stridey;
+            iWidth = width / 2;
+            iHeight = height / 2;
+            for (uint32_t i = 0; i < iHeight; i++) {
+              memcpy(_codec->videoBuffer + startIndex, v, iWidth);
+              v += strideu;
+              startIndex += iWidth;
+            }
+          }
         }
 
 #ifdef __EMSCRIPTEN__
@@ -204,14 +224,14 @@ void H265CodecFactor::_handleVideoTag(VideoTagValue &tag, uint32_t timestamp) {
               "width": $2,
               "height": $3,
               "stride0": $4,
-              "stride1": $5,
-              "isH265": true,
+              "stride1": $5
             });
           }
-        }, _codec->bridgeName.c_str(), timestamp, width, height, stridey, stridev);
+        }, _codec->bridgeName.c_str(), timestamp, width, height, stridey, strideu);
 #else
-        delete[] _codec->videoBuffer;
+//        delete[] _codec->videoBuffer;
 #endif
+//        display_sdl(img);
       }
     } while (more);
   } else {
