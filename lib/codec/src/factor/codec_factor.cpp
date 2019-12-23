@@ -294,8 +294,7 @@ void CodecFactor::_handleVideoTag(VideoTagValue &tag, uint32_t timestamp) {
               "width": $2,
               "height": $3,
               "stride0": $4,
-              "stride1": $5,
-              "isH265": false,
+              "stride1": $5
             });
           }
         }, _codec->bridgeName.c_str(), timestamp, width, height, stride0, stride1);
