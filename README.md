@@ -1,4 +1,4 @@
-WXInlinePlayer (Version 1.2)
+WXInlinePlayer (Version 1.3 beta)
 ------------------
 [![LICENSE](https://img.shields.io/badge/license-Anti%20996-blue.svg)](https://github.com/996icu/996.ICU/blob/master/LICENSE)
 [![996.icu](https://img.shields.io/badge/link-996.icu-red.svg)](https://996.icu)
@@ -19,6 +19,7 @@ WXInlinePlayer (Version 1.2)
   * 为什么有些机器播放点播/直播会频繁卡顿，如何解决？
   * 为什么不对UC浏览器（iOS/Android）进行支持？
   * 如何将现有视频文件转换成WXInlinePlayer可播放的文件？
+  * 如何编码H265的FLV？
 * [项目计划](https://github.com/qiaozi-tech/WXInlinePlayer#%E9%A1%B9%E7%9B%AE%E8%AE%A1%E5%88%92)
 * [已知使用的产品](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%B7%B2%E7%9F%A5%E4%BD%BF%E7%94%A8%E7%9A%84%E4%BA%A7%E5%93%81)
 * [QQ技术支持群](https://github.com/qiaozi-tech/WXInlinePlayer#qq%E6%8A%80%E6%9C%AF%E6%94%AF%E6%8C%81%E7%BE%A4)
@@ -45,8 +46,8 @@ WXInlinePlayer (Version 1.2)
 
 ## 特性
 
-1. FLV点播/直播全支持
-2. 自由选择解码依赖，在实际gzip中，Tinyh264只需 ~180k，OpenH264 ~260k （[如何选择解码依赖](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E8%A7%A3%E7%A0%81%E4%BE%9D%E8%B5%96)）
+1. FLV  H264/H265 点播/直播全支持
+2. 自由选择解码依赖，在实际gzip中，Tinyh264只需 ~180k，OpenH264 ~260k，de265 ~210k （[如何选择解码依赖](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E8%A7%A3%E7%A0%81%E4%BE%9D%E8%B5%96)）
 3. 专为移动端性能优化，内存和CPU占用稳定
 4. 直播延迟优化，比MSE的原生Video实现低1-2s（[如何降低卡顿和延迟](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%99%8D%E4%BD%8E%E5%8D%A1%E9%A1%BF%E5%92%8C%E5%BB%B6%E8%BF%9F)）
 5. 音频/视频独立支持
@@ -306,13 +307,15 @@ player.on('timeUpdate', ()=>{
 
 ## 如何选择解码依赖
 
-目前有两套解码库，分别是：
+目前有3套解码库，分别是：
 * prod.baseline.asm.combine / prod.baseline.wasm.combine
 * prod.all.asm.combine / prod.all.wasm.combine
+* prod.h265.asm.combine / prod.h265.wasm.combine
 
 其区别在于：
 1. baseline文件大小更小（gzip后相比all小80k），但是只支持baseline的profile
 2. all的profile支持更完整（baseline/main/high），并且性能相比于baseline更好
+2. h265主要支持h265的flv流，此实现拓展了FLV格式，参考了金山的拓展要求，如有此需求请参考[金山的FLV拓展规范](https://github.com/ksvc/FFmpeg/wiki)
 
 我们推荐当你播放广告视频/营销视频/小动画视频等对依赖库大小敏感的时候使用baseline.asm/baseline.wasm，而在播放点播视频/直播视频时等对依赖库大小不敏感的时候使用all.asm/all.wasm。
 
@@ -392,27 +395,30 @@ FFmpeg方案目前有几个比较大的问题，第一个是解码库的大小�
 
 UC不管是iOS还是Android都对WebAssembly/ASM.js进行了阉割，因此索性不支持了。
 
-1. **如何将现有视频文件转换成WXInlinePlayer可播放的文件？**
+4. **如何将现有视频文件转换成WXInlinePlayer可播放的文件？**
 
 请使用FFmpeg或是其他类似的工具，这里给出一个简单的命令示例：
 ```shell
 ffmpeg -i "your.mp4" -vcodec libx264 -acodec aac out.flv
 ```
 
+5. **如何将现有视频文件转换成WXInlinePlayer可播放的文件？**
+
+WXInlinePlayer的FLV规范遵循[金山的FLV拓展规范](https://github.com/ksvc/FFmpeg/wiki)，如果需要进行相关的编码，可以参考其相关的[FFmpeg patch](https://github.com/ksvc/FFmpeg/wiki/instructions)或者[金山编写的编码器](https://github.com/ksvc/ks265codec)。
+
 ## 项目计划
 1. <del>V1.1 支持HTTP-FLV及流式解码</del>
 2. <del>V1.1 支持音视频独立播放</del>
 3. <del>V1.2 降低直播流延迟</del>
-4. V1.3
+4. <del>V1.3 增加H265支持</del>
+5. V1.4
    * 提供默认的播放器UI
    * <del>SharedArrayBuffer支持，减少内存占用和CPU的拷贝性能消耗</del>
    * 增加OffscreenCanvas的支持，提升性能和减少内存占用（Chrome 69+）
-5. V1.4
+6. V1.5
    * 重构解码器，精确缓存帧数据
    * 增加首帧逻辑
    * 增加poster参数
-6. V1.5
-   * 增加H265支持
 7. V1.6 支持FLV Seek操作
 8. V2.0 支持多Worker的GOP并行解码，提升软解性能
 

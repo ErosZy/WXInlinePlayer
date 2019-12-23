@@ -28,7 +28,7 @@
         <input
           type="text"
           id="iUrl"
-          value="https://static.petera.cn/h265.flv"
+          value="https://static.petera.cn/music.flv"
           style="width:786px;height:10px;margin:0;padding:5px;margin-bottom:5px;display:block"
         />
         <input type="number" id="iChunkSize" value="128" />
@@ -86,6 +86,16 @@
       const $time = document.getElementById('time');
       const $duration = document.getElementById('duration');
       const $performance = document.getElementById('performance');
+
+
+      document.getElementById('iH265').addEventListener('change', (ev)=>{
+        const checked = ev.target.checked;
+        if(checked){
+          document.getElementById('iUrl').value = 'https://static.petera.cn/h265.flv';
+        }else{
+          document.getElementById('iUrl').value ='https://static.petera.cn/music.flv';
+        }
+      });
 
       if (WXInlinePlayer.isSupport()) {
         const $canvas = document.getElementById('canvas');
