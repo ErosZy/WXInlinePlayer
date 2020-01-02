@@ -412,15 +412,17 @@ WXInlinePlayer的FLV规范遵循[金山的FLV拓展规范](https://github.com/ks
 3. <del>V1.2 降低直播流延迟</del>
 4. <del>V1.3 增加H265支持</del>
 5. V1.4
-   * 提供默认的播放器UI
-   * <del>SharedArrayBuffer支持，减少内存占用和CPU的拷贝性能消耗</del>
-   * 增加OffscreenCanvas的支持，提升性能和减少内存占用（Chrome 69+）
-6. V1.5
-   * 重构解码器，精确缓存帧数据
    * 增加首帧逻辑
+   * 重构解码器，精确缓存帧数据
+   * <del>SharedArrayBuffer支持，减少内存占用和CPU的拷贝性能消耗</del>
+6. V1.5
    * 增加poster参数
-7. V1.6 支持FLV Seek操作
-8. V2.0 支持多Worker的GOP并行解码，提升软解性能
+   * 增加OffscreenCanvas的支持，提升性能和减少内存占用（Chrome 69+）
+   * 提供默认的播放器UI
+7. V1.7 新增H265的SIMD支持
+8. V1.8 新增H264的SIMD支持
+9. V1.9 支持多Worker的GOP并行解码，提升软解性能
+10. V1.10 支持FLV Seek操作
 
 ## 已知使用的产品
 
