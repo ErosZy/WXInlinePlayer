@@ -76,8 +76,8 @@ bash build.sh
 最终产物会在example文件夹中。
 
 > 请注意：
-> 1. 请在*nix环境下进行build，并不保证Windows下的OpenH264的编译
-> 2. 请确保emscripten在1.38.45版本，否则会出现wasm32错误
+> * 请在*nix环境下进行build，并不保证Windows下的OpenH264的编译
+> * 请确保emscripten在1.38.45版本，否则会出现wasm32错误
 
 ## 快速开始
 ```html
