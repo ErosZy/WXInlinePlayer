@@ -404,7 +404,7 @@ UC不管是iOS还是Android都对WebAssembly/ASM.js进行了阉割，因此索�
 ffmpeg -i "your.mp4" -vcodec libx264 -acodec aac out.flv
 ```
 
-5. **如何将现有视频文件转换成WXInlinePlayer可播放的文件？**
+5. **如何编码H265的FLV？**
 
 WXInlinePlayer的FLV规范遵循[金山的FLV拓展规范](https://github.com/ksvc/FFmpeg/wiki)，如果需要进行相关的编码，可以参考其相关的[FFmpeg patch](https://github.com/ksvc/FFmpeg/wiki/instructions)或者[金山编写的编码器](https://github.com/ksvc/ks265codec)。
 
