@@ -14,7 +14,7 @@ WXInlinePlayer (Version 1.3)
 * [初始化参数](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%88%9D%E5%A7%8B%E5%8C%96%E5%8F%82%E6%95%B0)
 * [如何选择解码依赖](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E8%A7%A3%E7%A0%81%E4%BE%9D%E8%B5%96)
 * [如何降低卡顿和延迟](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%99%8D%E4%BD%8E%E5%8D%A1%E9%A1%BF%E5%92%8C%E5%BB%B6%E8%BF%9F)
-* [性能比较]()
+* [性能比较](https://github.com/qiaozi-tech/WXInlinePlayer/blob/master/README.md#%E6%80%A7%E8%83%BD%E6%AF%94%E8%BE%83)
 * [其他问题](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%85%B6%E4%BB%96%E9%97%AE%E9%A2%98)
   * 为什么不对FFmpeg精简后emscripten编译？
   * 为什么有些机器播放点播/直播会频繁卡顿，如何解决？
@@ -323,7 +323,7 @@ player.on('timeUpdate', ()=>{
 我们推荐当你播放广告视频/营销视频/小动画视频等对依赖库大小敏感的时候使用baseline.asm/baseline.wasm，而在播放点播视频/直播视频时等对依赖库大小不敏感的时候使用all.asm/all.wasm。
 
 ## 性能比较
-在开发本机上，H264与手淘、花椒等FFMpeg实现在内存占用和CPU占用上相差不大，H264性能整体较FFMpeg方案好5-10%左右，而H265由于减少的deblock，其性能相比于FFMpeg方案好50%左右。
+在开发本机上，针对同一视频，WXInlinePlayer与手淘、花椒等FFMpeg实现在内存占用和CPU占用上相差不大，WXInlinePlayer性能整体较FFMpeg方案好5-10%左右，而H265由于减少的deblock，其性能相比于FFMpeg方案好50%左右。
 
 > 更详细的对比有时间会进行补充。
 
