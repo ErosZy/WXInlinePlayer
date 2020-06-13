@@ -79,7 +79,7 @@ class Drawer {
     while (!gl && nameIndex < validContextNames.length) {
       var contextName = validContextNames[nameIndex];
       try {
-        gl = canvas.getContext(contextName);
+        gl = canvas.getContext(contextName, { preserveDrawingBuffer: true });
       } catch (e) {
         gl = null;
       }
