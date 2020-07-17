@@ -111,7 +111,10 @@ export default function() {
   StreamLoader.prototype._getChunk = function() {
     return new Promise(resolve => {
       const buffer = slice(this.data, 0, this.chunkSize);
-      this.data = slice(this.data, this.chunkSize);
+      this.data = slice(
+        this.data, 
+        this.data.length <= this.chunkSize ? this.data.length : this.chunkSize
+      );
       resolve(buffer);
     });
   };
