@@ -174,8 +174,8 @@ void H265CodecFactor::_handleVideoTag(VideoTagValue &tag, uint32_t timestamp) {
           auto pps = make_shared<Buffer>(unit->slice(index, index + _));
           _codec->pps = make_shared<Buffer>(*_mask + *pps);
           index += _;
-          de265_push_data(_codec->storage, _codec->vps->get_buf_ptr(), _codec->vps->get_length(), _pts, nullptr);
-          _pts += _codec->vps->get_length();
+          de265_push_data(_codec->storage, _codec->pps->get_buf_ptr(), _codec->pps->get_length(), _pts, nullptr);
+          _pts += _codec->pps->get_length();
         }
       }
     }
