@@ -7,7 +7,9 @@ codec/decoder/core/src/decoder.o: codec/decoder/core/src/decoder.cpp \
   codec/common/inc/wels_common_defs.h codec/api/svc/codec_app_def.h \
   codec/decoder/core/inc/parameter_sets.h codec/decoder/core/inc/nalu.h \
   codec/decoder/core/inc/nal_prefix.h codec/decoder/core/inc/slice.h \
-  codec/decoder/core/inc/picture.h codec/decoder/core/inc/bit_stream.h \
+  codec/decoder/core/inc/picture.h \
+  codec/decoder/core/inc/wels_decoder_thread.h \
+  codec/common/inc/WelsThreadLib.h codec/decoder/core/inc/bit_stream.h \
   codec/common/inc/golomb_common.h codec/decoder/core/inc/dec_frame.h \
   codec/decoder/core/inc/fmo.h codec/common/inc/memory_align.h \
   codec/decoder/core/inc/pic_queue.h \
@@ -57,6 +59,10 @@ codec/decoder/core/inc/nal_prefix.h:
 codec/decoder/core/inc/slice.h:
 
 codec/decoder/core/inc/picture.h:
+
+codec/decoder/core/inc/wels_decoder_thread.h:
+
+codec/common/inc/WelsThreadLib.h:
 
 codec/decoder/core/inc/bit_stream.h:
 

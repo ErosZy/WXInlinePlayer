@@ -29,8 +29,8 @@ if (HAVE_POSIX_MEMALIGN)
 endif()
 
 configure_file (
-  "${PROJECT_SOURCE_DIR}/libde265/de265-version.h.in"
-  "${PROJECT_BINARY_DIR}/libde265/de265-version.h"
+        "${PROJECT_SOURCE_DIR}/libde265/de265-version.h.in"
+        "${PROJECT_BINARY_DIR}/libde265/de265-version.h"
 )
 
 if(CMAKE_COMPILER_IS_GNUCXX)

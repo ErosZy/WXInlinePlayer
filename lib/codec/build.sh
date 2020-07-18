@@ -36,7 +36,7 @@ node ../tool/compile.js
 node ../tool/wrapper.js ../bin/all.wasm.js all.wasm
 node ../tool/wrapper.js ../bin/all.asm.js all.asm
 
-# h265 decode library
+## h265 decode library
 node ../tool/compile.js wasm h265
 emcmake cmake ..
 emmake make -j 4

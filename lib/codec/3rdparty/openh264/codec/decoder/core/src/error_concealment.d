@@ -10,9 +10,11 @@ codec/decoder/core/src/error_concealment.o: \
   codec/api/svc/codec_def.h codec/decoder/core/inc/parameter_sets.h \
   codec/decoder/core/inc/nalu.h codec/decoder/core/inc/nal_prefix.h \
   codec/decoder/core/inc/slice.h codec/decoder/core/inc/picture.h \
-  codec/decoder/core/inc/bit_stream.h codec/common/inc/golomb_common.h \
-  codec/decoder/core/inc/dec_frame.h codec/decoder/core/inc/fmo.h \
-  codec/common/inc/memory_align.h codec/decoder/core/inc/pic_queue.h \
+  codec/decoder/core/inc/wels_decoder_thread.h \
+  codec/common/inc/WelsThreadLib.h codec/decoder/core/inc/bit_stream.h \
+  codec/common/inc/golomb_common.h codec/decoder/core/inc/dec_frame.h \
+  codec/decoder/core/inc/fmo.h codec/common/inc/memory_align.h \
+  codec/decoder/core/inc/pic_queue.h \
   codec/decoder/core/inc/vlc_decoder.h \
   codec/decoder/core/inc/dec_golomb.h codec/common/inc/ls_defines.h \
   codec/common/inc/crt_util_safe_x.h codec/decoder/core/inc/mb_cache.h \
@@ -55,6 +57,10 @@ codec/decoder/core/inc/nal_prefix.h:
 codec/decoder/core/inc/slice.h:
 
 codec/decoder/core/inc/picture.h:
+
+codec/decoder/core/inc/wels_decoder_thread.h:
+
+codec/common/inc/WelsThreadLib.h:
 
 codec/decoder/core/inc/bit_stream.h:
 

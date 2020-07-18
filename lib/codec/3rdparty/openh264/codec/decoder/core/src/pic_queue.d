@@ -3,6 +3,8 @@ codec/decoder/core/src/pic_queue.o: codec/decoder/core/src/pic_queue.cpp \
   codec/common/inc/typedefs.h codec/common/inc/wels_common_defs.h \
   codec/common/inc/macros.h codec/api/svc/codec_app_def.h \
   codec/api/svc/codec_def.h codec/common/inc/wels_const_common.h \
+  codec/decoder/core/inc/wels_decoder_thread.h \
+  codec/common/inc/WelsThreadLib.h \
   codec/decoder/core/inc/decoder_context.h codec/common/inc/utils.h \
   codec/decoder/core/inc/wels_const.h \
   codec/decoder/core/inc/wels_common_basis.h \
@@ -31,6 +33,10 @@ codec/api/svc/codec_app_def.h:
 codec/api/svc/codec_def.h:
 
 codec/common/inc/wels_const_common.h:
+
+codec/decoder/core/inc/wels_decoder_thread.h:
+
+codec/common/inc/WelsThreadLib.h:
 
 codec/decoder/core/inc/decoder_context.h:
 

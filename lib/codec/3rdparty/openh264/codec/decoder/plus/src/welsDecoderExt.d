@@ -9,7 +9,9 @@ codec/decoder/plus/src/welsDecoderExt.o: \
   codec/common/inc/wels_common_defs.h \
   codec/decoder/core/inc/parameter_sets.h codec/decoder/core/inc/nalu.h \
   codec/decoder/core/inc/nal_prefix.h codec/decoder/core/inc/slice.h \
-  codec/decoder/core/inc/picture.h codec/decoder/core/inc/bit_stream.h \
+  codec/decoder/core/inc/picture.h \
+  codec/decoder/core/inc/wels_decoder_thread.h \
+  codec/common/inc/WelsThreadLib.h codec/decoder/core/inc/bit_stream.h \
   codec/common/inc/golomb_common.h codec/decoder/core/inc/dec_frame.h \
   codec/decoder/core/inc/fmo.h codec/common/inc/memory_align.h \
   codec/decoder/core/inc/pic_queue.h \
@@ -21,9 +23,9 @@ codec/decoder/plus/src/welsDecoderExt.o: \
   codec/common/inc/cpu.h codec/common/inc/cpu_core.h \
   codec/common/inc/version.h codec/common/inc/version_gen.h \
   codec/decoder/core/inc/decoder.h codec/decoder/core/inc/decoder_core.h \
+  codec/decoder/core/inc/manage_dec_ref.h \
   codec/decoder/core/inc/error_concealment.h \
-  codec/decoder/core/inc/rec_mb.h codec/common/inc/measure_time.h \
-  codec/decoder/core/inc/manage_dec_ref.h
+  codec/decoder/core/inc/rec_mb.h codec/common/inc/measure_time.h
 
 codec/decoder/plus/inc/welsDecoderExt.h:
 
@@ -58,6 +60,10 @@ codec/decoder/core/inc/nal_prefix.h:
 codec/decoder/core/inc/slice.h:
 
 codec/decoder/core/inc/picture.h:
+
+codec/decoder/core/inc/wels_decoder_thread.h:
+
+codec/common/inc/WelsThreadLib.h:
 
 codec/decoder/core/inc/bit_stream.h:
 
@@ -101,10 +107,10 @@ codec/decoder/core/inc/decoder.h:
 
 codec/decoder/core/inc/decoder_core.h:
 
+codec/decoder/core/inc/manage_dec_ref.h:
+
 codec/decoder/core/inc/error_concealment.h:
 
 codec/decoder/core/inc/rec_mb.h:
 
 codec/common/inc/measure_time.h:
-
-codec/decoder/core/inc/manage_dec_ref.h:
