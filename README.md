@@ -440,3 +440,6 @@ WXInlinePlayer的FLV规范遵循[金山的FLV拓展规范](https://github.com/ks
 
 ## QQ技术支持群
 ![QQ群](./images/qq.jpeg "QQ群")
+
+## 项目捐赠
+![QQ群](./images/wepay.png "微信支付")  ![QQ群](./images/alipay.png "支付宝")
