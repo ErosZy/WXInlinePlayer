@@ -1,4 +1,4 @@
-WXInlinePlayer (Version 1.3.3)
+![LOGO](./images/logo.png)
 ------------------
 [![LICENSE](https://img.shields.io/badge/license-Anti%20996-blue.svg)](https://github.com/996icu/996.ICU/blob/master/LICENSE)
 [![996.icu](https://img.shields.io/badge/link-996.icu-red.svg)](https://996.icu)
@@ -24,6 +24,7 @@ WXInlinePlayer (Version 1.3.3)
 * [项目计划](https://github.com/qiaozi-tech/WXInlinePlayer#%E9%A1%B9%E7%9B%AE%E8%AE%A1%E5%88%92)
 * [已知使用的产品](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%B7%B2%E7%9F%A5%E4%BD%BF%E7%94%A8%E7%9A%84%E4%BA%A7%E5%93%81)
 * [QQ技术支持群](https://github.com/qiaozi-tech/WXInlinePlayer#qq%E6%8A%80%E6%9C%AF%E6%94%AF%E6%8C%81%E7%BE%A4)
+* [项目捐助](https://github.com/qiaozi-tech/WXInlinePlayer#%E9%A1%B9%E7%9B%AE%E6%8D%90%E8%B5%A0)
 
 ## 简介
 
@@ -442,4 +443,4 @@ WXInlinePlayer的FLV规范遵循[金山的FLV拓展规范](https://github.com/ks
 ![QQ群](./images/qq.jpeg "QQ群")
 
 ## 项目捐赠
-![QQ群](./images/wepay.png "微信支付")  ![QQ群](./images/alipay.png "支付宝")
+![微信支付](./images/wepay.png "微信支付")  ![支付宝](./images/alipay.png "支付宝")
