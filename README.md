@@ -319,7 +319,7 @@ player.on('timeUpdate', ()=>{
 我们推荐当你播放广告视频/营销视频/小动画视频等对依赖库大小敏感的时候使用baseline.asm/baseline.wasm，而在播放点播视频/直播视频时等对依赖库大小不敏感的时候使用all.asm/all.wasm。
 
 ## 性能比较
-在开发本机上，针对同一视频，WXInlinePlayer与手淘、花椒等FFMpeg实现在内存占用和CPU占用上相差不大，WXInlinePlayer性能整体较FFMpeg方案好5-10%左右，而H265由于减少的deblock，其性能相比于FFMpeg方案好50%左右，以下为H265的播放性能对比：
+在开发本机上，针对同一视频，WXInlinePlayer与手淘、花椒等FFMpeg实现在内存占用和CPU占用上相差不大，WXInlinePlayer性能整体较FFMpeg方案好5-10%左右，而H265由于减少的deblock，其性能相比于FFMpeg方案好30%左右，以下为H265的播放性能对比：
 
 ![性能比较](./images/benchmark.png)
 
