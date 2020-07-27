@@ -399,7 +399,7 @@ FFmpeg方案目前有几个比较大的问题，第一个是解码库的大小�
 
 UC不管是iOS还是Android都对WebAssembly/ASM.js进行了阉割，因此索性不支持了。
 
-* **如何将现有视频文件转换成WXInlinePlayer可播放的文件？**
+* *如何将现有视频文件转换成WXInlinePlayer可播放的文件？*
 
 请使用FFmpeg或是其他类似的工具，这里给出一个简单的命令示例：
 ```shell
