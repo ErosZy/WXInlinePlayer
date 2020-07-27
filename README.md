@@ -16,11 +16,6 @@
 * [如何降低卡顿和延迟](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%99%8D%E4%BD%8E%E5%8D%A1%E9%A1%BF%E5%92%8C%E5%BB%B6%E8%BF%9F)
 * [性能比较](https://github.com/qiaozi-tech/WXInlinePlayer/blob/master/README.md#%E6%80%A7%E8%83%BD%E6%AF%94%E8%BE%83)
 * [其他问题](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%85%B6%E4%BB%96%E9%97%AE%E9%A2%98)
-  * 为什么不对FFmpeg精简后emscripten编译？
-  * 为什么有些机器播放点播/直播会频繁卡顿，如何解决？
-  * 为什么不对UC浏览器（iOS/Android）进行支持？
-  * 如何将现有视频文件转换成WXInlinePlayer可播放的文件？
-  * 如何编码H265的FLV？
 * [项目计划](https://github.com/qiaozi-tech/WXInlinePlayer#%E9%A1%B9%E7%9B%AE%E8%AE%A1%E5%88%92)
 * [已知使用的产品](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%B7%B2%E7%9F%A5%E4%BD%BF%E7%94%A8%E7%9A%84%E4%BA%A7%E5%93%81)
 * [QQ技术支持群](https://github.com/qiaozi-tech/WXInlinePlayer#qq%E6%8A%80%E6%9C%AF%E6%94%AF%E6%8C%81%E7%BE%A4)
@@ -324,9 +319,9 @@ player.on('timeUpdate', ()=>{
 我们推荐当你播放广告视频/营销视频/小动画视频等对依赖库大小敏感的时候使用baseline.asm/baseline.wasm，而在播放点播视频/直播视频时等对依赖库大小不敏感的时候使用all.asm/all.wasm。
 
 ## 性能比较
-在开发本机上，针对同一视频，WXInlinePlayer与手淘、花椒等FFMpeg实现在内存占用和CPU占用上相差不大，WXInlinePlayer性能整体较FFMpeg方案好5-10%左右，而H265由于减少的deblock，其性能相比于FFMpeg方案好50%左右。
+在开发本机上，针对同一视频，WXInlinePlayer与手淘、花椒等FFMpeg实现在内存占用和CPU占用上相差不大，WXInlinePlayer性能整体较FFMpeg方案好5-10%左右，而H265由于减少的deblock，其性能相比于FFMpeg方案好50%左右，以下为H265的播放性能对比：
 
-> 更详细的对比有时间会进行补充。
+![性能比较](./images/benchmark.png)
 
 ## 如何降低卡顿和延迟
 
@@ -416,22 +411,22 @@ ffmpeg -i "your.mp4" -vcodec libx264 -acodec aac out.flv
 WXInlinePlayer的FLV规范遵循[金山的FLV拓展规范](https://github.com/ksvc/FFmpeg/wiki)，如果需要进行相关的编码，可以参考其相关的[FFmpeg patch](https://github.com/ksvc/FFmpeg/wiki/instructions)或者[金山编写的编码器](https://github.com/ksvc/ks265codec)。
 
 ## 项目计划
-1. <del>V1.1 支持HTTP-FLV及流式解码</del>
-2. <del>V1.1 支持音视频独立播放</del>
-3. <del>V1.2 降低直播流延迟</del>
-4. <del>V1.3 增加H265支持</del>
-5. V1.4
+* <del>V1.1 支持HTTP-FLV及流式解码</del>
+* <del>V1.1 支持音视频独立播放</del>
+* <del>V1.2 降低直播流延迟</del>
+* <del>V1.3 增加H265支持</del>
+* V1.4
    * 增加首帧逻辑
    * 重构解码器，精确缓存帧数据
    * <del>SharedArrayBuffer支持，减少内存占用和CPU的拷贝性能消耗</del>
-6. V1.5
+* V1.5
    * 增加poster参数
    * 增加OffscreenCanvas的支持，提升性能和减少内存占用（Chrome 69+）
    * 提供默认的播放器UI
-7. V1.7 新增H265的SIMD支持
-8. V1.8 新增H264的SIMD支持
-9. V1.9 支持多Worker的GOP并行解码，提升软解性能
-10. V1.10 支持FLV Seek操作
+* V1.7 新增H265的SIMD支持
+* V1.8 新增H264的SIMD支持
+* V1.9 支持多Worker的GOP并行解码，提升软解性能
+* V1.10 支持FLV Seek操作
 
 ## 已知使用的产品
 
