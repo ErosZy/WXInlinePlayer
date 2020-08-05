@@ -66,8 +66,10 @@
 
 ## 如何编译
 
-请确保你安装过[parcel](https://parceljs.org/) / [emscripten 1.38.45](https://github.com/emscripten-core/emscripten) / [cmake](https://cmake.org/) 以及 [make](http://www.gnu.org/software/make/)，然后直接执行build.sh文件即可：
+请确保你安装过[parcel](https://parceljs.org/) / [emscripten 1.38.45](https://github.com/emscripten-core/emscripten) / [cmake](https://cmake.org/) 以及 [make](http://www.gnu.org/software/make/)，然后执行以下命令即可：
 ```shell
+npm install #初始化工程
+npm update #更新工程有关的插件。如果网络错误，改用 cnpm update
 bash build.sh
 ```
 最终产物会在example文件夹中。
@@ -137,6 +139,15 @@ bash build.sh
   </script>
 </body>
 </html>
+```
+
+然后在工程根目录,输入命令启动server:
+```shell
+npm run serve
+```
+然后输入网址访问demo:
+```
+http://localhost:8888/example/index.html
 ```
 
 ## API
