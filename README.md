@@ -139,6 +139,15 @@ bash build.sh
 </html>
 ```
 
+然后在工程根目录,输入命令启动server:
+```shell
+npm run serve
+```
+然后输入网址访问demo:
+```
+http://localhost:8888/example/index.html
+```
+
 ## API
 
 ### Boolean WXInlinePlayer.isSupport(void)
