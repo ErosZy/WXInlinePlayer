@@ -121,7 +121,7 @@ bash build.sh
       cacheSegmentCount: 64,
       customLoader: null
     }).then((player) => {
-      if(palyer == null)return;
+      // you can put anything here
       const { userAgent } = navigator;
       const isWeChat = /MicroMessenger/i.test(userAgent);
       if (!isWeChat) {
@@ -162,7 +162,6 @@ WXInlinePlayer安全的进行初始化操作代码如下:
 
 ```javascript
 WXInlinePlayer.isSupport() && WXInlinePlayer.ready({/*...*/}).then((player)=>{
-  if(player == null)return;
   //do anything here...
 });
 ```
