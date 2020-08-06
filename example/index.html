@@ -105,13 +105,14 @@
       const videoHeight = 400;
       const videoWidth = 800;
       const $canvas = document.getElementById('canvas');
-      var isH265 = document.getElementById('iH265').checked;
 
       document.querySelector(".header").style.width = videoWidth + "px";
       document.getElementById('iUrl').value = defautVideoUrl;
       document.getElementById('iH265').checked = true;
 
-      WXInlinePlayer.isSupport() && WXInlinePlayer.ready({
+      var isH265 = document.getElementById('iH265').checked;
+
+      WXInlinePlayer.ready({
         asmUrl: './prod.' + (isH265 ? 'h265' : 'all') + '.asm.combine.js',
         wasmUrl: './prod.' + (isH265 ? 'h265' : 'all') + '.wasm.combine.js',
         url: document.getElementById('iUrl').value,
