@@ -170,7 +170,7 @@ WXInlinePlayer.isSupport() && WXInlinePlayer.ready({/*...*/}).then((player)=>{
 
 ```javascript
 {
-  asmUrl: String, //asm 解码库地址.关于解码库的选择，请参考：[如何选择解码依赖](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E8%A7%A3%E7%A0%81%E4%BE%9D%E8%B5%96)。
+  asmUrl: String, //asm 解码库地址.
   wasmUrl: String,//wasm 解码库地址,参考同上
   url: String, // 播放地址，仅支持flv
   $container: DomElement, // 绘制的canvas对象
@@ -188,6 +188,7 @@ WXInlinePlayer.isSupport() && WXInlinePlayer.ready({/*...*/}).then((player)=>{
   customLoader: LoaderImpl, // 自定义loader，请参考src/loader/chunk(stream)代码
 }
 ```
+关于解码库的选择，请参考：[如何选择解码依赖](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E8%A7%A3%E7%A0%81%E4%BE%9D%E8%B5%96)。
 
 ### void WXInlinePlayerInstance.play(void)
 
