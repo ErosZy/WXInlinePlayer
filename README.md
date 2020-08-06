@@ -77,6 +77,7 @@ bash build.sh
 > 请注意：
 > * 请在*nix环境下进行build，并不保证Windows下的OpenH264的编译
 > * 请确保emscripten在1.38.45版本，否则会出现wasm32错误
+> * cmake 版本需要是 3.16+
 
 ## 快速开始
 ```html
@@ -102,46 +103,40 @@ bash build.sh
   <canvas id="container" width="800" height="450"></canvas>
   <script src="./index.js"></script>
   <script>
-    if (WXInlinePlayer.isSupport()) {
-      WXInlinePlayer.init({
-        asmUrl: './prod.baseline.asm.combine.js',
-        wasmUrl: './prod.baseline.wasm.combine.js'
-      });
-
-      WXInlinePlayer.ready().then(() => {
-        const player = new WXInlinePlayer({
-          url: 'https://static.petera.cn/mm.flv',
-          $container: document.getElementById('container'),
-          hasVideo: true,
-          hasAudio: true,
-          volume: 1.0,
-          muted: false,
-          autoplay: true,
-          loop: true,
-          isLive: false,
-          chunkSize: 128 * 1024,
-          preloadTime: 5e2,
-          bufferingTime: 1e3,
-          cacheSegmentCount: 64,
-          customLoader: null
+    WXInlinePlayer.isSupport() && WXInlinePlayer.ready({
+      asmUrl: './prod.baseline.asm.combine.js',
+      wasmUrl: './prod.baseline.wasm.combine.js'
+      url: 'https://static.petera.cn/mm.flv',//改为你自己的flv地址
+      $container: document.getElementById('container'),
+      hasVideo: true,
+      hasAudio: true,
+      volume: 1.0,
+      muted: false,
+      autoplay: true,
+      loop: true,
+      isLive: false,
+      chunkSize: 128 * 1024,
+      preloadTime: 5e2,
+      bufferingTime: 1e3,
+      cacheSegmentCount: 64,
+      customLoader: null
+    }).then((player) => {
+      if(palyer == null)return;
+      const { userAgent } = navigator;
+      const isWeChat = /MicroMessenger/i.test(userAgent);
+      if (!isWeChat) {
+        alert('click to play!');
+        document.body.addEventListener('click', () => {
+          player.play();
         });
-
-        const { userAgent } = navigator;
-        const isWeChat = /MicroMessenger/i.test(userAgent);
-        if (!isWeChat) {
-          alert('click to play!');
-          document.body.addEventListener('click', () => {
-            player.play();
-          });
-        }
-      });
-    }
+      }
+    });
   </script>
 </body>
 </html>
 ```
 
-然后在工程根目录,输入命令启动server:
+在工程根目录,输入命令启动server:
 ```shell
 npm run serve
 ```
@@ -161,143 +156,23 @@ if(WXInlinePlayer.isSupport()){
 }
 ```
 
-### Promise WXInlinePlayer.init(Object)
+### Promise WXInlinePlayer.ready(options)
 
-初始化WXInlinePlayer，需要传入加载的H264解码库的具体地址，关于解码库的选择，请参考：[如何选择解码依赖](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E8%A7%A3%E7%A0%81%E4%BE%9D%E8%B5%96)。
-```javascript
-if(WXInlinePlayer.isSupport()){
-  WXInlinePlayer.init({
-    asmUrl: './prod.baseline.asm.combine.js',
-    wasmUrl: './prod.baseline.wasm.combine.js'
-  }).catch(e=>{
-    console.log(`WXInlinePlayer init error: ${e}`);
-  });
-}
-```
-
-### Promise WXInlinePlayer.ready(void)
-
-WXInlinePlayer已经准备就绪，可以安全的进行初始化操作。
+WXInlinePlayer安全的进行初始化操作代码如下:
 
 ```javascript
-if(WXInlinePlayer.isSupport()){
-  WXInlinePlayer.init({/*.....*/});
-  WXInlinePlayer.ready().then(()=>{
-    console.log('WXInlinePlayer ready');
-  });
-}
-```
-
-### WXInlinePlayerInstance WXInlinePlayer(Object)
-
-WXInlinePlayer构造函数，相关初始化参数请参考：[初始化参数](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%88%9D%E5%A7%8B%E5%8C%96%E5%8F%82%E6%95%B0)。
-
-```javascript
-WXInlinePlayer.ready().then(()=>{
-  const player = new WXInlinePlayer({/*...*/});
+WXInlinePlayer.isSupport() && WXInlinePlayer.ready({/*...*/}).then((player)=>{
+  if(player == null)return;
+  //do anything here...
 });
 ```
 
-### void WXInlinePlayerInstance.play(void)
+上面代码调用 WXInlinePlayer.ready(options)初始化,参数options说明如下:
 
-进行视频播放。需要注意的是由于浏览器限制（不包含微信及Chrome 66版本以下），高版本已经禁用了音频自动播放，因此直接调用此方法可能并不会有作用，请在click/touchstart/touchend/touchmove等事件中让用户主动触发。
-
-```javascript
-const player = new WXInlinePlayer({/*...*/});
-document.body.addEventListener('click', ()=>{
-  player.play();
-});
-```
-
-### void WXInlinePlayerInstance.stop(void)
-
-停止整个播放器，不可被恢复(resume)。
-
-```javascript
-const player = new WXInlinePlayer({/*...*/});
-player.stop();
-```
-
-### void WXInlinePlayerInstance.pause(void)
-
-暂停当前播放。
-
-```javascript
-const player = new WXInlinePlayer({/*...*/});
-player.pause();
-```
-
-### void WXInlinePlayerInstance.resume(void)
-
-恢复由pause引起的暂停操作。
-
-```javascript
-const player = new WXInlinePlayer({/*...*/});
-player.resume();
-```
-
-### Number|void WXInlinePlayerInstance.volume(Number|void)
-
-获取/设置当前音量。
-```javascript
-const player = new WXInlinePlayer({/*...*/});
-const volume = player.volume(); // get volume
-player.volume(volume); // set volume
-```
-
-### Boolean|void WXInlinePlayerInstance.mute(Boolean|void)
-
-获取/设置静音状态。
-```javascript
-const player = new WXInlinePlayer({/*...*/});
-const muted = player.mute(); // get mute
-player.mute(muted); // set mute
-```
-
-### void WXInlinePlayerInstance.destroy(void)
-
-销毁播放器，释放所有内存等待回收。
-```javascript
-const player = new WXInlinePlayer({/*...*/});
-player.destroy();
-```
-
-### Number WXInlinePlayerInstance.getCurrentTime(void)
-
-获取当前播放时间，请注意，可能出现负值的情况请注意处理。
-```javascript
-const player = new WXInlinePlayer({/*...*/});
-player.on('timeUpdate', ()=>{
-  let currentTime = player.getCurrentTime();
-  currentTime = currentTime <= 0 ? 0 : currentTime;
-});
-```
-
-### Number WXInlinePlayerInstance.getAvaiableDuration(void)
-
-可播放时长，可理解为缓冲的时长。
-```javascript
-const player = new WXInlinePlayer({/*...*/});
-player.on('timeUpdate', ()=>{
-  const duration = player.getAvaiableDuration();
-});
-```
-
-## 事件
-
-* mediaInfo(Object) - 视频相关信息，例如width/height/fps/framerate等
-* playing(void) - 开始/正在播放
-* buffering(void) - 内部帧数据不足，开始缓冲
-* stopped(void) - 停止播放
-* end(void) - 播放结束
-* timeUpdate(currentTime:Number) - 当前播放的进度，250ms进行一次触发
-* loadError({status:Number, statusText:String, detail:Object}) - 加载失败
-* loadSuccess(void) - 加载成功
-* performance({averageDecodeCost:Number, averageUnitDuration:Number}) - 编码性能检测事件，averageDecodeCost代表平均的解码消耗的时长，averageUnitDuration代表在averageDecodeCost下解码得到的可播放单元时长
-
-## 初始化参数
 ```javascript
 {
+  asmUrl: String, //asm 解码库地址.关于解码库的选择，请参考：[如何选择解码依赖](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E8%A7%A3%E7%A0%81%E4%BE%9D%E8%B5%96)。
+  wasmUrl: String,//wasm 解码库地址,参考同上
   url: String, // 播放地址，仅支持flv
   $container: DomElement, // 绘制的canvas对象
   hasVideo: Boolean, // 是否含有视频，默认true
@@ -314,6 +189,94 @@ player.on('timeUpdate', ()=>{
   customLoader: LoaderImpl, // 自定义loader，请参考src/loader/chunk(stream)代码
 }
 ```
+
+### void WXInlinePlayerInstance.play(void)
+
+进行视频播放。需要注意的是由于浏览器限制（不包含微信及Chrome 66版本以下），高版本已经禁用了音频自动播放，因此直接调用此方法可能并不会有作用，请在click/touchstart/touchend/touchmove等事件中让用户主动触发。
+
+```javascript
+document.body.addEventListener('click', ()=>{
+  player.play();
+});
+```
+
+### void WXInlinePlayerInstance.stop(void)
+
+停止整个播放器，不可被恢复(resume)。
+
+```javascript
+player.stop();
+```
+
+### void WXInlinePlayerInstance.pause(void)
+
+暂停当前播放。
+
+```javascript
+player.pause();
+```
+
+### void WXInlinePlayerInstance.resume(void)
+
+恢复由pause引起的暂停操作。
+
+```javascript
+player.resume();
+```
+
+### Number|void WXInlinePlayerInstance.volume(Number|void)
+
+获取/设置当前音量。
+```javascript
+const volume = player.volume(); // get volume
+player.volume(volume); // set volume
+```
+
+### Boolean|void WXInlinePlayerInstance.mute(Boolean|void)
+
+获取/设置静音状态。
+```javascript
+const muted = player.mute(); // get mute
+player.mute(muted); // set mute
+```
+
+### void WXInlinePlayerInstance.destroy(void)
+
+销毁播放器，释放所有内存等待回收。
+```javascript
+player.destroy();
+```
+
+### Number WXInlinePlayerInstance.getCurrentTime(void)
+
+获取当前播放时间，请注意，可能出现负值的情况请注意处理。
+```javascript
+player.on('timeUpdate', ()=>{
+  let currentTime = player.getCurrentTime();
+  currentTime = currentTime <= 0 ? 0 : currentTime;
+});
+```
+
+### Number WXInlinePlayerInstance.getAvaiableDuration(void)
+
+可播放时长，可理解为缓冲的时长。
+```javascript
+player.on('timeUpdate', ()=>{
+  const duration = player.getAvaiableDuration();
+});
+```
+
+## 事件
+
+* mediaInfo(Object) - 视频相关信息，例如width/height/fps/framerate等
+* playing(void) - 开始/正在播放
+* buffering(void) - 内部帧数据不足，开始缓冲
+* stopped(void) - 停止播放
+* end(void) - 播放结束
+* timeUpdate(currentTime:Number) - 当前播放的进度，250ms进行一次触发
+* loadError({status:Number, statusText:String, detail:Object}) - 加载失败
+* loadSuccess(void) - 加载成功
+* performance({averageDecodeCost:Number, averageUnitDuration:Number}) - 编码性能检测事件，averageDecodeCost代表平均的解码消耗的时长，averageUnitDuration代表在averageDecodeCost下解码得到的可播放单元时长
 
 ## 如何选择解码依赖
 

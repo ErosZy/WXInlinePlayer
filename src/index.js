@@ -54,6 +54,7 @@ import Drawer from './drawer/drawer';
 import Util from './util/util';
 
 class WXInlinePlayer extends EventEmitter {
+  static _instance = null;
   static initPromise = null;
   static isInited = false;
 
@@ -102,22 +103,6 @@ class WXInlinePlayer extends EventEmitter {
     }
   }
 
-  static init({ asmUrl, wasmUrl }) {
-    WXInlinePlayer.initPromise = new Promise((resolve, reject) => {
-      const url = window['WebAssembly'] ? wasmUrl : asmUrl;
-      const head = document.head || document.getElementsByTagName('head')[0];
-      const script = document.createElement('script');
-      script.onload = () => {
-        WXInlinePlayer.isInited = true;
-        resolve();
-      };
-      script.onerror = e => reject(e);
-      script.src = `${url}`;
-      script.type = 'text/javascript';
-      head.appendChild(script);
-    });
-  }
-
   static isSupport() {
     return !!
     (
@@ -139,14 +124,36 @@ class WXInlinePlayer extends EventEmitter {
     );
   }
 
-  static ready() {
+  static _initLib(options) {
+    WXInlinePlayer.initPromise = new Promise((resolve, reject) => {
+      const url = window['WebAssembly'] ? options.wasmUrl : options.asmUrl;
+      const head = document.head || document.getElementsByTagName('head')[0];
+      const script = document.createElement('script');
+      script.onload = () => {
+        WXInlinePlayer.isInited = true;
+        WXInlinePlayer._instance = WXInlinePlayer._instance || new WXInlinePlayer(options);
+        resolve(WXInlinePlayer._instance);
+      };
+      script.onerror = e => reject(null);
+      script.src = `${url}`;
+      script.type = 'text/javascript';
+      head.appendChild(script);
+    });
+  }
+
+  /**
+   * init WXInlinePlayer and return a promise.
+   */
+  static ready(options) {
     if (!WXInlinePlayer.isSupport()) {
       return Promise.resolve(false);
     }
 
-    if (WXInlinePlayer.isInited) {
-      return Promise.resolve(true);
-    }
+    WXInlinePlayer._initLib(options);
+
+    // if (WXInlinePlayer.isInited) {
+    //   return Promise.resolve(true);
+    // }
 
     return WXInlinePlayer.initPromise;
   }
