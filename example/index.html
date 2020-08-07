@@ -1,226 +1,272 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=0.5" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>Document</title>
-    <style>
-      html,
-      body {
-        width: 100%;
-        height: 100%;
-        font-size: 14px;
-      }
-      #wrapper {
-        width: 1024px;
-        height: 500px;
-        position: absolute;
-        top: 50px;
-        left: 50%;
-        margin-left: -400px;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="wrapper">
-      <div style="margin-bottom: 10px">
-        <input
-          type="text"
-          id="iUrl"
-          value="http://localhost/sample.flv"
-          style="width:786px;height:10px;margin:0;padding:5px;margin-bottom:5px;display:block"
-        />
-        <input type="number" id="iChunkSize" value="128" />
-        chunkSize&nbsp;&nbsp;&nbsp;
-        <input type="number" id="iBuffer" value="500" />
-        bufferingTime&nbsp;&nbsp;&nbsp;
-        <input type="number" id="iPreload" value="500" />
-        preloadTime&nbsp;&nbsp;&nbsp;
-        <div style="margin-right:1000px;margin-bottom:5px;"></div>
-        <input type="checkbox" id="iH265" /> isH265
-        <input type="checkbox" id="iIsLive" checked /> isLive
-        <input type="checkbox" id="iHasAudio" checked /> hasAudio
-        <input type="checkbox" id="iHasVideo" checked /> hasVideo
-        <input type="checkbox" id="iLoop" checked /> loop
-        <input type="checkbox" id="iAutoPlay" checked /> autoplay
-      </div>
-      <canvas
-        id="canvas"
-        width="1080"
-        height="720"
-        style="background: black;"
-      ></canvas>
-      <div style="margin-bottom: 10px">
-        <span id="status">状态：等待播放</span>
-        <span id="duration" style="display: inline-block;margin-left:40px;">
-          可播放时长: 0s
-        </span>
-        <span id="time" style="display:inline-block;margin-left:40px;">
-          进度：0s
-        </span>
-        <span id="performance" style="display:inline-block;margin-left:40px;">
-          解码平均：0ms, 单元平均：0ms 
-        </span>
-      </div>
-      <button id="playBtn">播放</button>
-      <button id="stopBtn">停止</button>
-      <button id="pauseBtn">暂停</button>
-      <button id="resumeBtn">恢复</button>
-      <button id="muteBtn">静音切换</button>
 
-      <input
-        type="number"
-        name="volume"
-        step="0.1"
-        max="1.0"
-        min="0.0"
-        value="1.0"
-        style="width: 100px;"
-      />
-      <span>音量设置</span>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=0.5" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title>WXInlinePlayer demo</title>
+  <style>
+    html,
+    td,
+    th,
+    body {
+      font-size: 12px;
+      text-align: center;
+      background-color: #eee;
+    }
+
+    #wrapper {
+      width: 100%;
+      top: 50px;
+      text-align: center;
+      margin: auto;
+    }
+
+    #wrapper #header {
+      margin: auto;
+      text-align: left;
+      margin-bottom: 10px;
+      padding-top: 30px;
+    }
+
+    #wrapper input[type=number] {
+      width: 40px;
+      height: 26px;
+      padding: 0;
+      margin: 0;
+      border: 1px solid #666;
+      text-align: center;
+    }
+
+    #wrapper button {
+      width: 80px;
+      height: 28px;
+      border: 1px solid #666;
+      background-color: #fff;
+      font-size: 14px;
+    }
+
+    #canvas {
+      width: 800px;
+      height: 400px;
+      margin: auto;
+      background-color: #333;
+    }
+
+    #resetBtn {
+      /* visibility: hidden; */
+      background-color: orange !important
+    }
+  </style>
+</head>
+
+<body>
+  <div id="wrapper">
+    <div id="header">
+      <input type="text" id="iUrl" value=""
+        style="width:786px;height:10px;margin:0;padding:5px;margin-bottom:5px;display:block" />
+      <input type="number" id="iChunkSize" value="128" />
+      chunkSize&nbsp;&nbsp;&nbsp;
+      <input type="number" id="iBuffer" value="500" />
+      bufferingTime&nbsp;&nbsp;&nbsp;
+      <input type="number" id="iPreload" value="500" />
+      preloadTime&nbsp;&nbsp;&nbsp;
+      <div style="margin-right:1000px;margin-bottom:5px;"></div>
+      <input type="checkbox" id="iH265" /><label for="iH265">isH265</label>
+      <input type="checkbox" id="iIsLive" checked /><label for="iIsLive">isLive</label>
+      <input type="checkbox" id="iHasAudio" checked /><label for="iHasAudio">hasAudio</label>
+      <input type="checkbox" id="iHasVideo" checked /><label for="iHasVideo">hasVideo</label>
+      <input type="checkbox" id="iLoop" checked /><label for="iLoop">loop</label>
+      <input type="checkbox" id="iAutoPlay" checked /><label for="iAutoPlay">autoplay</label>
+      <button id="resetBtn">重设</button>
     </div>
-    <script src="./index.js"></script>
-    <script>
-      const $status = document.getElementById('status');
-      const $time = document.getElementById('time');
-      const $duration = document.getElementById('duration');
-      const $performance = document.getElementById('performance');
+    <canvas id="canvas"></canvas>
+    <div style="margin-bottom: 10px">
+      <span id="status">状态：等待播放</span>
+      <span id="duration" style="display: inline-block;margin-left:40px;">
+        可播放时长: 0s
+      </span>
+      <span id="time" style="display:inline-block;margin-left:40px;">
+        进度：0s
+      </span>
+      <span id="performance" style="display:inline-block;margin-left:40px;">
+        解码平均：0ms, 单元平均：0ms
+      </span>
+    </div>
+    <button id="playBtn">播放</button>
+    <button id="stopBtn">停止</button>
+    <button id="pauseBtn">暂停</button>
+    <button id="resumeBtn">恢复</button>
+    <button id="muteBtn">静音切换</button>
 
+    <input type="number" name="volume" step="0.1" max="1.0" min="0.0" value="1.0" />
+    <span>音量设置</span>
+  </div>
+  <script src="./index.js"></script>
+  <script>
+    (() => {
 
-      document.getElementById('iH265').addEventListener('change', (ev)=>{
-        const checked = ev.target.checked;
-        if(checked){
-          document.getElementById('iUrl').value = 'http://localhost/sample.flv';
-        }else{
-          document.getElementById('iUrl').value ='http://localhost/sample.flv';
+      const $ = document.getElementById.bind(document);
+      const $canvas = $('canvas');
+      const $status = $('status');
+      const $time = $('time');
+      const $duration = $('duration');
+      const $performance = $('performance');
+
+      const defautVideoUrl = "https://ks3-cn-beijing.ksyun.com/ksplayer/h265/outside_demo/v1.1.3/720P2M30fpsh265-wasmtest.flv";
+      const videoHeight = 400;
+      const videoWidth = 800;
+
+      let $player = null;
+
+      //////////////main logic///////////////////////////////////////////////////////
+
+      (function () {
+
+        //default setting
+        $('header').style.width = videoWidth + "px";
+        $('iUrl').value = defautVideoUrl;
+        $('iH265').checked = true;
+
+        $canvas.onclick = () => {
+          $canvas.requestFullscreen();
+        };
+
+        //init player
+        initPlayer(getOptions());
+
+      })();
+
+      ///////////////////////////////////////////////////////////////////////////////
+
+      function getOptions() {
+        let isH265 = $('iH265').checked;
+        return {
+          asmUrl: './prod.' + (isH265 ? 'h265' : 'all') + '.asm.combine.js',
+          wasmUrl: './prod.' + (isH265 ? 'h265' : 'all') + '.wasm.combine.js',
+          url: $('iUrl').value,
+          $container: $canvas,
+          hasVideo: $('iHasVideo').checked,
+          hasAudio: $('iHasAudio').checked,
+          volume: 1.0,
+          muted: false,
+          autoplay: $('iAutoPlay').checked,
+          loop: $('iLoop').checked,
+          isLive: $('iIsLive').checked,
+          chunkSize: parseInt($('iChunkSize').value) * 1024,
+          preloadTime: parseInt($('iPreload').value),
+          bufferingTime: parseInt($('iBuffer').value),
+          cacheSegmentCount: 64,
+          customLoader: null
         }
-      });
+      }
 
-      if (WXInlinePlayer.isSupport()) {
-        const $canvas = document.getElementById('canvas');
-        let player = null;
-        document.getElementById('playBtn').addEventListener('click', () => {
-          var isH265 = document.getElementById('iH265').checked;
-          WXInlinePlayer.init({
-            asmUrl: './prod.' + (isH265 ? 'h265' : 'all') + '.asm.combine.js',
-            wasmUrl: './prod.' + (isH265 ? 'h265' : 'all') + '.wasm.combine.js'
+      function initPlayer(options) {
+        WXInlinePlayer.ready(options).then((player) => {
+          console.log("WXInlinePlayer is ready!")
+          player.on('loadError', e => {
+            console.e('loadError', e);
           });
-
-          WXInlinePlayer.ready().then(() => {
-            if (!player) {
-              player = new WXInlinePlayer({
-                url: document.getElementById('iUrl').value,
-                $container: $canvas,
-                hasVideo: document.getElementById('iHasVideo').checked,
-                hasAudio: document.getElementById('iHasAudio').checked,
-                volume: 1.0,
-                muted: false,
-                autoplay: document.getElementById('iAutoPlay').checked,
-                loop: document.getElementById('iLoop').checked,
-                isLive: document.getElementById('iIsLive').checked,
-                chunkSize:
-                  parseInt(document.getElementById('iChunkSize').value) * 1024,
-                preloadTime: parseInt(
-                  document.getElementById('iPreload').value
-                ),
-                bufferingTime: parseInt(
-                  document.getElementById('iBuffer').value
-                ),
-                cacheSegmentCount: 64,
-                customLoader: null
-              });
-
-              player.on('loadError', e => {
-                console.log('>>>>> load error happend: ', e);
-              });
-
-              player.on('loadSuccess', () => {
-                console.log('>>>>> load success');
-              });
-
-              player.on('mediaInfo', mediaInfo => {
-                const { onMetaData } = mediaInfo;
-                $canvas.height = onMetaData.height || 720;
-                $canvas.width = onMetaData.width || 1080;
-                for (let i = 0; i < onMetaData.length; i++) {
-                  if ('height' in onMetaData[i]) {
-                    $canvas.height = onMetaData[i].height;
-                  } else if ('width' in onMetaData[i]) {
-                    $canvas.width = onMetaData[i].width;
-                  }
-                }
-                $canvas.style.marginLeft = (800 - $canvas.width) / 2 + 'px';
-              });
-
-              player.on('buffering', () => {
-                $status.innerHTML = '状态: 等待加载';
-              });
-
-              player.on('playing', () => {
-                $status.innerHTML = '状态: 正在播放';
-              });
-
-              player.on('stopped', () => {
-                $status.innerHTML = '状态：已停止';
-              });
-
-              player.on('end', () => {
-                $status.innerHTML = '状态：播放结束';
-              });
-
-              player.on('timeUpdate', timestamp => {
-                $time.innerHTML = '进度：' + Math.floor(timestamp / 1000) + 's';
-                $duration.innerHTML =
-                  '可播放时长: ' +
-                  Math.ceil(player.getAvaiableDuration() / 1000) +
-                  's';
-              });
-
-              player.on(
-                'performance',
-                ({ averageDecodeCost, averageUnitDuration }) => {
-                  $performance.innerHTML =
-                    '解码平均：' +
-                    Math.floor(averageDecodeCost) +
-                    'ms, 单元平均：' +
-                    Math.floor(averageUnitDuration) +
-                    'ms';
-                }
-              );
+          player.on('loadSuccess', () => {
+            console.log('loadSuccess');
+          });
+          player.on('mediaInfo', mediaInfo => {
+            console.log('mediaInfo', mediaInfo);
+            const { onMetaData } = mediaInfo;
+            $canvas.height = onMetaData.height || videoHeight;
+            $canvas.width = onMetaData.width || videoWidth;
+            for (let i = 0; i < onMetaData.length; i++) {
+              if ('height' in onMetaData[i]) {
+                $canvas.height = onMetaData[i].height;
+              } else if ('width' in onMetaData[i]) {
+                $canvas.width = onMetaData[i].width;
+              }
             }
-
-            player.play();
+            // $canvas.style.marginLeft = (800 - $canvas.width) / 2 + 'px';
+          });
+          player.on('buffering', () => {
+            $status.innerHTML = '状态: 等待加载';
+          });
+          player.on('playing', () => {
+            $status.innerHTML = '状态: 正在播放';
+          });
+          player.on('stopped', () => {
+            $status.innerHTML = '状态：已停止';
+          });
+          player.on('end', () => {
+            $status.innerHTML = '状态：播放结束';
+          });
+          player.on('timeUpdate', timestamp => {
+            $time.innerHTML = '进度：' + Math.floor(timestamp / 1000) + 's';
+            $duration.innerHTML =
+              '可播放时长: ' +
+              Math.ceil(player.getAvaiableDuration() / 1000) +
+              's';
+          });
+          player.on('performance', ({ averageDecodeCost, averageUnitDuration }) => {
+            $performance.innerHTML =
+              '解码平均：' +
+              Math.floor(averageDecodeCost) +
+              'ms, 单元平均：' +
+              Math.floor(averageUnitDuration) +
+              'ms';
           });
 
-          $canvas.onclick = () => {
-            $canvas.requestFullscreen();
-          };
+          //addEventListener()添加的匿名函数无法通过removeEventListener()移除,会造成内存泄漏
+          //所以要对每个事件处理函数命名
 
-          document.getElementById('stopBtn').addEventListener('click', () => {
+          let fnPlay = () => {
+            $('resetBtn').style.visibility = 'visible';
+            player.play();
+          }
+          $('playBtn').addEventListener('click', fnPlay);
+
+          let fnPause = () => {
+            player.pause();
+          }
+          $('pauseBtn').addEventListener('click', fnPause);
+
+          let fnResume = () => {
+            player.resume();
+          }
+          $('resumeBtn').addEventListener('click', fnResume);
+
+          let fnMute = () => {
+            player.mute(!player.mute());
+          }
+          $('muteBtn').addEventListener('click', fnMute);
+          
+          let fnChange = ev => {
+            player.volume(ev.target.value);
+          }
+          document.querySelector('input[name=volume]').addEventListener('change', fnChange);
+
+          let fnStop = () => {
+            player.stop();
+          }
+          $('stopBtn').addEventListener('click', fnStop);
+
+          let fnReset = () => {
             player.stop();
             player = null;
-          });
-
-          document.getElementById('pauseBtn').addEventListener('click', () => {
-            player.pause();
-          });
-
-          document.getElementById('resumeBtn').addEventListener('click', () => {
-            player.resume();
-          });
-
-          document.getElementById('muteBtn').addEventListener('click', () => {
-            player.mute(!player.mute());
-          });
-
-          document
-            .querySelector('input[name=volume]')
-            .addEventListener('change', ev => {
-              player.volume(ev.target.value);
-            });
+            //you must remove all eventListeners to prevent from memory leaking
+            $('playBtn').removeEventListener('click',fnPlay);
+            $('pauseBtn').removeEventListener('click',fnPause);
+            $('resumeBtn').removeEventListener('click',fnResume);
+            $('muteBtn').removeEventListener('click',fnMute);
+            document.querySelector('input[name=volume]').removeEventListener('click',fnChange);
+            $('stopBtn').removeEventListener('click',fnStop);
+            $('resetBtn').removeEventListener('click',fnReset);
+            //reload player
+            initPlayer(getOptions());
+          }
+          $('resetBtn').addEventListener('click', fnReset);
         });
       }
-    </script>
-  </body>
+
+    })();
+  </script>
+</body>
+
 </html>

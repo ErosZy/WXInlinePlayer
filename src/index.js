@@ -54,7 +54,6 @@ import Drawer from './drawer/drawer';
 import Util from './util/util';
 
 class WXInlinePlayer extends EventEmitter {
-  static initPromise = null;
   static isInited = false;
 
   constructor({
@@ -102,22 +101,6 @@ class WXInlinePlayer extends EventEmitter {
     }
   }
 
-  static init({ asmUrl, wasmUrl }) {
-    WXInlinePlayer.initPromise = new Promise((resolve, reject) => {
-      const url = window['WebAssembly'] ? wasmUrl : asmUrl;
-      const head = document.head || document.getElementsByTagName('head')[0];
-      const script = document.createElement('script');
-      script.onload = () => {
-        WXInlinePlayer.isInited = true;
-        resolve();
-      };
-      script.onerror = e => reject(e);
-      script.src = `${url}`;
-      script.type = 'text/javascript';
-      head.appendChild(script);
-    });
-  }
-
   static isSupport() {
     return !!
     (
@@ -139,16 +122,27 @@ class WXInlinePlayer extends EventEmitter {
     );
   }
 
-  static ready() {
+  /**
+   * init WXInlinePlayer and return a promise.
+   */
+  static ready(options) {
     if (!WXInlinePlayer.isSupport()) {
-      return Promise.resolve(false);
+      return Promise.reject(new Error('your browser do not support WXInlinePlayer.'));
     }
 
-    if (WXInlinePlayer.isInited) {
-      return Promise.resolve(true);
-    }
-
-    return WXInlinePlayer.initPromise;
+    return new Promise((resolve, reject) => {
+      const url = window['WebAssembly'] ? options.wasmUrl : options.asmUrl;
+      const head = document.head || document.getElementsByTagName('head')[0];
+      const script = document.createElement('script');
+      script.onload = () => {
+        resolve(new WXInlinePlayer(options));
+        WXInlinePlayer.isInited = true;
+      };
+      script.onerror = e => reject(e);
+      script.src = `${url}`;
+      script.type = 'text/javascript';
+      head.appendChild(script);
+    });
   }
 
   play() {
