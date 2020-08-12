@@ -74,7 +74,7 @@
       preloadTime&nbsp;&nbsp;&nbsp;
       <div style="margin-right:1000px;margin-bottom:5px;"></div>
       <input type="checkbox" id="iH265" /><label for="iH265">isH265</label>
-      <input type="checkbox" id="iIsLive" checked /><label for="iIsLive">isLive</label>
+      <input type="checkbox" id="iIsLive" /><label for="iIsLive">isLive</label>
       <input type="checkbox" id="iHasAudio" checked /><label for="iHasAudio">hasAudio</label>
       <input type="checkbox" id="iHasVideo" checked /><label for="iHasVideo">hasVideo</label>
       <input type="checkbox" id="iLoop" checked /><label for="iLoop">loop</label>
@@ -174,6 +174,7 @@
           player.on('mediaInfo', mediaInfo => {
             console.log('mediaInfo', mediaInfo);
             const { onMetaData } = mediaInfo;
+            //注意：这里是指定绘制的真实分辨率。若要让canvas拉伸填满指定的高宽，则由css的style.width和style.height决定。
             $canvas.height = onMetaData.height || videoHeight;
             $canvas.width = onMetaData.width || videoWidth;
             for (let i = 0; i < onMetaData.length; i++) {
@@ -183,19 +184,24 @@
                 $canvas.width = onMetaData[i].width;
               }
             }
-            // $canvas.style.marginLeft = (800 - $canvas.width) / 2 + 'px';
+          });
+          player.on('play', () => {
+            $status.innerHTML = '状态: 开始播放';
           });
           player.on('buffering', () => {
             $status.innerHTML = '状态: 等待加载';
           });
           player.on('playing', () => {
-            $status.innerHTML = '状态: 正在播放';
+            $status.innerHTML = '状态: 播放中';
+          });
+          player.on('paused', () => {
+            $status.innerHTML = '状态：已暂停';
           });
           player.on('stopped', () => {
             $status.innerHTML = '状态：已停止';
           });
           player.on('end', () => {
-            $status.innerHTML = '状态：播放结束';
+            $status.innerHTML = '状态：已放完';
           });
           player.on('timeUpdate', timestamp => {
             $time.innerHTML = '进度：' + Math.floor(timestamp / 1000) + 's';

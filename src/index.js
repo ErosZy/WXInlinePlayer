@@ -150,6 +150,7 @@ class WXInlinePlayer extends EventEmitter {
       this._initlize();
       this.processor.unblock(0);
     }
+    this.emit('play');
   }
 
   stop() {
@@ -179,6 +180,7 @@ class WXInlinePlayer extends EventEmitter {
         this.processor.pause();
       }
     }
+    this.emit('paused');
   }
 
   resume() {
