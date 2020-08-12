@@ -58,6 +58,15 @@
       /* visibility: hidden; */
       background-color: orange !important
     }
+
+    #footer{
+      margin: 10px auto;
+    }
+    #footer>span{
+      display: inline-table;    
+      color:gray;
+      min-width: 15%;
+    }
   </style>
 </head>
 
@@ -82,15 +91,15 @@
       <button id="resetBtn">重设</button>
     </div>
     <canvas id="canvas"></canvas>
-    <div style="margin-bottom: 10px">
-      <span id="status">状态：等待播放</span>
-      <span id="duration" style="display: inline-block;margin-left:40px;">
+    <div id="footer">
+      <span id="status">状态：待播放</span>
+      <span id="duration">
         可播放时长: 0s
       </span>
-      <span id="time" style="display:inline-block;margin-left:40px;">
+      <span id="time">
         进度：0s
       </span>
-      <span id="performance" style="display:inline-block;margin-left:40px;">
+      <span id="performance">
         解码平均：0ms, 单元平均：0ms
       </span>
     </div>
@@ -126,6 +135,7 @@
 
         //default setting
         $('header').style.width = videoWidth + "px";
+        $('footer').style.width = videoWidth + "px";
         $('iUrl').value = defautVideoUrl;
         $('iH265').checked = true;
 
@@ -193,10 +203,10 @@
             }
           });
           player.on('play', () => {
-            $status.innerHTML = '状态: 开始播放';
+            $status.innerHTML = '状态: 开播了';
           });
           player.on('buffering', () => {
-            $status.innerHTML = '状态: 等待加载';
+            $status.innerHTML = '状态: 加载中';
           });
           player.on('playing', () => {
             $status.innerHTML = '状态: 播放中';
@@ -211,7 +221,7 @@
             $status.innerHTML = '状态：已放完';
           });
           player.on('timeUpdate', timestamp => {
-            $time.innerHTML = '进度：' + Math.floor(timestamp / 1000) + 's';
+            $time.innerHTML = '进度：' + Math.ceil(100*timestamp /player.getDuration()) + '%';
             $duration.innerHTML =
               '可播放时长: ' +
               Math.ceil(player.getAvaiableDuration() / 1000) +
