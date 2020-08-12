@@ -257,6 +257,16 @@ class WXInlinePlayer extends EventEmitter {
     return 0;
   }
 
+  /**
+   * 获得流媒体总时长
+   *
+   * @return {number}
+   *          The total duration of the current media.
+   */
+  getDuration() {
+    return this.duration;
+  }
+
   _initlize() {
     clearInterval(this.timeUpdateTimer);
     this.timeUpdateTimer = setInterval(() => {
