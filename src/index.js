@@ -250,6 +250,9 @@ class WXInlinePlayer extends EventEmitter {
     }
   }
 
+  /**
+   * 获得可播放的时长
+   */
   getAvaiableDuration() {
     if (this.processor) {
       return this.processor.getAvaiableDuration();
@@ -271,18 +274,17 @@ class WXInlinePlayer extends EventEmitter {
     clearInterval(this.timeUpdateTimer);
     this.timeUpdateTimer = setInterval(() => {
       let currentTime = 0.0;
-      if (this.processor) {
-        currentTime = this.processor.getCurrentTime();
-      }
-
-      this.emit('timeUpdate', currentTime < 0 ? 0.0 : currentTime);
-      if (this.isEnd) {
-        this.emit('timeUpdate', this.processor.getAvaiableDuration());//debug:让进度可以到100%
+      if (!this.isEnd){
+        if (this.processor) {
+          currentTime = this.processor.getCurrentTime();
+        }
+        this.emit('timeUpdate', currentTime < 0 ? 0.0 : currentTime);
+      }else {
+        this.emit('timeUpdate', this.duration);//让进度可以100%
         if (
           (this.processor.hasAudio && currentTime >= this.duration) ||
           (this.processor.hasVideo && !this.processor.frames.length)
         ) {
-          this.emit('end');
           if (this.loop) {
             this.stop()
             this.play();
@@ -292,7 +294,7 @@ class WXInlinePlayer extends EventEmitter {
     }, 250);
 
     this.isEnd = false;
-    this.drawer = new Drawer(this.$container);
+    this.drawer =  new Drawer(this.$container);
     this.loader = new (this.customLoader ? this.customLoader : Loader)({
       type: this.isLive ? 'stream' : 'chunk',
       opt: {
