@@ -267,13 +267,14 @@ class WXInlinePlayer extends EventEmitter {
 
       this.emit('timeUpdate', currentTime < 0 ? 0.0 : currentTime);
       if (this.isEnd) {
+        this.emit('timeUpdate', this.processor.getAvaiableDuration());//debug:让进度可以到100%
         if (
           (this.processor.hasAudio && currentTime >= this.duration) ||
           (this.processor.hasVideo && !this.processor.frames.length)
         ) {
           this.emit('end');
-          this.stop();
           if (this.loop) {
+            this.stop()
             this.play();
           }
         }
