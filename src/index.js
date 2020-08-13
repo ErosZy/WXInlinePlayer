@@ -102,19 +102,13 @@ class WXInlinePlayer extends EventEmitter {
     this.timeUpdateTimer = null;
     this.isInitlize = false;
     this.isEnd = false;
-    /**
-     * created
-     * playing
-     * buffering
-     * paused
-     * stopped
-     * destroy
-     */
     this.state = STATE.created;
 
-    if (((hasVideo && !hasAudio) || Util.isWeChat()) && this.autoplay) {
-      this._initlize();
-      this.processor.unblock(0);
+    if ((/*(hasVideo && !hasAudio) ||  //这个条件表达式很奇怪，不符合一般API封装的逻辑，或者说WXInlinePlayer作为抽象的API，不用在当前layer考虑特殊具体业务场景的组合情况，所以注释掉 */ 
+      Util.isWeChat() /* 微信自动播放？也建议后续去掉这个具体的业务逻辑 */) || 
+      this.autoplay /*autoplay如果是true就应该自动播放*/
+    ) {
+      this.play();
     }
   }
 
