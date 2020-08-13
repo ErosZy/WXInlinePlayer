@@ -168,8 +168,7 @@ class Processor extends EventEmitter {
     if (this.state == 'playing') {
       return;
     }
-
-    this.state = 'playing';
+    
     if (this.sound) {
       this.sound.resume();
     }
@@ -177,6 +176,7 @@ class Processor extends EventEmitter {
     if (this.ticker) {
       this.ticker.add(this.tickHandler);
     }
+    this.state = 'playing';//基于一致性考虑，这行应该放在函数末尾
   }
 
   destroy() {
@@ -201,11 +201,15 @@ class Processor extends EventEmitter {
     this.state = 'destroy';
   }
 
+  /**
+   * a big function  with a lot logic
+   */
   _onTickHandler() {
     if (this.state == 'created') {
       return;
     }
 
+    ////////////////// case 1
     if (this.hasAudio && this.hasVideo) {
       let diff = 0;
       let lastIndex = 0;
@@ -263,7 +267,9 @@ class Processor extends EventEmitter {
           break;
         }
       }
-    } else if (this.hasAudio) {
+    } 
+    ////////////////// case 2
+    else if (this.hasAudio) {
       const duration = this.sound.getAvaiableDuration() * 1000;
       const bufferTime = this.bufferingTime;
       this.currentTime = this.getCurrentTime();
@@ -275,7 +281,9 @@ class Processor extends EventEmitter {
         this.state = 'preload';
         this.emit('preload');
       }
-    } else if (this.hasVideo) {
+    } 
+    ////////////////// case 3
+    else if (this.hasVideo) {
       if (!this.isEnded && this.state == 'buffering') {
         return;
       }
@@ -323,6 +331,10 @@ class Processor extends EventEmitter {
     }
   }
 
+  /**
+   * another big function with a lot logic
+   * @param {*} msg 
+   */
   _onCodecMsgHandler(msg) {
     if (this.state == 'destroy') {
       return;
@@ -398,13 +410,12 @@ class Processor extends EventEmitter {
       case 'decode': {
         if (
           this.state == 'buffering' ||
-          (this.hasVideo && this.state != 'playing') ||
-          (!this.hasVideo && this.hasAudio && this.state != 'playing')
+          (this.hasVideo && this.state != 'playing' && this.state != 'paused') ||
+          (!this.hasVideo && this.hasAudio && this.state != 'playing' && this.state != 'paused')
         ) {
           this.emit('playing');
-        }
-
-        this.state = 'playing';
+          this.state = 'playing';        
+        } 
         this.ticker.setFps(this.framerate);
 
         const { consume, duration } = msg.data;
