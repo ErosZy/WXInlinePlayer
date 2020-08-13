@@ -404,6 +404,7 @@ WXInlinePlayer的FLV规范遵循[金山的FLV拓展规范](https://github.com/ks
 
 ## 已知使用的产品
 
+* [全民K歌](https://kg.qq.com/)
 * [好惠买](http://h5.haohuimai1.com/)
 * [兔几直播](https://www.tuji.com/)
 * 各个安防厂商
