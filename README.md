@@ -103,34 +103,40 @@ bash build.sh
   <canvas id="container" width="800" height="450"></canvas>
   <script src="./index.js"></script>
   <script>
-    WXInlinePlayer.isSupport() && WXInlinePlayer.ready({
-      asmUrl: './prod.baseline.asm.combine.js',
-      wasmUrl: './prod.baseline.wasm.combine.js'
-      url: 'https://static.petera.cn/mm.flv',//改为你自己的flv地址
-      $container: document.getElementById('container'),
-      hasVideo: true,
-      hasAudio: true,
-      volume: 1.0,
-      muted: false,
-      autoplay: true,
-      loop: true,
-      isLive: false,
-      chunkSize: 128 * 1024,
-      preloadTime: 5e2,
-      bufferingTime: 1e3,
-      cacheSegmentCount: 64,
-      customLoader: null
-    }).then((player) => {
-      // you can put anything here
-      const { userAgent } = navigator;
-      const isWeChat = /MicroMessenger/i.test(userAgent);
-      if (!isWeChat) {
-        alert('click to play!');
-        document.body.addEventListener('click', () => {
-          player.play();
+    if (WXInlinePlayer.isSupport()) {
+      WXInlinePlayer.init({
+        asmUrl: './prod.baseline.asm.combine.js',
+        wasmUrl: './prod.baseline.wasm.combine.js'
+      });
+
+      WXInlinePlayer.ready().then(() => {
+        const player = new WXInlinePlayer({
+          url: 'https://static.petera.cn/mm.flv',
+          $container: document.getElementById('container'),
+          hasVideo: true,
+          hasAudio: true,
+          volume: 1.0,
+          muted: false,
+          autoplay: true,
+          loop: true,
+          isLive: false,
+          chunkSize: 128 * 1024,
+          preloadTime: 5e2,
+          bufferingTime: 1e3,
+          cacheSegmentCount: 64,
+          customLoader: null
         });
-      }
-    });
+
+        const { userAgent } = navigator;
+        const isWeChat = /MicroMessenger/i.test(userAgent);
+        if (!isWeChat) {
+          alert('click to play!');
+          document.body.addEventListener('click', () => {
+            player.play();
+          });
+        }
+      });
+    }
   </script>
 </body>
 </html>
@@ -156,39 +162,42 @@ if(WXInlinePlayer.isSupport()){
 }
 ```
 
-### Promise WXInlinePlayer.ready(options)
+### Promise WXInlinePlayer.init(Object)
 
-WXInlinePlayer安全的进行初始化操作代码如下:
-
+初始化WXInlinePlayer，需要传入加载的H264解码库的具体地址，关于解码库的选择，请参考：[如何选择解码依赖](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E8%A7%A3%E7%A0%81%E4%BE%9D%E8%B5%96)。
 ```javascript
-WXInlinePlayer.isSupport() && WXInlinePlayer.ready({/*...*/}).then((player)=>{
-  //do anything here...
-});
-```
-
-上面代码调用 WXInlinePlayer.ready(options)初始化,参数options说明如下:
-
-```javascript
-{
-  asmUrl: String, //asm 解码库地址.
-  wasmUrl: String,//wasm 解码库地址,参考同上
-  url: String, // 播放地址，仅支持flv
-  $container: DomElement, // 绘制的canvas对象
-  hasVideo: Boolean, // 是否含有视频，默认true
-  hasAudio: Boolean, // 是否含有音频，默认true
-  volume: Number, // 音量，范围0~1，默认1.0
-  muted: Boolean, // 是否静音，默认false
-  autoplay: Boolean, // 是否自动播放，微信WebView/无音频视频设置此参数有效
-  loop: Boolean, // 循环播放，默认false，请注意处理Safari及其WebView（不包含微信）每次播放都需要人主动触发的限制
-  isLive: Boolean, // 是否是直播流，默认false
-  chunkSize: Number, // 加载/解析块大小，默认256 * 1024
-  preloadTime: Number, // 预加载时间，默认1000ms
-  bufferingTime: Number, // 缓冲时间，默认3000ms
-  cacheSegmentCount: Number, // 内部最大的缓存帧数量，默认256
-  customLoader: LoaderImpl, // 自定义loader，请参考src/loader/chunk(stream)代码
+if(WXInlinePlayer.isSupport()){
+  WXInlinePlayer.init({
+    asmUrl: './prod.baseline.asm.combine.js',
+    wasmUrl: './prod.baseline.wasm.combine.js'
+  }).catch(e=>{
+    console.log(`WXInlinePlayer init error: ${e}`);
+  });
 }
 ```
-关于解码库的选择，请参考：[如何选择解码依赖](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E8%A7%A3%E7%A0%81%E4%BE%9D%E8%B5%96)。
+
+### Promise WXInlinePlayer.ready(void)
+
+WXInlinePlayer已经准备就绪，可以安全的进行初始化操作。
+
+```javascript
+if(WXInlinePlayer.isSupport()){
+  WXInlinePlayer.init({/*.....*/});
+  WXInlinePlayer.ready().then(()=>{
+    console.log('WXInlinePlayer ready');
+  });
+}
+```
+
+### WXInlinePlayerInstance WXInlinePlayer(Object)
+
+WXInlinePlayer构造函数，相关初始化参数请参考：[初始化参数](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%88%9D%E5%A7%8B%E5%8C%96%E5%8F%82%E6%95%B0)。
+
+```javascript
+WXInlinePlayer.ready().then(()=>{
+  const player = new WXInlinePlayer({/*...*/});
+});
+```
 
 ### void WXInlinePlayerInstance.play(void)
 

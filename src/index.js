@@ -139,27 +139,32 @@ class WXInlinePlayer extends EventEmitter {
     );
   }
 
-  /**
-   * init WXInlinePlayer and return a promise.
-   */
-  static ready(options) {
-    if (!WXInlinePlayer.isSupport()) {
-      return Promise.reject(new Error('your browser do not support WXInlinePlayer.'));
-    }
-
-    return new Promise((resolve, reject) => {
-      const url = window['WebAssembly'] ? options.wasmUrl : options.asmUrl;
+  static init({ asmUrl, wasmUrl }) {
+    WXInlinePlayer.initPromise = new Promise((resolve, reject) => {
+      const url = window['WebAssembly'] ? wasmUrl : asmUrl;
       const head = document.head || document.getElementsByTagName('head')[0];
       const script = document.createElement('script');
       script.onload = () => {
-        resolve(new WXInlinePlayer(options));
         WXInlinePlayer.isInited = true;
+        resolve();
       };
       script.onerror = e => reject(e);
       script.src = `${url}`;
       script.type = 'text/javascript';
       head.appendChild(script);
     });
+  }
+
+  static ready() {
+    if (!WXInlinePlayer.isSupport()) {
+      return Promise.resolve(false);
+    }
+
+    if (WXInlinePlayer.isInited) {
+      return Promise.resolve(true);
+    }
+
+    return WXInlinePlayer.initPromise;
   }
 
   /**

@@ -125,8 +125,7 @@
         const $duration = $("duration");
         const $performance = $("performance");
 
-        const defautVideoUrl =
-          "https://ks3-cn-beijing.ksyun.com/ksplayer/h265/outside_demo/v1.1.3/720P2M30fpsh265-wasmtest.flv";
+        const defautVideoUrl = "https://ks3-cn-beijing.ksyun.com/ksplayer/h265/outside_demo/v1.1.3/720P2M30fpsh265-wasmtest.flv";
         const videoHeight = 400;
         const videoWidth = 800;
 
@@ -157,10 +156,7 @@
         ///////////////////////////////////////////////////////////////////////////////
 
         function getOptions() {
-          let isH265 = $("iH265").checked;
           return {
-            asmUrl: "./prod." + (isH265 ? "h265" : "all") + ".asm.combine.js",
-            wasmUrl: "./prod." + (isH265 ? "h265" : "all") + ".wasm.combine.js",
             url: $("iUrl").value,
             $container: $canvas,
             hasVideo: $("iHasVideo").checked,
@@ -179,9 +175,14 @@
         }
 
         function initPlayer(options) {
-          return WXInlinePlayer.ready(options).then((instance) => {
-            console.log("WXInlinePlayer is ready!");
-            player = instance;
+          let isH265 = $("iH265").checked;
+          WXInlinePlayer.init({
+            asmUrl: "./prod." + (isH265 ? "h265" : "all") + ".asm.combine.js",
+            wasmUrl: "./prod." + (isH265 ? "h265" : "all") + ".wasm.combine.js",
+          })
+          
+          return WXInlinePlayer.ready().then(()=>{
+            player = new WXInlinePlayer(getOptions());
             player.on("loadError", (e) => {
               console.e("loadError", e);
             });
@@ -202,6 +203,7 @@
                 }
               }
             });
+
             player.on("play", () => {
               $status.innerHTML = "状态: 开播了";
             });
