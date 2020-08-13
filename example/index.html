@@ -58,6 +58,15 @@
       /* visibility: hidden; */
       background-color: orange !important
     }
+
+    #footer{
+      margin: 10px auto;
+    }
+    #footer>span{
+      display: inline-table;    
+      color:gray;
+      min-width: 15%;
+    }
   </style>
 </head>
 
@@ -74,7 +83,7 @@
       preloadTime&nbsp;&nbsp;&nbsp;
       <div style="margin-right:1000px;margin-bottom:5px;"></div>
       <input type="checkbox" id="iH265" /><label for="iH265">isH265</label>
-      <input type="checkbox" id="iIsLive" checked /><label for="iIsLive">isLive</label>
+      <input type="checkbox" id="iIsLive" /><label for="iIsLive">isLive</label>
       <input type="checkbox" id="iHasAudio" checked /><label for="iHasAudio">hasAudio</label>
       <input type="checkbox" id="iHasVideo" checked /><label for="iHasVideo">hasVideo</label>
       <input type="checkbox" id="iLoop" checked /><label for="iLoop">loop</label>
@@ -82,15 +91,15 @@
       <button id="resetBtn">重设</button>
     </div>
     <canvas id="canvas"></canvas>
-    <div style="margin-bottom: 10px">
-      <span id="status">状态：等待播放</span>
-      <span id="duration" style="display: inline-block;margin-left:40px;">
+    <div id="footer">
+      <span id="status">状态：待播放</span>
+      <span id="duration">
         可播放时长: 0s
       </span>
-      <span id="time" style="display:inline-block;margin-left:40px;">
+      <span id="time">
         进度：0s
       </span>
-      <span id="performance" style="display:inline-block;margin-left:40px;">
+      <span id="performance">
         解码平均：0ms, 单元平均：0ms
       </span>
     </div>
@@ -126,12 +135,20 @@
 
         //default setting
         $('header').style.width = videoWidth + "px";
+        $('footer').style.width = videoWidth + "px";
         $('iUrl').value = defautVideoUrl;
         $('iH265').checked = true;
 
+        //set UI
+        setUI();
+
+        //set events
         $canvas.onclick = () => {
           $canvas.requestFullscreen();
         };
+        $('iIsLive').addEventListener("change",()=>{
+          setUI();
+        })
 
         //init player
         initPlayer(getOptions());
@@ -174,6 +191,7 @@
           player.on('mediaInfo', mediaInfo => {
             console.log('mediaInfo', mediaInfo);
             const { onMetaData } = mediaInfo;
+            //注意：这里是指定绘制的真实分辨率。若要让canvas拉伸填满指定的高宽，则由css的style.width和style.height决定。
             $canvas.height = onMetaData.height || videoHeight;
             $canvas.width = onMetaData.width || videoWidth;
             for (let i = 0; i < onMetaData.length; i++) {
@@ -183,22 +201,27 @@
                 $canvas.width = onMetaData[i].width;
               }
             }
-            // $canvas.style.marginLeft = (800 - $canvas.width) / 2 + 'px';
+          });
+          player.on('play', () => {
+            $status.innerHTML = '状态: 开播了';
           });
           player.on('buffering', () => {
-            $status.innerHTML = '状态: 等待加载';
+            $status.innerHTML = '状态: 加载中';
           });
           player.on('playing', () => {
-            $status.innerHTML = '状态: 正在播放';
+            $status.innerHTML = '状态: 播放中';
+          });
+          player.on('paused', () => {
+            $status.innerHTML = '状态：已暂停';
           });
           player.on('stopped', () => {
             $status.innerHTML = '状态：已停止';
           });
           player.on('end', () => {
-            $status.innerHTML = '状态：播放结束';
+            $status.innerHTML = '状态：已放完';
           });
           player.on('timeUpdate', timestamp => {
-            $time.innerHTML = '进度：' + Math.floor(timestamp / 1000) + 's';
+            $time.innerHTML = '进度：' + Math.ceil(100*timestamp /player.getDuration()) + '%';
             $duration.innerHTML =
               '可播放时长: ' +
               Math.ceil(player.getAvaiableDuration() / 1000) +
@@ -263,6 +286,13 @@
           }
           $('resetBtn').addEventListener('click', fnReset);
         });
+      }
+
+      function setUI(){
+        let chked = !$('iIsLive').checked ;
+        let isShow = chked?"inline":"none";
+        $('pauseBtn').style.display = isShow;
+        $('resumeBtn').style.display = isShow;
       }
 
     })();

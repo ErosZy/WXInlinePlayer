@@ -53,6 +53,15 @@ import Loader from './loader/loader';
 import Drawer from './drawer/drawer';
 import Util from './util/util';
 
+const STATE = {
+  created:"created",
+  playing:"playing",
+  buffering:"buffering",
+  paused:"paused",
+  stopped:"stopped",
+  destroyed:"destroyed"
+};
+
 class WXInlinePlayer extends EventEmitter {
   static isInited = false;
 
@@ -93,7 +102,15 @@ class WXInlinePlayer extends EventEmitter {
     this.timeUpdateTimer = null;
     this.isInitlize = false;
     this.isEnd = false;
-    this.state = 'created';
+    /**
+     * created
+     * playing
+     * buffering
+     * paused
+     * stopped
+     * destroy
+     */
+    this.state = STATE.created;
 
     if (((hasVideo && !hasAudio) || Util.isWeChat()) && this.autoplay) {
       this._initlize();
@@ -145,15 +162,19 @@ class WXInlinePlayer extends EventEmitter {
     });
   }
 
+  /**
+   * 首次播放。不包括暂停之后的恢复播放。
+   */
   play() {
-    if (this.state != 'destroy' && !this.isInitlize) {
+    if (this.state != STATE.destroyed && !this.isInitlize) {
       this._initlize();
       this.processor.unblock(0);
     }
+    this.emit('play');
   }
 
   stop() {
-    this.state = 'stopped';
+    this.state = STATE.stopped;
     this.isInitlize = false;
     clearInterval(this.timeUpdateTimer);
 
@@ -170,20 +191,28 @@ class WXInlinePlayer extends EventEmitter {
     this.emit('stopped');
   }
 
+  /**
+   * 每个API应该职责单一，莫要设计UI交互逻辑，让用户去做组合使用API，形成复杂的交互。
+   * 因此，暂停就只是做暂停的事情。
+   */
   pause() {
     if (this.isLive) {
-      this.stop();
+      throw new Error("Live stream can't be paused,please call stop() instead.")
     } else {
       if (this.processor) {
-        this.state = 'paused';
+        this.state = STATE.paused;
         this.processor.pause();
+        this.emit('paused');
       }
-    }
+    }    
   }
 
+  /**
+   * 同上，应该职责单一
+   */
   resume() {
     if (this.isLive) {
-      this.play();
+      throw new Error("Because live stream can't be paused, so can't be resumed,please call play() instead.")
     } else {
       if (this.processor) {
         this.processor.resume();
@@ -204,14 +233,13 @@ class WXInlinePlayer extends EventEmitter {
   }
 
   destroy() {
-    this.state = 'destroy';
     this.removeAllListeners();
     this.stop();
-
     if (this.drawer) {
       this.drawer.destroy();
       this.drawer = null;
     }
+    this.state = STATE.destroyed;
   }
 
   getCurrentTime() {
@@ -222,6 +250,9 @@ class WXInlinePlayer extends EventEmitter {
     }
   }
 
+  /**
+   * 获得可播放的时长
+   */
   getAvaiableDuration() {
     if (this.processor) {
       return this.processor.getAvaiableDuration();
@@ -229,23 +260,33 @@ class WXInlinePlayer extends EventEmitter {
     return 0;
   }
 
+  /**
+   * 获得流媒体总时长
+   *
+   * @return {number}
+   *          The total duration of the current media.
+   */
+  getDuration() {
+    return this.duration;
+  }
+
   _initlize() {
     clearInterval(this.timeUpdateTimer);
     this.timeUpdateTimer = setInterval(() => {
       let currentTime = 0.0;
-      if (this.processor) {
-        currentTime = this.processor.getCurrentTime();
-      }
-
-      this.emit('timeUpdate', currentTime < 0 ? 0.0 : currentTime);
-      if (this.isEnd) {
+      if (!this.isEnd){
+        if (this.processor) {
+          currentTime = this.processor.getCurrentTime();
+        }
+        this.emit('timeUpdate', currentTime < 0 ? 0.0 : currentTime);
+      }else {
+        this.emit('timeUpdate', this.duration);//让进度可以100%
         if (
           (this.processor.hasAudio && currentTime >= this.duration) ||
           (this.processor.hasVideo && !this.processor.frames.length)
         ) {
-          this.emit('end');
-          this.stop();
           if (this.loop) {
+            this.stop()
             this.play();
           }
         }
@@ -253,7 +294,7 @@ class WXInlinePlayer extends EventEmitter {
     }, 250);
 
     this.isEnd = false;
-    this.drawer = new Drawer(this.$container);
+    this.drawer =  new Drawer(this.$container);
     this.loader = new (this.customLoader ? this.customLoader : Loader)({
       type: this.isLive ? 'stream' : 'chunk',
       opt: {
@@ -307,7 +348,7 @@ class WXInlinePlayer extends EventEmitter {
 
   _onBufferingHandler() {
     if (this.loader) {
-      this.state = 'buffering';
+      this.state = STATE.buffering;
       this.emit('buffering');
       this.loader.read().then(data => {
         if (data.length) {
@@ -328,14 +369,15 @@ class WXInlinePlayer extends EventEmitter {
   }
 
   _onPlayingHandler() {
-    if (this.state != 'playing') {
-      this.state = 'playing';
+    if (this.state != STATE.playing) {
+      this.state = STATE.playing;
       this.emit('playing');
     }
   }
 
   _onEndHandler() {
     this.isEnd = true;
+    this.emit('end');
   }
 }
 
