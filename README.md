@@ -61,25 +61,11 @@
 * Edge 15+
 * Safari 10.1+
 
-## 示例
+## 在线演示
 > https://qiaozi-tech.github.io/WXInlinePlayer/example/index.html
 
-## 如何编译
-
-请确保你安装过[parcel](https://parceljs.org/) / [emscripten 1.38.45](https://github.com/emscripten-core/emscripten) / [cmake](https://cmake.org/) 以及 [make](http://www.gnu.org/software/make/)，然后执行以下命令即可：
-```shell
-npm install # 初始化工程
-npm update # 更新工程有关的插件。如果网络错误，改用 cnpm update
-bash build.sh
-```
-最终产物会在example文件夹中。
-
-> 请注意：
-> * 请在*nix环境下进行build，并不保证Windows下的OpenH264的编译
-> * 请确保emscripten在1.38.45版本，否则会出现wasm32错误
-> * cmake 版本需要是 3.16+
-
 ## 快速开始
+首先在工程里面找到 /example/index.html ，主要核心代码如下：
 ```html
 <!DOCTYPE html>
 <html>
@@ -266,13 +252,19 @@ player.on('timeUpdate', ()=>{
 });
 ```
 
+### Number WXInlinePlayerInstance.getDuration(void)
+视频总时长。
+
 ## 事件
 
 * mediaInfo(Object) - 视频相关信息，例如width/height/fps/framerate等
-* playing(void) - 开始/正在播放
+* play(void) - 首次开始播放
+* paused(void) - 已暂停
+* resumed(void) - 暂停之后恢复继续播放
+* playing(void) - 正在播放
 * buffering(void) - 内部帧数据不足，开始缓冲
 * stopped(void) - 停止播放
-* end(void) - 播放结束
+* ended(void) - 播放结束
 * timeUpdate(currentTime:Number) - 当前播放的进度，250ms进行一次触发
 * loadError({status:Number, statusText:String, detail:Object}) - 加载失败
 * loadSuccess(void) - 加载成功
@@ -296,6 +288,22 @@ player.on('timeUpdate', ()=>{
 在开发本机上，针对同一视频，WXInlinePlayer与手淘、花椒等FFMpeg实现在内存占用和CPU占用上相差不大，WXInlinePlayer性能整体较FFMpeg方案好5-10%左右，而H265由于减少的deblock，其性能相比于FFMpeg方案好30%左右，以下为H265的播放性能对比：
 
 ![性能比较](./images/benchmark.png)
+
+
+## 如何编译
+
+请确保你安装过[parcel](https://parceljs.org/) / [emscripten 1.38.45](https://github.com/emscripten-core/emscripten) / [cmake](https://cmake.org/) 以及 [make](http://www.gnu.org/software/make/)，然后执行以下命令即可：
+```shell
+npm install # 初始化工程
+npm update # 更新工程有关的插件。如果网络错误，改用 cnpm update
+bash build.sh
+```
+最终产物会在example文件夹中。
+
+> 请注意：
+> * 请在*nix环境下进行build，并不保证Windows下的OpenH264的编译
+> * 请确保emscripten在1.38.45版本，否则会出现wasm32错误
+> * cmake 版本需要是 3.16+
 
 ## 如何降低卡顿和延迟
 
