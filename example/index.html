@@ -245,10 +245,13 @@
           player.on("paused", () => {
             $status.innerHTML = "状态：已暂停";
           });
+          player.on("resumed", () => {
+            $status.innerHTML = "状态：已继续";
+          });
           player.on("stopped", () => {
             $status.innerHTML = "状态：已停止";
           });
-          player.on("end", () => {
+          player.on("ended", () => {
             $status.innerHTML = "状态：已放完";
           });
           player.on("timeUpdate", (timestamp) => {

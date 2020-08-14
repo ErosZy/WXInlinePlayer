@@ -210,6 +210,7 @@ class WXInlinePlayer extends EventEmitter {
     } else {
       if (this.processor) {
         this.processor.resume();
+        this.emit('resumed');
       }
     }
   }
@@ -314,7 +315,7 @@ class WXInlinePlayer extends EventEmitter {
     this.processor.on('buffering', this._onBufferingHandler.bind(this));
     this.processor.on('preload', this._onPreloadHandler.bind(this));
     this.processor.on('playing', this._onPlayingHandler.bind(this));
-    this.processor.on('end', this._onEndHandler.bind(this));
+    this.processor.on('ended', this._onEndHandler.bind(this));
     this.processor.on('performance', data => this.emit('performance', data));
 
     this.isInitlize = true;
@@ -371,7 +372,7 @@ class WXInlinePlayer extends EventEmitter {
 
   _onEndHandler() {
     this.isEnd = true;
-    this.emit('end');
+    this.emit('ended');
   }
 }
 

@@ -456,8 +456,8 @@ class Processor extends EventEmitter {
       }
       case 'complete': {
         this.isEnded = true;
-        this.state = 'end';
-        this.emit('end');
+        this.state = 'ended';
+        this.emit('ended');
         break;
       }
       default: {
