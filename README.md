@@ -3,54 +3,19 @@
 [![LICENSE](https://img.shields.io/badge/license-Anti%20996-blue.svg)](https://github.com/996icu/996.ICU/blob/master/LICENSE)
 [![996.icu](https://img.shields.io/badge/link-996.icu-red.svg)](https://996.icu)
 
-* [简介](https://github.com/qiaozi-tech/WXInlinePlayer#%E7%AE%80%E4%BB%8B)
-* [特性](https://github.com/qiaozi-tech/WXInlinePlayer#%E7%89%B9%E6%80%A7)
-* [兼容性](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%85%BC%E5%AE%B9%E6%80%A7)
-* [示例](https://github.com/qiaozi-tech/WXInlinePlayer#%E7%A4%BA%E4%BE%8B)
-* [如何编译](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E7%BC%96%E8%AF%91)
-* [快速开始](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B)
-* [API](https://github.com/qiaozi-tech/WXInlinePlayer#api)
-* [事件](https://github.com/qiaozi-tech/WXInlinePlayer#%E4%BA%8B%E4%BB%B6)
-* [初始化参数](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%88%9D%E5%A7%8B%E5%8C%96%E5%8F%82%E6%95%B0)
-* [如何选择解码依赖](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E8%A7%A3%E7%A0%81%E4%BE%9D%E8%B5%96)
-* [如何降低卡顿和延迟](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%99%8D%E4%BD%8E%E5%8D%A1%E9%A1%BF%E5%92%8C%E5%BB%B6%E8%BF%9F)
-* [性能比较](https://github.com/qiaozi-tech/WXInlinePlayer/blob/master/README.md#%E6%80%A7%E8%83%BD%E6%AF%94%E8%BE%83)
-* [其他问题](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%85%B6%E4%BB%96%E9%97%AE%E9%A2%98)
-* [项目计划](https://github.com/qiaozi-tech/WXInlinePlayer#%E9%A1%B9%E7%9B%AE%E8%AE%A1%E5%88%92)
-* [已知使用的产品](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%B7%B2%E7%9F%A5%E4%BD%BF%E7%94%A8%E7%9A%84%E4%BA%A7%E5%93%81)
-* [QQ技术支持群](https://github.com/qiaozi-tech/WXInlinePlayer#qq%E6%8A%80%E6%9C%AF%E6%94%AF%E6%8C%81%E7%BE%A4)
-* [项目捐助](https://github.com/qiaozi-tech/WXInlinePlayer#%E9%A1%B9%E7%9B%AE%E6%8D%90%E8%B5%A0)
-
 ## 简介
 
-随着直播和短视频的兴起，视频由于承担了更大的信息量，因此现在已经是非常主流的运营/产品信息输出方式。但由于国内各个浏览器厂商自身的利益关系所在，他们对HTML5的Video能力做了非常多的限制，不限于：
-1. 禁止自动播放
-2. 播放器魔改为原生播放器，层级最高，不可进行HTML相关元素层叠
-3. 播放前后硬插广告内容
-4. 视频自动置顶
-5. 相关API和事件实现不统一
-6. ......
-
-其具体问题可以参考腾讯IMWeb团队编写的[《复杂帧动画之移动端Video采坑实现》](https://juejin.im/post/5d513623e51d453b72147600)。
-
-为了解决这些问题，我们通过软解FLV的方式实现了WXInlinePlayer，其用的第三方技术和平台API如下：
-1. [OpenH264](https://github.com/cisco/openh264)/[TinyH264](https://github.com/udevbe/tinyh264)/[de265](https://github.com/strukturag/libde265)；
-2. [emscripten](https://github.com/emscripten-core/emscripten)
-3. [WebGL](https://developer.mozilla.org/zh-CN/docs/Web/API/WebGL_API)
-4. [Web Audio Api](https://developer.mozilla.org/zh-CN/docs/Web/API/Web_Audio_API)
-
-同时我们也编写了WebAssembly版本的FLV Demuxer，你可以在[lib/codec](https://github.com/qiaozi-tech/WXInlinePlayer/tree/master/lib/codec)找到相关代码。
+本工程fork自[WXInlinePlayer](https://github.com/qiaozi-tech/WXInlinePlayer)，在源工程的基础上加入了本人的封装，以便让API更友好、更方便前端人员使用。本人也会提交RP给源工程，C++底层和源工程代码一致，请放心star和使用。
 
 ## 特性
 
-1. FLV  H264/H265 点播/直播全支持
-2. 自由选择解码依赖，在实际gzip中，Tinyh264只需 ~180k，OpenH264 ~260k，de265 ~210k （[如何选择解码依赖](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E8%A7%A3%E7%A0%81%E4%BE%9D%E8%B5%96)）
-3. 专为移动端性能优化，内存和CPU占用稳定
-4. 直播延迟优化，比MSE的原生Video实现低1-2s（[如何降低卡顿和延迟](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%99%8D%E4%BD%8E%E5%8D%A1%E9%A1%BF%E5%92%8C%E5%BB%B6%E8%BF%9F)）
-5. 音频/视频独立支持
-6. 微信WebView自动播放
-7. 无音频动画自动播放
-8. 良好的移动端WebView兼容性
+1. FLV + H264/H265 + 点播/直播 都支持；
+2. 自由选择解码依赖，在实际gzip中，Tinyh264只需 ~180k，OpenH264 ~260k，de265 ~210k （[如何选择解码依赖](https://github.com/coffe1891/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E8%A7%A3%E7%A0%81%E4%BE%9D%E8%B5%96)）；
+3. 专为移动端性能优化，内存和CPU占用稳定；
+4. 直播延迟优化，比MSE的原生Video实现低1-2s（[如何降低卡顿和延迟](https://github.com/coffe1891/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%99%8D%E4%BD%8E%E5%8D%A1%E9%A1%BF%E5%92%8C%E5%BB%B6%E8%BF%9F)）；
+5. 音频/视频独立支持；
+6. 无音频动画自动播放；
+7. 良好的移动端WebView兼容性。
 
 ## 兼容性
 兼容测试使用BrowserStack服务提供的相关机型，仅供参考：
@@ -61,8 +26,6 @@
 * Edge 15+
 * Safari 10.1+
 
-## 在线演示
-> https://qiaozi-tech.github.io/WXInlinePlayer/example/index.html
 
 ## 快速开始
 首先在工程里面找到 /example/index.html ，主要核心代码如下：
@@ -174,7 +137,7 @@ WXInlinePlayer.isSupport() && WXInlinePlayer.ready({/*...*/}).then((player)=>{
   customLoader: LoaderImpl, // 自定义loader，请参考src/loader/chunk(stream)代码
 }
 ```
-关于解码库的选择，请参考：[如何选择解码依赖](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E8%A7%A3%E7%A0%81%E4%BE%9D%E8%B5%96)。
+关于解码库的选择，请参考：[如何选择解码依赖](https://github.com/coffe1891/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E8%A7%A3%E7%A0%81%E4%BE%9D%E8%B5%96)。
 
 ### void WXInlinePlayerInstance.play(void)
 
@@ -375,7 +338,7 @@ player.on('performance', ({averageDecodeCost, averageUnitDuration})=>{
 
 * *为什么有些机器播放点播/直播会频繁卡顿，如何解决？*
 
-  卡顿和延迟的原因比较复杂，对于WXInlinePlayer来说一般情况是解码速度跟不上播放速度，请参考[如何降低卡顿和延迟](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%99%8D%E4%BD%8E%E5%8D%A1%E9%A1%BF%E5%92%8C%E5%BB%B6%E8%BF%9F)进行优化。
+  卡顿和延迟的原因比较复杂，对于WXInlinePlayer来说一般情况是解码速度跟不上播放速度，请参考[如何降低卡顿和延迟](https://github.com/coffe1891/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%99%8D%E4%BD%8E%E5%8D%A1%E9%A1%BF%E5%92%8C%E5%BB%B6%E8%BF%9F)进行优化。
 
 * *为什么不对UC浏览器（iOS/Android）进行支持？*
 
