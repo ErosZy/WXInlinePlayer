@@ -53,14 +53,22 @@ import Loader from './loader/loader';
 import Drawer from './drawer/drawer';
 import Util from './util/util';
 
+/**
+ * 生命周期对应的状态
+ */
 const STATE = {
   created:"created",
+  play:"play",
   playing:"playing",
   buffering:"buffering",
   paused:"paused",
+  resumed:"resumed",
+  ended:"ended",
   stopped:"stopped",
   destroyed:"destroyed"
 };
+
+const UPDATE_INTERVAL_TIME = 100;//ms
 
 class WXInlinePlayer extends EventEmitter {
   static isInited = false;
@@ -101,11 +109,17 @@ class WXInlinePlayer extends EventEmitter {
     this.customLoader = customLoader;
     this.timeUpdateTimer = null;
     this.isInitlize = false;
+    /**解码完 */
+    this.isDecodeEnd = false;
+    /**播放完 */
     this.isEnd = false;
     this.state = STATE.created;
+    this.timestamp_st = 0;
+    this.compensateTime = 0;//补偿时间，用来修正时间偏移
 
-    if ((/*(hasVideo && !hasAudio) ||  //这个条件表达式很奇怪，不符合一般API封装的逻辑，或者说WXInlinePlayer作为抽象的API，不用在当前layer考虑特殊具体业务场景的组合情况，所以注释掉 */ 
-      Util.isWeChat() /* 微信自动播放？也建议后续去掉这个具体的业务逻辑 */) || 
+    if (
+      //(/*(hasVideo && !hasAudio) ||  //这个条件表达式很奇怪，不符合一般API封装的逻辑，或者说WXInlinePlayer作为抽象的API，不用在当前layer考虑特殊具体业务场景的组合情况，所以注释掉 */ 
+      //Util.isWeChat() /* 微信自动播放？也建议后续去掉这个具体的业务逻辑 */) || 
       this.autoplay /*autoplay如果是true就应该自动播放*/
     ) {
       this.play();
@@ -237,11 +251,15 @@ class WXInlinePlayer extends EventEmitter {
     this.state = STATE.destroyed;
   }
 
-  getCurrentTime() {
-    if (this.processor) {
-      return this.processor.getCurrentTime();
-    } else {
-      return 0.0;
+  currentTime(p) {
+    if(p==undefined)
+      if (this.processor) {
+        return this.processor.getCurrentTime()+this.compensateTime;
+      }
+    else{
+      if (this.processor) {
+        this.processor.setCurrentTime(p);
+      }
     }
   }
 
@@ -267,17 +285,18 @@ class WXInlinePlayer extends EventEmitter {
 
   _initlize() {
     clearInterval(this.timeUpdateTimer);
-    this.timeUpdateTimer = setInterval(() => {
-      let currentTime = 0.0;
-      if (!this.isEnd){
-        if (this.processor) {
-          currentTime = this.processor.getCurrentTime();
-        }
-        this.emit('timeUpdate', currentTime < 0 ? 0.0 : currentTime);
+    
+    let stTime = new Date().getTime();
+    
+    function fn() {      
+      if (!this.isDecodeEnd || !this.isEnd){
+        console.log("时间流逝：",new Date().getTime()-stTime,"currentTime："+ this.currentTime()+" / " + this.getDuration(),"isDecodeEnd:"+this.isDecodeEnd) 
+        this.emit('timeUpdate', this.currentTime() < 0 ? 0.0 : this.currentTime());
       }else {
-        this.emit('timeUpdate', this.duration);//让进度可以100%
+        console.log("时间流逝：",new Date().getTime()-stTime,"currentTime："+ this.getDuration()+" / " + this.getDuration()) 
+        this.emit('timeUpdate', this.getDuration());//让进度可以100%
         if (
-          (this.processor.hasAudio && currentTime >= this.duration) ||
+          (this.processor.hasAudio && this.currentTime() >= this.getDuration()) ||
           (this.processor.hasVideo && !this.processor.frames.length)
         ) {
           if (this.loop) {
@@ -285,8 +304,13 @@ class WXInlinePlayer extends EventEmitter {
             this.play();
           }
         }
+        clearInterval(this.timeUpdateTimer);
       }
-    }, 250);
+    }
+    
+    fn.call(this);//首先，立即执行一次
+
+    this.timeUpdateTimer = setInterval(fn.bind(this), UPDATE_INTERVAL_TIME);//然后，每隔 UPDATE_INTERVAL_TIME ms执行一次
 
     this.isEnd = false;
     this.drawer =  new Drawer(this.$container);
@@ -300,7 +324,11 @@ class WXInlinePlayer extends EventEmitter {
     });
 
     this.loader.on('loadError', error => this.emit('loadError', error));
-    this.loader.on('loadSuccess', () => this.emit('loadSuccess'));
+    this.loader.on('loadSuccess', () => {
+      //因为this.currentTime()总是小于实际播放时间，所以需要补上时间差
+      self.compensateTime = new Date().getTime()-stTime + UPDATE_INTERVAL_TIME;
+      this.emit('loadSuccess')
+    });
 
     this.processor = new Processor({
       volume: this.vol,
@@ -315,7 +343,7 @@ class WXInlinePlayer extends EventEmitter {
     this.processor.on('buffering', this._onBufferingHandler.bind(this));
     this.processor.on('preload', this._onPreloadHandler.bind(this));
     this.processor.on('playing', this._onPlayingHandler.bind(this));
-    this.processor.on('ended', this._onEndHandler.bind(this));
+    this.processor.on('decodeEnded', this._onDecodeEndHandler.bind(this));
     this.processor.on('performance', data => this.emit('performance', data));
 
     this.isInitlize = true;
@@ -338,6 +366,12 @@ class WXInlinePlayer extends EventEmitter {
   _onFrameHandler({ width, height, data }) {
     if (this.drawer) {
       this.drawer.drawNextOutputPicture(width, height, data);
+    }
+    console.log("frame")
+    this.isEnd = this.currentTime()>=this.getDuration() && this.getDuration() > 0;
+    if(this.isEnd){
+      this.state = STATE.ended;
+      this.once('ended');
     }
   }
 
@@ -370,9 +404,9 @@ class WXInlinePlayer extends EventEmitter {
     }
   }
 
-  _onEndHandler() {
-    this.isEnd = true;
-    this.emit('ended');
+  _onDecodeEndHandler() {
+    this.isDecodeEnd = true;
+    this.timestamp_st = new Date().getTime();
   }
 }
 
