@@ -114,8 +114,7 @@ class WXInlinePlayer extends EventEmitter {
     /**播放完 */
     this.isEnd = false;
     this.state = STATE.created;
-    this.timestamp_st = 0;
-    this.compensateTime = 0;//补偿时间，用来修正时间偏移
+    this.timestapmArr=[];//时间戳数组
 
     if (
       //(/*(hasVideo && !hasAudio) ||  //这个条件表达式很奇怪，不符合一般API封装的逻辑，或者说WXInlinePlayer作为抽象的API，不用在当前layer考虑特殊具体业务场景的组合情况，所以注释掉 */ 
@@ -184,6 +183,7 @@ class WXInlinePlayer extends EventEmitter {
   stop() {
     this.state = STATE.stopped;
     this.isInitlize = false;
+    this.timestapmArr.length=0;
     clearInterval(this.timeUpdateTimer);
 
     if (this.processor) {
@@ -254,7 +254,7 @@ class WXInlinePlayer extends EventEmitter {
   currentTime(p) {
     if(p==undefined)
       if (this.processor) {
-        return this.processor.getCurrentTime()+this.compensateTime;
+        return this.processor.getCurrentTime();
       }
     else{
       if (this.processor) {
@@ -285,34 +285,61 @@ class WXInlinePlayer extends EventEmitter {
 
   _initlize() {
     clearInterval(this.timeUpdateTimer);
-    
-    let stTime = new Date().getTime();
+    this.isDecodeEnd = false;
+    this.isEnd = false;    
+    // let stTime = new Date().getTime();   
     
     function fn() {      
-      if (!this.isDecodeEnd || !this.isEnd){
-        console.log("时间流逝：",new Date().getTime()-stTime,"currentTime："+ this.currentTime()+" / " + this.getDuration(),"isDecodeEnd:"+this.isDecodeEnd) 
+      /////////判断播放结束的逻辑：方案一
+      const timestapmArrLength = 3;
+      if (this.timestapmArr.length >= timestapmArrLength) this.timestapmArr.shift();
+      this.timestapmArr.push(this.currentTime());      
+
+      this.isEnd = this.currentTime() >= this.getDuration() && this.getDuration() > 0;
+      let length = this.timestapmArr.length;
+      this.isEnd = length == timestapmArrLength && this.isDecodeEnd && this.timestapmArr[0] == this.timestapmArr[length - 1];
+      if (this.isEnd) {
+        if (this.state != STATE.ended) { //仅仅发一次通知
+          this.emit('ended'); 
+          this.state = STATE.ended;
+        }
+      }
+
+      /////////判断播放结束的逻辑：方案二，不准
+      // if (this.isDecodeEnd && (
+      //     (this.processor.hasAudio && this.currentTime() >= this.getDuration()) ||
+      //     (this.processor.hasVideo && !this.processor.frames.length)
+      //   )
+      // ){
+      //   this.isEnd = true;
+      // };              
+      // if (this.isEnd && this.state != STATE.ended) { //仅仅发一次通知
+      //   this.emit('ended');
+      //   this.state = STATE.ended;
+      // }
+
+      if (!this.isEnd){
+        // console.log("时间流逝：",new Date().getTime()-stTime,"currentTime："+ this.currentTime()+" / " + this.getDuration(),"isDecodeEnd:"+this.isDecodeEnd) 
         this.emit('timeUpdate', this.currentTime() < 0 ? 0.0 : this.currentTime());
       }else {
-        console.log("时间流逝：",new Date().getTime()-stTime,"currentTime："+ this.getDuration()+" / " + this.getDuration()) 
+        // console.log("时间流逝：",new Date().getTime()-stTime,"currentTime："+ this.getDuration()+" / " + this.getDuration()) 
         this.emit('timeUpdate', this.getDuration());//让进度可以100%
-        if (
-          (this.processor.hasAudio && this.currentTime() >= this.getDuration()) ||
-          (this.processor.hasVideo && !this.processor.frames.length)
-        ) {
+        // if (
+        //   (this.processor.hasAudio && this.currentTime() >= this.getDuration()) ||
+        //   (this.processor.hasVideo && !this.processor.frames.length)
+        // ) {
           if (this.loop) {
             this.stop()
             this.play();
           }
-        }
-        clearInterval(this.timeUpdateTimer);
+        // }
+        // clearInterval(this.timeUpdateTimer);
       }
     }
     
     fn.call(this);//首先，立即执行一次
 
     this.timeUpdateTimer = setInterval(fn.bind(this), UPDATE_INTERVAL_TIME);//然后，每隔 UPDATE_INTERVAL_TIME ms执行一次
-
-    this.isEnd = false;
     this.drawer =  new Drawer(this.$container);
     this.loader = new (this.customLoader ? this.customLoader : Loader)({
       type: this.isLive ? 'stream' : 'chunk',
@@ -325,8 +352,6 @@ class WXInlinePlayer extends EventEmitter {
 
     this.loader.on('loadError', error => this.emit('loadError', error));
     this.loader.on('loadSuccess', () => {
-      //因为this.currentTime()总是小于实际播放时间，所以需要补上时间差
-      self.compensateTime = new Date().getTime()-stTime + UPDATE_INTERVAL_TIME;
       this.emit('loadSuccess')
     });
 
@@ -367,12 +392,6 @@ class WXInlinePlayer extends EventEmitter {
     if (this.drawer) {
       this.drawer.drawNextOutputPicture(width, height, data);
     }
-    console.log("frame")
-    this.isEnd = this.currentTime()>=this.getDuration() && this.getDuration() > 0;
-    if(this.isEnd){
-      this.state = STATE.ended;
-      this.once('ended');
-    }
   }
 
   _onBufferingHandler() {
@@ -406,7 +425,6 @@ class WXInlinePlayer extends EventEmitter {
 
   _onDecodeEndHandler() {
     this.isDecodeEnd = true;
-    this.timestamp_st = new Date().getTime();
   }
 }
 

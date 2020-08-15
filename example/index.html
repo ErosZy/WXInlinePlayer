@@ -253,7 +253,6 @@
             $status.innerHTML = "状态：已停止";
           });
           player.on("ended", () => {
-            console.log("**************ended")
             $status.innerHTML = "状态：已放完";
           });
           player.on("timeUpdate", (timestamp) => {
