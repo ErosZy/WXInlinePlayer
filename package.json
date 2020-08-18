@@ -1,14 +1,19 @@
 {
   "name": "wx-inline-player-new",
-  "version": "1.0.8",
-  "description": "",
+  "version": "1.0.9",
+  "description": "A decoder of Flv + H265/H264 video.",
   "main": "index.js",
+  "keywords": ["h265","h264","flv","video playback"],
   "repository": {
     "type": "git",
     "url": "https://github.com/coffe1891/WXInlinePlayer.git"
   },
-  "author": "",
+  "author": "coffe1891<kai.ma@163.com>",
   "license": "ISC",
+  "files": [
+    "README.md",
+    "example/"
+  ],
   "scripts": {
     "serve": "node node_modules/static-server/bin/static-server.js example"
   },

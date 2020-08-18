@@ -139,7 +139,6 @@
         const $duration = $("duration");
         const $performance = $("performance");
         const defautVideoUrl ="https://ks3-cn-beijing.ksyun.com/ksplayer/h265/outside_demo/v1.1.3/720P2M30fpsh265-wasmtest.flv";
-        // const defautVideoUrl ="http://localhost:9080/10.flv";
         const videoWidth = 720;
         const videoHeight = 400;
 
@@ -215,7 +214,7 @@
 
         function setListener(player){
           player.on("loadError", (e) => {
-            console.e("loadError", e);
+            console.error("loadError", e);
           });
           player.on("loadSuccess", () => {
             console.log("loadSuccess");
