@@ -47,8 +47,6 @@
       }
 
       #canvas {
-        width: 800px;
-        height: 400px;
         margin: auto;
         background-color: #333;
       }
@@ -88,7 +86,7 @@
           type="text"
           id="iUrl"
           value=""
-          style="width: 786px; height: 10px; margin: 0; padding: 5px; margin-bottom: 5px; display: block;"
+          style="width: 100%; height: 10px; margin: 0; padding: 5px; margin-bottom: 5px; display: block;"
         />
         <input type="number" id="iChunkSize" value="128" />
         chunkSize&nbsp;&nbsp;&nbsp;
@@ -140,10 +138,10 @@
         const $time = $("time");
         const $duration = $("duration");
         const $performance = $("performance");
-        // const defautVideoUrl ="https://ks3-cn-beijing.ksyun.com/ksplayer/h265/outside_demo/v1.1.3/720P2M30fpsh265-wasmtest.flv";
-        const defautVideoUrl ="http://localhost:9080/10.flv";
+        const defautVideoUrl ="https://ks3-cn-beijing.ksyun.com/ksplayer/h265/outside_demo/v1.1.3/720P2M30fpsh265-wasmtest.flv";
+        // const defautVideoUrl ="http://localhost:9080/10.flv";
+        const videoWidth = 720;
         const videoHeight = 400;
-        const videoWidth = 800;
 
         //////////////main logic///////////////////////////////////////////////////////
 
@@ -151,6 +149,8 @@
           //default setting
           $("header").style.width = videoWidth + "px";
           $("footer").style.width = videoWidth + "px";
+          $canvas.style.width = videoWidth + "px";
+          $canvas.style.height = videoHeight + "px";
           $("iUrl").value = defautVideoUrl;
           $("iH265").checked = true;
           $("iIsLive").checked = true;
@@ -222,17 +222,6 @@
           });
           player.on("mediaInfo", (mediaInfo) => {
             console.log("mediaInfo", mediaInfo);
-            const { onMetaData } = mediaInfo;
-            //注意：这里是指定绘制的真实分辨率。若要让canvas拉伸填满指定的高宽，则由css的style.width和style.height决定。
-            $canvas.height = onMetaData.height || videoHeight;
-            $canvas.width = onMetaData.width || videoWidth;
-            for (let i = 0; i < onMetaData.length; i++) {
-              if ("height" in onMetaData[i]) {
-                $canvas.height = onMetaData[i].height;
-              } else if ("width" in onMetaData[i]) {
-                $canvas.width = onMetaData[i].width;
-              }
-            }
           });
           player.on("play", () => {
             $status.innerHTML = "状态: 开播了";
