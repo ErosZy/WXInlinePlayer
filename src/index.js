@@ -375,14 +375,18 @@ class WXInlinePlayer extends EventEmitter {
   }
 
   _onMediaInfoHandler(mediaInfo) {
+    //注意：
+    //这里设置canvas(this.$container)的width和height属性，会指定绘制的真实分辨率。
+    //若要让canvas拉伸填满指定的高宽，则由css的style.width和style.height决定。
+
     const { onMetaData = [] } = mediaInfo;
     for (let i = 0; i < onMetaData.length; i++) {
       if ('duration' in onMetaData[i]) {
         this.duration = onMetaData[i].duration * 1000;
       } else if ('width' in onMetaData[i]) {
-        this.width = onMetaData[i].width;
+        this.width = this.$container.width = onMetaData[i].width;
       } else if ('height' in onMetaData[i]) {
-        this.height = onMetaData[i].height;
+        this.height = this.$container.height = onMetaData[i].height;
       }
     }
     this.emit('mediaInfo', mediaInfo);
@@ -390,6 +394,13 @@ class WXInlinePlayer extends EventEmitter {
 
   _onFrameHandler({ width, height, data }) {
     if (this.drawer) {
+      //注意：
+      //这里设置canvas(this.$container)的width和height属性，会指定绘制的真实分辨率。
+      //若要让canvas拉伸填满指定的高宽，则由css的style.width和style.height决定。
+      this.$container.width = width;
+      this.$container.height = height;
+
+      // console.log("this.width/height",this.width,this.height,"this.$container.width/height",this.$container.width,this.$container.height,"draw width/height",width, height);
       this.drawer.drawNextOutputPicture(width, height, data);
     }
   }
