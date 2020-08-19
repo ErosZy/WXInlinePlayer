@@ -5,7 +5,7 @@
 
 ## 简介
 
-本工程fork自[WXInlinePlayer](https://github.com/qiaozi-tech/WXInlinePlayer)，在源工程的基础上加入了前端友好的、JavaScript层面的优化封装，并解决掉各种大量bug。C++底层和源工程保持同步，请放心star和使用。
+本工程fork自[WXInlinePlayer](https://github.com/qiaozi-tech/WXInlinePlayer)，在源工程的基础上加入了前端友好的、JavaScript层面的优化封装，并解决掉大量bug。C++底层和源工程保持同步，请放心star和使用。
 
 ## 特性
 
