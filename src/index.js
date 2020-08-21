@@ -95,6 +95,8 @@ class WXInlinePlayer extends EventEmitter {
     this.$container = $container;
     this.width = $container.width;
     this.height = $container.height;
+    this.hasVideo = hasVideo;
+    this.hasAudio = hasAudio;
     this.vol = volume;
     this.muted = muted;
     this.duration = 0;
@@ -324,15 +326,10 @@ class WXInlinePlayer extends EventEmitter {
       }else {
         // console.log("时间流逝：",new Date().getTime()-stTime,"currentTime："+ this.getDuration()+" / " + this.getDuration()) 
         this.emit('timeUpdate', this.getDuration());//让进度可以100%
-        // if (
-        //   (this.processor.hasAudio && this.currentTime() >= this.getDuration()) ||
-        //   (this.processor.hasVideo && !this.processor.frames.length)
-        // ) {
-          if (this.loop) {
-            this.stop()
-            this.play();
-          }
-        // }
+        if (this.loop) {
+          this.stop()
+          this.play();
+        }
         // clearInterval(this.timeUpdateTimer);
       }
     }
@@ -360,7 +357,9 @@ class WXInlinePlayer extends EventEmitter {
       muted: this.muted,
       preloadTime: this.preloadTime,
       bufferingTime: this.bufferingTime,
-      cacheSegmentCount: this.cacheSegmentCount
+      cacheSegmentCount: this.cacheSegmentCount,
+      hasVideo:this.hasVideo,
+      hasAudio:this.hasAudio
     });
 
     this.processor.on('mediaInfo', this._onMediaInfoHandler.bind(this));

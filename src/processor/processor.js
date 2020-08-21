@@ -59,7 +59,9 @@ class Processor extends EventEmitter {
     muted = false,
     preloadTime = 1000,
     bufferingTime = 3000,
-    cacheSegmentCount = 128
+    cacheSegmentCount = 128,
+    hasVideo = true,
+    hasAudio = true
   }) {
     super();
     this.averageUnitDuration = 0;
@@ -71,8 +73,8 @@ class Processor extends EventEmitter {
     this.state = 'created';
     this.baseTime = 0;
     this.blocked = !Util.isWeChat();
-    this.hasVideo = true;
-    this.hasAudio = true;
+    this.hasVideo = true;//hasVideo;  //TODO need fix
+    this.hasAudio = true;//hasAudio;  //TODO need fix
     this.frames = [];
     this.audios = [];
     this.currentTime = 0;
