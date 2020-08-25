@@ -199,14 +199,13 @@ class WXInlinePlayer extends EventEmitter {
       this.loader.cancel();
     }
 
-    this._resetCanvas();
-
     this.emit('stopped');
   }
 
-  _resetCanvas(){
-    var ctx = this.$container.getContext("2d");
-    ctx .clearRect(0,0,c.width,c.height);
+  clearCanvas(){
+    let c = this.$container;
+    let gl = c.getContext("webgl");
+    gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
   }
 
   /**

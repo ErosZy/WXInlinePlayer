@@ -1,6 +1,6 @@
 {
   "name": "wx-inline-player-new",
-  "version": "1.0.9",
+  "version": "1.1.0",
   "description": "A decoder of Flv + H265/H264 video.",
   "main": "index.js",
   "keywords": [
@@ -23,7 +23,7 @@
     "serve": "node node_modules/static-server/bin/static-server.js example",
     "build": "parcel build src/index.js --no-source-maps --target browser",
     "prebuild": "",
-    "postbuild": "cpy dist/*.js example/ && rimraf dist"
+    "postbuild": "cpy dist/ example/ && rimraf dist"
   },
   "dependencies": {
     "buffer": "^5.2.1",

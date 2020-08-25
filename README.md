@@ -218,6 +218,9 @@ player.on('timeUpdate', ()=>{
 ### Number WXInlinePlayerInstance.getDuration(void)
 视频总时长。
 
+### void WXInlinePlayerInstance.clearCanvas(void)
+清空画布。有时视频播放完毕之后，您可能需要清空画布。
+
 ## 事件
 
 * mediaInfo(Object) - 视频相关信息，例如width/height/fps/framerate等
