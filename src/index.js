@@ -348,9 +348,7 @@ class WXInlinePlayer extends EventEmitter {
     });
 
     this.loader.on('loadError', error => this.emit('loadError', error));
-    this.loader.on('loadSuccess', () => {
-      this.emit('loadSuccess')
-    });
+    this.loader.on('loadSuccess', () => { this.emit('loadSuccess') });
 
     this.processor = new Processor({
       volume: this.vol,
