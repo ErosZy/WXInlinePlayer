@@ -188,6 +188,7 @@ class WXInlinePlayer extends EventEmitter {
     this.timestapmArr.length=0;
     clearInterval(this.timeUpdateTimer);
 
+    // TODO need to fix logic
     if (this.processor) {
       this.processor.destroy();
       this.processor = null;
@@ -198,7 +199,14 @@ class WXInlinePlayer extends EventEmitter {
       this.loader.cancel();
     }
 
+    this._resetCanvas();
+
     this.emit('stopped');
+  }
+
+  _resetCanvas(){
+    var ctx = this.$container.getContext("2d");
+    ctx .clearRect(0,0,c.width,c.height);
   }
 
   /**
