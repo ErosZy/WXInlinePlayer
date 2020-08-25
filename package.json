@@ -1,6 +1,6 @@
 {
   "name": "wx-inline-player-new",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A decoder of Flv + H265/H264 video.",
   "main": "index.js",
   "keywords": [
@@ -17,7 +17,14 @@
   "license": "ISC",
   "files": [
     "README.md",
-    "example/"
+    "example/index.html",
+    "example/index.js",
+    "example/prod.all.asm.combine.js",
+    "example/prod.all.wasm.combine.js",
+    "example/prod.baseline.asm.combine.js",
+    "example/prod.baseline.wasm.combine.js",
+    "example/prod.h265.asm.combine.js",
+    "example/prod.h265.wasm.combine.js"
   ],
   "scripts": {
     "serve": "node node_modules/static-server/bin/static-server.js example",
