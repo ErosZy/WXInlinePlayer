@@ -176,30 +176,10 @@ class WXInlinePlayer extends EventEmitter {
    */
   play() {
     if (this.state != STATE.destroyed && !this.isInitlize) {
-      this._initlize();
+      this._init4play();
       this.processor.unblock(0);
     }
     this.emit('play');
-  }
-
-  stop() {
-    this.state = STATE.stopped;
-    this.isInitlize = false;
-    this.timestapmArr.length=0;
-    clearInterval(this.timeUpdateTimer);
-
-    // TODO need to fix logic
-    if (this.processor) {
-      this.processor.destroy();
-      this.processor = null;
-    }
-
-    if (this.loader) {
-      this.loader.removeAllListeners();
-      this.loader.cancel();
-    }
-
-    this.emit('stopped');
   }
 
   clearCanvas(){
@@ -249,14 +229,37 @@ class WXInlinePlayer extends EventEmitter {
       return this.processor.mute(muted);
     }
   }
+  
+  stop() {
+    this.state = STATE.stopped;
+    this.isInitlize = false;
+    this.timestapmArr.length=0;
+    clearInterval(this.timeUpdateTimer);
+
+    if (this.processor) {
+      this.processor.destroy();
+      this.processor = null;
+    }
+
+    if (this.loader) {
+      this.loader.removeAllListeners();
+      this.loader.cancel();
+      this.loader = null;
+    }
+
+    this.emit('stopped');
+  }
 
   destroy() {
-    this.removeAllListeners();
     this.stop();
+    this.removeAllListeners();
+    
+    // release WebGL context
     if (this.drawer) {
       this.drawer.destroy();
       this.drawer = null;
     }
+
     this.state = STATE.destroyed;
   }
 
@@ -292,7 +295,10 @@ class WXInlinePlayer extends EventEmitter {
     return this.duration;
   }
 
-  _initlize() {
+  /**
+   * called by play()
+   */
+  _init4play() {
     clearInterval(this.timeUpdateTimer);
     this.isDecodeEnd = false;
     this.isEnd = false;    
@@ -344,7 +350,7 @@ class WXInlinePlayer extends EventEmitter {
     fn.call(this);//首先，立即执行一次
 
     this.timeUpdateTimer = setInterval(fn.bind(this), UPDATE_INTERVAL_TIME);//然后，每隔 UPDATE_INTERVAL_TIME ms执行一次
-    this.drawer =  new Drawer(this.$container);
+    this.drawer = this.drawer ? this.drawer : new Drawer(this.$container);//重用drawer以便重用WebGL.context
     this.loader = new (this.customLoader ? this.customLoader : Loader)({
       type: this.isLive ? 'stream' : 'chunk',
       opt: {
