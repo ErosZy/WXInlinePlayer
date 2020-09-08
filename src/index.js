@@ -1,8 +1,6 @@
 /********************************************************
 Copyright (c) <2019> <copyright ErosZy>
-
 "Anti 996" License Version 1.0 (Draft)
-
 Permission is hereby granted to any individual or legal entity
 obtaining a copy of this licensed work (including the source code,
 documentation and/or related items, hereinafter collectively referred
@@ -10,11 +8,9 @@ to as the "licensed work"), free of charge, to deal with the licensed
 work for any purpose, including without limitation, the rights to use,
 reproduce, modify, prepare derivative works of, distribute, publish
 and sublicense the licensed work, subject to the following conditions:
-
 1. The individual or the legal entity must conspicuously display,
 without modification, this License and the notice on each redistributed
 or derivative copy of the Licensed Work.
-
 2. The individual or the legal entity must strictly comply with all
 applicable laws, regulations, rules and standards of the jurisdiction
 relating to labor and employment where the individual is physically
@@ -24,7 +20,6 @@ case that the jurisdiction has no such laws, regulations, rules and
 standards or its laws, regulations, rules and standards are
 unenforceable, the individual or the legal entity are required to
 comply with Core International Labor Standards.
-
 3. The individual or the legal entity shall not induce, suggest or force
 its employee(s), whether full-time or part-time, or its independent
 contractor(s), in any methods, to agree in oral or written form, to
@@ -37,7 +32,6 @@ limit, in any methods, the rights of its employee(s) or independent
 contractor(s) from reporting or complaining to the copyright holder or
 relevant authorities monitoring the compliance of the license about
 its violation(s) of the said license.
-
 THE LICENSED WORK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -47,34 +41,34 @@ OTHERWISE, ARISING FROM, OUT OF OR IN ANY WAY CONNECTION WITH THE
 LICENSED WORK OR THE USE OR OTHER DEALINGS IN THE LICENSED WORK.
 *********************************************************/
 
-import EventEmitter from 'eventemitter3';
-import Processor from './processor/processor';
-import Loader from './loader/loader';
-import Drawer from './drawer/drawer';
-import Util from './util/util';
+import EventEmitter from "eventemitter3";
+import Processor from "./processor/processor";
+import Loader from "./loader/loader";
+import Drawer from "./drawer/drawer";
+import Util from "./util/util";
 
 /**
  * 生命周期对应的状态
  */
 const STATE = {
-  created:"created",
-  play:"play",
-  playing:"playing",
-  buffering:"buffering",
-  paused:"paused",
-  resumed:"resumed",
-  ended:"ended",
-  stopped:"stopped",
-  destroyed:"destroyed"
+  created: "created",
+  play: "play",
+  playing: "playing",
+  buffering: "buffering",
+  paused: "paused",
+  resumed: "resumed",
+  ended: "ended",
+  stopped: "stopped",
+  destroyed: "destroyed",
 };
 
-const UPDATE_INTERVAL_TIME = 100;//ms
+const UPDATE_INTERVAL_TIME = 100; //ms
 
 class WXInlinePlayer extends EventEmitter {
   static isInited = false;
 
   constructor({
-    url = '',
+    url = "",
     $container,
     hasVideo = true,
     hasAudio = true,
@@ -88,7 +82,7 @@ class WXInlinePlayer extends EventEmitter {
     bufferingTime = 3e3,
     cacheSegmentCount = 128,
     /*cacheInMemory = false,*/
-    customLoader = null
+    customLoader = null,
   }) {
     super();
     this.url = url;
@@ -116,11 +110,11 @@ class WXInlinePlayer extends EventEmitter {
     /**播放完 */
     this.isEnd = false;
     this.state = STATE.created;
-    this.timestapmArr=[];//时间戳数组
+    this.timestapmArr = []; //时间戳数组
 
     if (
-      //(/*(hasVideo && !hasAudio) ||  //这个条件表达式很奇怪，不符合一般API封装的逻辑，或者说WXInlinePlayer作为抽象的API，不用在当前layer考虑特殊具体业务场景的组合情况，所以注释掉 */ 
-      //Util.isWeChat() /* 微信自动播放？也建议后续去掉这个具体的业务逻辑 */) || 
+      //(/*(hasVideo && !hasAudio) ||  //这个条件表达式很奇怪，不符合一般API封装的逻辑，或者说WXInlinePlayer作为抽象的API，不用在当前layer考虑特殊具体业务场景的组合情况，所以注释掉 */
+      //Util.isWeChat() /* 微信自动播放？也建议后续去掉这个具体的业务逻辑 */) ||
       this.autoplay /*autoplay如果是true就应该自动播放*/
     ) {
       this.play();
@@ -128,52 +122,48 @@ class WXInlinePlayer extends EventEmitter {
   }
 
   static isSupport() {
-    return !!
-    (
+    return !!(
       // UC and Quark browser (iOS/Android) support wasm/asm limited,
       // its iOS version make wasm/asm performance very slow （maybe hook something）
       // its Android version removed support for wasm/asm, it just run pure javascript codes,
       // so it is very easy to cause memory leaks
-      !/UCBrowser|Quark/.test(window.navigator.userAgent) &&
-      window.fetch &&
-      window.ReadableStream &&
-      window.Promise &&
-      window.URL &&
-      window.URL.createObjectURL &&
-      window.Blob &&
-      window.Worker &&
-      !!new Audio().canPlayType('audio/aac;').replace(/^no$/, '') &&
-      (window.AudioContext || window.webkitAudioContext) &&
-      Drawer.isSupport()
+      (
+        !/UCBrowser|Quark/.test(window.navigator.userAgent) &&
+        window.fetch &&
+        window.ReadableStream &&
+        window.Promise &&
+        window.URL &&
+        window.URL.createObjectURL &&
+        window.Blob &&
+        window.Worker &&
+        !!new Audio().canPlayType("audio/aac;").replace(/^no$/, "") &&
+        (window.AudioContext || window.webkitAudioContext) &&
+        Drawer.isSupport()
+      )
     );
   }
 
-  static init({ asmUrl, wasmUrl }) {
-    WXInlinePlayer.initPromise = new Promise((resolve, reject) => {
-      const url = window['WebAssembly'] ? wasmUrl : asmUrl;
-      const head = document.head || document.getElementsByTagName('head')[0];
-      const script = document.createElement('script');
+  /**
+   * init WXInlinePlayer and return a promise.
+   */
+  static ready(options) {
+    if (!WXInlinePlayer.isSupport()) {
+      return Promise.reject(new Error("your browser do not support WXInlinePlayer."));
+    }
+
+    return new Promise((resolve, reject) => {
+      const url = window["WebAssembly"] ? options.wasmUrl : options.asmUrl;
+      const head = document.head || document.getElementsByTagName("head")[0];
+      const script = document.createElement("script");
       script.onload = () => {
+        resolve(new WXInlinePlayer(options));
         WXInlinePlayer.isInited = true;
-        resolve();
       };
-      script.onerror = e => reject(e);
+      script.onerror = (e) => reject(e);
       script.src = `${url}`;
-      script.type = 'text/javascript';
+      script.type = "text/javascript";
       head.appendChild(script);
     });
-  }
-
-  static ready() {
-    if (!WXInlinePlayer.isSupport()) {
-      return Promise.resolve(false);
-    }
-
-    if (WXInlinePlayer.isInited) {
-      return Promise.resolve(true);
-    }
-
-    return WXInlinePlayer.initPromise;
   }
 
   /**
@@ -184,10 +174,10 @@ class WXInlinePlayer extends EventEmitter {
       this._init4play();
       this.processor.unblock(0);
     }
-    this.emit('play');
+    this.emit("play");
   }
 
-  clearCanvas(){
+  clearCanvas() {
     let c = this.$container;
     let gl = c.getContext("webgl");
     gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
@@ -199,14 +189,14 @@ class WXInlinePlayer extends EventEmitter {
    */
   pause() {
     if (this.isLive) {
-      throw new Error("Live stream can't be paused,please call stop() instead.")
+      throw new Error("Live stream can't be paused,please call stop() instead.");
     } else {
       if (this.processor) {
         this.state = STATE.paused;
         this.processor.pause();
-        this.emit('paused');
+        this.emit("paused");
       }
-    }    
+    }
   }
 
   /**
@@ -214,11 +204,11 @@ class WXInlinePlayer extends EventEmitter {
    */
   resume() {
     if (this.isLive) {
-      throw new Error("Because live stream can't be paused, so can't be resumed,please call play() instead.")
+      throw new Error("Because live stream can't be paused, so can't be resumed,please call play() instead.");
     } else {
       if (this.processor) {
         this.processor.resume();
-        this.emit('resumed');
+        this.emit("resumed");
       }
     }
   }
@@ -234,11 +224,11 @@ class WXInlinePlayer extends EventEmitter {
       return this.processor.mute(muted);
     }
   }
-  
+
   stop() {
     this.state = STATE.stopped;
     this.isInitlize = false;
-    this.timestapmArr.length=0;
+    this.timestapmArr.length = 0;
     clearInterval(this.timeUpdateTimer);
 
     if (this.processor) {
@@ -252,13 +242,13 @@ class WXInlinePlayer extends EventEmitter {
       this.loader = null;
     }
 
-    this.emit('stopped');
+    this.emit("stopped");
   }
 
   destroy() {
     this.stop();
     this.removeAllListeners();
-    
+
     // release WebGL context
     if (this.drawer) {
       this.drawer.destroy();
@@ -269,15 +259,14 @@ class WXInlinePlayer extends EventEmitter {
   }
 
   currentTime(p) {
-    if(p==undefined)
+    if (p == undefined)
       if (this.processor) {
         return this.processor.getCurrentTime();
+      } else {
+        if (this.processor) {
+          this.processor.setCurrentTime(p);
+        }
       }
-    else{
-      if (this.processor) {
-        this.processor.setCurrentTime(p);
-      }
-    }
   }
 
   /**
@@ -306,21 +295,23 @@ class WXInlinePlayer extends EventEmitter {
   _init4play() {
     clearInterval(this.timeUpdateTimer);
     this.isDecodeEnd = false;
-    this.isEnd = false;    
-    // let stTime = new Date().getTime();   
-    
-    function fn() {      
+    this.isEnd = false;
+    // let stTime = new Date().getTime();
+
+    function fn() {
       /////////判断播放结束的逻辑：方案一
       const timestapmArrLength = 3;
       if (this.timestapmArr.length >= timestapmArrLength) this.timestapmArr.shift();
-      this.timestapmArr.push(this.currentTime());      
+      this.timestapmArr.push(this.currentTime());
 
       this.isEnd = this.currentTime() >= this.getDuration() && this.getDuration() > 0;
       let length = this.timestapmArr.length;
-      this.isEnd = length == timestapmArrLength && this.isDecodeEnd && this.timestapmArr[0] == this.timestapmArr[length - 1];
+      this.isEnd =
+        length == timestapmArrLength && this.isDecodeEnd && this.timestapmArr[0] == this.timestapmArr[length - 1];
       if (this.isEnd) {
-        if (this.state != STATE.ended) { //仅仅发一次通知
-          this.emit('ended'); 
+        if (this.state != STATE.ended) {
+          //仅仅发一次通知
+          this.emit("ended");
           this.state = STATE.ended;
         }
       }
@@ -332,41 +323,43 @@ class WXInlinePlayer extends EventEmitter {
       //   )
       // ){
       //   this.isEnd = true;
-      // };              
+      // };
       // if (this.isEnd && this.state != STATE.ended) { //仅仅发一次通知
       //   this.emit('ended');
       //   this.state = STATE.ended;
       // }
 
-      if (!this.isEnd){
-        // console.log("时间流逝：",new Date().getTime()-stTime,"currentTime："+ this.currentTime()+" / " + this.getDuration(),"isDecodeEnd:"+this.isDecodeEnd) 
-        this.emit('timeUpdate', this.currentTime() < 0 ? 0.0 : this.currentTime());
-      }else {
-        // console.log("时间流逝：",new Date().getTime()-stTime,"currentTime："+ this.getDuration()+" / " + this.getDuration()) 
-        this.emit('timeUpdate', this.getDuration());//让进度可以100%
+      if (!this.isEnd) {
+        // console.log("时间流逝：",new Date().getTime()-stTime,"currentTime："+ this.currentTime()+" / " + this.getDuration(),"isDecodeEnd:"+this.isDecodeEnd)
+        this.emit("timeUpdate", this.currentTime() < 0 ? 0.0 : this.currentTime());
+      } else {
+        // console.log("时间流逝：",new Date().getTime()-stTime,"currentTime："+ this.getDuration()+" / " + this.getDuration())
+        this.emit("timeUpdate", this.getDuration()); //让进度可以100%
         if (this.loop) {
-          this.stop()
+          this.stop();
           this.play();
         }
         // clearInterval(this.timeUpdateTimer);
       }
     }
-    
-    fn.call(this);//首先，立即执行一次
 
-    this.timeUpdateTimer = setInterval(fn.bind(this), UPDATE_INTERVAL_TIME);//然后，每隔 UPDATE_INTERVAL_TIME ms执行一次
-    this.drawer = this.drawer ? this.drawer : new Drawer(this.$container);//重用drawer以便重用WebGL.context
+    fn.call(this); //首先，立即执行一次
+
+    this.timeUpdateTimer = setInterval(fn.bind(this), UPDATE_INTERVAL_TIME); //然后，每隔 UPDATE_INTERVAL_TIME ms执行一次
+    this.drawer = this.drawer ? this.drawer : new Drawer(this.$container); //重用drawer以便重用WebGL.context
     this.loader = new (this.customLoader ? this.customLoader : Loader)({
-      type: this.isLive ? 'stream' : 'chunk',
+      type: this.isLive ? "stream" : "chunk",
       opt: {
         url: this.url,
-        chunkSize: this.chunkSize
+        chunkSize: this.chunkSize,
         /*cacheInMemory: this.cacheInMemory*/
-      }
+      },
     });
 
-    this.loader.on('loadError', error => this.emit('loadError', error));
-    this.loader.on('loadSuccess', () => { this.emit('loadSuccess') });
+    this.loader.on("loadError", (error) => this.emit("loadError", error));
+    this.loader.on("loadSuccess", () => {
+      this.emit("loadSuccess");
+    });
 
     this.processor = new Processor({
       volume: this.vol,
@@ -374,17 +367,17 @@ class WXInlinePlayer extends EventEmitter {
       preloadTime: this.preloadTime,
       bufferingTime: this.bufferingTime,
       cacheSegmentCount: this.cacheSegmentCount,
-      hasVideo:this.hasVideo,
-      hasAudio:this.hasAudio
+      hasVideo: this.hasVideo,
+      hasAudio: this.hasAudio,
     });
 
-    this.processor.on('mediaInfo', this._onMediaInfoHandler.bind(this));
-    this.processor.on('frame', this._onFrameHandler.bind(this));
-    this.processor.on('buffering', this._onBufferingHandler.bind(this));
-    this.processor.on('preload', this._onPreloadHandler.bind(this));
-    this.processor.on('playing', this._onPlayingHandler.bind(this));
-    this.processor.on('decodeEnded', this._onDecodeEndHandler.bind(this));
-    this.processor.on('performance', data => this.emit('performance', data));
+    this.processor.on("mediaInfo", this._onMediaInfoHandler.bind(this));
+    this.processor.on("frame", this._onFrameHandler.bind(this));
+    this.processor.on("buffering", this._onBufferingHandler.bind(this));
+    this.processor.on("preload", this._onPreloadHandler.bind(this));
+    this.processor.on("playing", this._onPlayingHandler.bind(this));
+    this.processor.on("decodeEnded", this._onDecodeEndHandler.bind(this));
+    this.processor.on("performance", (data) => this.emit("performance", data));
 
     this.isInitlize = true;
   }
@@ -396,15 +389,15 @@ class WXInlinePlayer extends EventEmitter {
 
     const { onMetaData = [] } = mediaInfo;
     for (let i = 0; i < onMetaData.length; i++) {
-      if ('duration' in onMetaData[i]) {
+      if ("duration" in onMetaData[i]) {
         this.duration = onMetaData[i].duration * 1000;
-      } else if ('width' in onMetaData[i]) {
+      } else if ("width" in onMetaData[i]) {
         this.width = this.$container.width = onMetaData[i].width;
-      } else if ('height' in onMetaData[i]) {
+      } else if ("height" in onMetaData[i]) {
         this.height = this.$container.height = onMetaData[i].height;
       }
     }
-    this.emit('mediaInfo', mediaInfo);
+    this.emit("mediaInfo", mediaInfo);
   }
 
   _onFrameHandler({ width, height, data }) {
@@ -423,8 +416,8 @@ class WXInlinePlayer extends EventEmitter {
   _onBufferingHandler() {
     if (this.loader) {
       this.state = STATE.buffering;
-      this.emit('buffering');
-      this.loader.read().then(data => {
+      this.emit("buffering");
+      this.loader.read().then((data) => {
         if (data.length) {
           this.processor.process(data);
         }
@@ -434,7 +427,7 @@ class WXInlinePlayer extends EventEmitter {
 
   _onPreloadHandler() {
     if (this.loader) {
-      this.loader.read().then(data => {
+      this.loader.read().then((data) => {
         if (data.length) {
           this.processor.process(data);
         }
@@ -445,7 +438,7 @@ class WXInlinePlayer extends EventEmitter {
   _onPlayingHandler() {
     if (this.state != STATE.playing) {
       this.state = STATE.playing;
-      this.emit('playing');
+      this.emit("playing");
     }
   }
 
