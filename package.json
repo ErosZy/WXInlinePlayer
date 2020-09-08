@@ -1,16 +1,36 @@
 {
-  "name": "wx-inline-player",
-  "version": "1.3.5",
-  "description": "",
+  "name": "wx-inline-player-new",
+  "version": "1.1.1",
+  "description": "A decoder of Flv + H265/H264 video.",
   "main": "index.js",
+  "keywords": [
+    "h265",
+    "h264",
+    "flv",
+    "video playback"
+  ],
   "repository": {
     "type": "git",
-    "url": "git@code.aliyun.com:2018-shop/wx-inline-player.git"
+    "url": "https://github.com/coffe1891/WXInlinePlayer.git"
   },
-  "author": "",
+  "author": "coffe1891<kai.ma@163.com>",
   "license": "ISC",
+  "files": [
+    "README.md",
+    "example/index.html",
+    "example/index.js",
+    "example/prod.all.asm.combine.js",
+    "example/prod.all.wasm.combine.js",
+    "example/prod.baseline.asm.combine.js",
+    "example/prod.baseline.wasm.combine.js",
+    "example/prod.h265.asm.combine.js",
+    "example/prod.h265.wasm.combine.js"
+  ],
   "scripts": {
-    "serve": "node node_modules/static-server/bin/static-server.js example"
+    "serve": "node node_modules/static-server/bin/static-server.js example",
+    "build": "parcel build src/index.js --no-source-maps --target browser",
+    "prebuild": "",
+    "postbuild": "cpy dist/ example/ && rimraf dist"
   },
   "dependencies": {
     "buffer": "^5.2.1",
@@ -35,6 +55,8 @@
     "babel-plugin-transform-es2015-destructuring": "^6.23.0",
     "babel-plugin-transform-es2015-parameters": "^6.24.1",
     "babel-plugin-transform-runtime": "^6.23.0",
+    "cpy-cli": "^3.1.1",
+    "rimraf": "^3.0.2",
     "static-server": "^2.2.1",
     "uglify-js": "^3.10.1"
   }

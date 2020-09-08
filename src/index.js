@@ -53,14 +53,22 @@ import Loader from './loader/loader';
 import Drawer from './drawer/drawer';
 import Util from './util/util';
 
+/**
+ * 生命周期对应的状态
+ */
 const STATE = {
   created:"created",
+  play:"play",
   playing:"playing",
   buffering:"buffering",
   paused:"paused",
+  resumed:"resumed",
+  ended:"ended",
   stopped:"stopped",
   destroyed:"destroyed"
 };
+
+const UPDATE_INTERVAL_TIME = 100;//ms
 
 class WXInlinePlayer extends EventEmitter {
   static isInited = false;
@@ -87,6 +95,8 @@ class WXInlinePlayer extends EventEmitter {
     this.$container = $container;
     this.width = $container.width;
     this.height = $container.height;
+    this.hasVideo = hasVideo;
+    this.hasAudio = hasAudio;
     this.vol = volume;
     this.muted = muted;
     this.duration = 0;
@@ -101,20 +111,19 @@ class WXInlinePlayer extends EventEmitter {
     this.customLoader = customLoader;
     this.timeUpdateTimer = null;
     this.isInitlize = false;
+    /**解码完 */
+    this.isDecodeEnd = false;
+    /**播放完 */
     this.isEnd = false;
-    /**
-     * created
-     * playing
-     * buffering
-     * paused
-     * stopped
-     * destroy
-     */
     this.state = STATE.created;
+    this.timestapmArr=[];//时间戳数组
 
-    if (((hasVideo && !hasAudio) || Util.isWeChat()) && this.autoplay) {
-      this._initlize();
-      this.processor.unblock(0);
+    if (
+      //(/*(hasVideo && !hasAudio) ||  //这个条件表达式很奇怪，不符合一般API封装的逻辑，或者说WXInlinePlayer作为抽象的API，不用在当前layer考虑特殊具体业务场景的组合情况，所以注释掉 */ 
+      //Util.isWeChat() /* 微信自动播放？也建议后续去掉这个具体的业务逻辑 */) || 
+      this.autoplay /*autoplay如果是true就应该自动播放*/
+    ) {
+      this.play();
     }
   }
 
@@ -172,28 +181,16 @@ class WXInlinePlayer extends EventEmitter {
    */
   play() {
     if (this.state != STATE.destroyed && !this.isInitlize) {
-      this._initlize();
+      this._init4play();
       this.processor.unblock(0);
     }
     this.emit('play');
   }
 
-  stop() {
-    this.state = STATE.stopped;
-    this.isInitlize = false;
-    clearInterval(this.timeUpdateTimer);
-
-    if (this.processor) {
-      this.processor.destroy();
-      this.processor = null;
-    }
-
-    if (this.loader) {
-      this.loader.removeAllListeners();
-      this.loader.cancel();
-    }
-
-    this.emit('stopped');
+  clearCanvas(){
+    let c = this.$container;
+    let gl = c.getContext("webgl");
+    gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
   }
 
   /**
@@ -221,6 +218,7 @@ class WXInlinePlayer extends EventEmitter {
     } else {
       if (this.processor) {
         this.processor.resume();
+        this.emit('resumed');
       }
     }
   }
@@ -236,22 +234,49 @@ class WXInlinePlayer extends EventEmitter {
       return this.processor.mute(muted);
     }
   }
+  
+  stop() {
+    this.state = STATE.stopped;
+    this.isInitlize = false;
+    this.timestapmArr.length=0;
+    clearInterval(this.timeUpdateTimer);
+
+    if (this.processor) {
+      this.processor.destroy();
+      this.processor = null;
+    }
+
+    if (this.loader) {
+      this.loader.removeAllListeners();
+      this.loader.cancel();
+      this.loader = null;
+    }
+
+    this.emit('stopped');
+  }
 
   destroy() {
-    this.removeAllListeners();
     this.stop();
+    this.removeAllListeners();
+    
+    // release WebGL context
     if (this.drawer) {
       this.drawer.destroy();
       this.drawer = null;
     }
+
     this.state = STATE.destroyed;
   }
 
-  getCurrentTime() {
-    if (this.processor) {
-      return this.processor.getCurrentTime();
-    } else {
-      return 0.0;
+  currentTime(p) {
+    if(p==undefined)
+      if (this.processor) {
+        return this.processor.getCurrentTime();
+      }
+    else{
+      if (this.processor) {
+        this.processor.setCurrentTime(p);
+      }
     }
   }
 
@@ -275,31 +300,62 @@ class WXInlinePlayer extends EventEmitter {
     return this.duration;
   }
 
-  _initlize() {
+  /**
+   * called by play()
+   */
+  _init4play() {
     clearInterval(this.timeUpdateTimer);
-    this.timeUpdateTimer = setInterval(() => {
-      let currentTime = 0.0;
-      if (!this.isEnd){
-        if (this.processor) {
-          currentTime = this.processor.getCurrentTime();
-        }
-        this.emit('timeUpdate', currentTime < 0 ? 0.0 : currentTime);
-      }else {
-        this.emit('timeUpdate', this.duration);//让进度可以100%
-        if (
-          (this.processor.hasAudio && currentTime >= this.duration) ||
-          (this.processor.hasVideo && !this.processor.frames.length)
-        ) {
-          if (this.loop) {
-            this.stop()
-            this.play();
-          }
+    this.isDecodeEnd = false;
+    this.isEnd = false;    
+    // let stTime = new Date().getTime();   
+    
+    function fn() {      
+      /////////判断播放结束的逻辑：方案一
+      const timestapmArrLength = 3;
+      if (this.timestapmArr.length >= timestapmArrLength) this.timestapmArr.shift();
+      this.timestapmArr.push(this.currentTime());      
+
+      this.isEnd = this.currentTime() >= this.getDuration() && this.getDuration() > 0;
+      let length = this.timestapmArr.length;
+      this.isEnd = length == timestapmArrLength && this.isDecodeEnd && this.timestapmArr[0] == this.timestapmArr[length - 1];
+      if (this.isEnd) {
+        if (this.state != STATE.ended) { //仅仅发一次通知
+          this.emit('ended'); 
+          this.state = STATE.ended;
         }
       }
-    }, 250);
 
-    this.isEnd = false;
-    this.drawer =  new Drawer(this.$container);
+      /////////判断播放结束的逻辑：方案二，不准
+      // if (this.isDecodeEnd && (
+      //     (this.processor.hasAudio && this.currentTime() >= this.getDuration()) ||
+      //     (this.processor.hasVideo && !this.processor.frames.length)
+      //   )
+      // ){
+      //   this.isEnd = true;
+      // };              
+      // if (this.isEnd && this.state != STATE.ended) { //仅仅发一次通知
+      //   this.emit('ended');
+      //   this.state = STATE.ended;
+      // }
+
+      if (!this.isEnd){
+        // console.log("时间流逝：",new Date().getTime()-stTime,"currentTime："+ this.currentTime()+" / " + this.getDuration(),"isDecodeEnd:"+this.isDecodeEnd) 
+        this.emit('timeUpdate', this.currentTime() < 0 ? 0.0 : this.currentTime());
+      }else {
+        // console.log("时间流逝：",new Date().getTime()-stTime,"currentTime："+ this.getDuration()+" / " + this.getDuration()) 
+        this.emit('timeUpdate', this.getDuration());//让进度可以100%
+        if (this.loop) {
+          this.stop()
+          this.play();
+        }
+        // clearInterval(this.timeUpdateTimer);
+      }
+    }
+    
+    fn.call(this);//首先，立即执行一次
+
+    this.timeUpdateTimer = setInterval(fn.bind(this), UPDATE_INTERVAL_TIME);//然后，每隔 UPDATE_INTERVAL_TIME ms执行一次
+    this.drawer = this.drawer ? this.drawer : new Drawer(this.$container);//重用drawer以便重用WebGL.context
     this.loader = new (this.customLoader ? this.customLoader : Loader)({
       type: this.isLive ? 'stream' : 'chunk',
       opt: {
@@ -310,14 +366,16 @@ class WXInlinePlayer extends EventEmitter {
     });
 
     this.loader.on('loadError', error => this.emit('loadError', error));
-    this.loader.on('loadSuccess', () => this.emit('loadSuccess'));
+    this.loader.on('loadSuccess', () => { this.emit('loadSuccess') });
 
     this.processor = new Processor({
       volume: this.vol,
       muted: this.muted,
       preloadTime: this.preloadTime,
       bufferingTime: this.bufferingTime,
-      cacheSegmentCount: this.cacheSegmentCount
+      cacheSegmentCount: this.cacheSegmentCount,
+      hasVideo:this.hasVideo,
+      hasAudio:this.hasAudio
     });
 
     this.processor.on('mediaInfo', this._onMediaInfoHandler.bind(this));
@@ -325,21 +383,25 @@ class WXInlinePlayer extends EventEmitter {
     this.processor.on('buffering', this._onBufferingHandler.bind(this));
     this.processor.on('preload', this._onPreloadHandler.bind(this));
     this.processor.on('playing', this._onPlayingHandler.bind(this));
-    this.processor.on('end', this._onEndHandler.bind(this));
+    this.processor.on('decodeEnded', this._onDecodeEndHandler.bind(this));
     this.processor.on('performance', data => this.emit('performance', data));
 
     this.isInitlize = true;
   }
 
   _onMediaInfoHandler(mediaInfo) {
+    //注意：
+    //这里设置canvas(this.$container)的width和height属性，会指定绘制的真实分辨率。
+    //若要让canvas拉伸填满指定的高宽，则由css的style.width和style.height决定。
+
     const { onMetaData = [] } = mediaInfo;
     for (let i = 0; i < onMetaData.length; i++) {
       if ('duration' in onMetaData[i]) {
         this.duration = onMetaData[i].duration * 1000;
       } else if ('width' in onMetaData[i]) {
-        this.width = onMetaData[i].width;
+        this.width = this.$container.width = onMetaData[i].width;
       } else if ('height' in onMetaData[i]) {
-        this.height = onMetaData[i].height;
+        this.height = this.$container.height = onMetaData[i].height;
       }
     }
     this.emit('mediaInfo', mediaInfo);
@@ -347,6 +409,13 @@ class WXInlinePlayer extends EventEmitter {
 
   _onFrameHandler({ width, height, data }) {
     if (this.drawer) {
+      //注意：
+      //这里设置canvas(this.$container)的width和height属性，会指定绘制的真实分辨率。
+      //若要让canvas拉伸填满指定的高宽，则由css的style.width和style.height决定。
+      this.$container.width = width;
+      this.$container.height = height;
+
+      // console.log("this.width/height",this.width,this.height,"this.$container.width/height",this.$container.width,this.$container.height,"draw width/height",width, height);
       this.drawer.drawNextOutputPicture(width, height, data);
     }
   }
@@ -380,9 +449,8 @@ class WXInlinePlayer extends EventEmitter {
     }
   }
 
-  _onEndHandler() {
-    this.isEnd = true;
-    this.emit('end');
+  _onDecodeEndHandler() {
+    this.isDecodeEnd = true;
   }
 }
 
