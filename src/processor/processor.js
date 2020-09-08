@@ -59,19 +59,22 @@ class Processor extends EventEmitter {
     muted = false,
     preloadTime = 1000,
     bufferingTime = 3000,
-    cacheSegmentCount = 128
+    cacheSegmentCount = 128,
+    hasVideo = true,
+    hasAudio = true
   }) {
     super();
     this.averageUnitDuration = 0;
     this.averageDecodeCost = 0;
     this.soundHeadSliced = false;
     this.framerate = 1000 / 24;
-    this.isEnded = false;
+    /** 解码完毕 */
+    this.isDecodeEnded = false;
     this.state = 'created';
     this.baseTime = 0;
     this.blocked = !Util.isWeChat();
-    this.hasVideo = true;
-    this.hasAudio = true;
+    this.hasVideo = true;//hasVideo;  //TODO need fix
+    this.hasAudio = true;//hasAudio;  //TODO need fix
     this.frames = [];
     this.audios = [];
     this.currentTime = 0;
@@ -104,14 +107,22 @@ class Processor extends EventEmitter {
     return 0;
   }
 
+  /**
+   * 1，有音频，取音频时间
+   * 2，否则取视频的时间
+   * 3，没视频也没音频时，返回0
+   */
   getCurrentTime() {
-    if (this.hasAudio) {
-      return this.sound ? this.sound.getCurrentTime() * 1000 : 0.0;
-    } else if (this.hasVideo) {
-      return this.currentTime;
-    } else {
-      return 0;
+    if (this.hasAudio) {//有音频时
+      this.currentTime = this.sound ? this.sound.getCurrentTime() * 1000 : 0.0;
+    } else if (!this.hasVideo) {//没视频也没音频时
+      this.currentTime = 0;
     }
+    return this.currentTime;
+  }
+
+  setCurrentTime(p){
+    this.currentTime = p;
   }
 
   process(buffer) {
@@ -228,7 +239,7 @@ class Processor extends EventEmitter {
 
       if (
         !this.frames.length ||
-        (!this.isEnded && diff && diff < this.minBufferingTime)
+        (!this.isDecodeEnded && diff && diff < this.minBufferingTime)
       ) {
         if (this.state != 'buffering') {
           this.emit('buffering');
@@ -284,11 +295,11 @@ class Processor extends EventEmitter {
     } 
     ////////////////// case 3
     else if (this.hasVideo) {
-      if (!this.isEnded && this.state == 'buffering') {
+      if (!this.isDecodeEnded && this.state == 'buffering') {
         return;
       }
 
-      if (!this.isEnded && this.frames.length < this.cacheSegmentCount / 3) {
+      if (!this.isDecodeEnded && this.frames.length < this.cacheSegmentCount / 3) {
         this.ticker.setFps(this.framerate / 1.5);
       }
       const frame = this.frames.shift();
@@ -309,7 +320,7 @@ class Processor extends EventEmitter {
     }
 
     if (
-      !this.isEnded &&
+      !this.isDecodeEnded &&
       this.state != 'buffering' &&
       (this.hasVideo && !this.hasAudio) &&
       diff < this.bufferingTime
@@ -332,6 +343,7 @@ class Processor extends EventEmitter {
   }
 
   /**
+   * 解码
    * another big function with a lot logic
    * @param {*} msg 
    */
@@ -455,9 +467,10 @@ class Processor extends EventEmitter {
         break;
       }
       case 'complete': {
-        this.isEnded = true;
-        this.state = 'end';
-        this.emit('end');
+        this.isDecodeEnded = true;
+        this.state = 'decodeEnded';
+        this.emit('decodeEnded');
+
         break;
       }
       default: {

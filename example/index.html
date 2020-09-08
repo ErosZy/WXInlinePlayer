@@ -47,24 +47,35 @@
       }
 
       #canvas {
-        width: 800px;
-        height: 400px;
         margin: auto;
         background-color: #333;
       }
 
-      #resetBtn {
+      #resetBtn,
+      #createBtn {
         /* visibility: hidden; */
         background-color: orange !important;
       }
 
+      #createBtn {
+        margin-right: 10px;
+        width: 110px !important;
+      }
+      #resetBtn {
+        display: none;
+      }
+
       #footer {
+        display: none;
         margin: 10px auto;
       }
-      #footer > span {
+      #footer > div.state > span {
         display: inline-table;
         color: gray;
         min-width: 15%;
+      }
+      #footer > div.btn {
+        margin: 10px;
       }
     </style>
   </head>
@@ -76,7 +87,7 @@
           type="text"
           id="iUrl"
           value=""
-          style="width: 786px; height: 10px; margin: 0; padding: 5px; margin-bottom: 5px; display: block;"
+          style="width: 100%; height: 10px; margin: 0; padding: 5px; margin-bottom: 5px; display: block"
         />
         <input type="number" id="iChunkSize" value="128" />
         chunkSize&nbsp;&nbsp;&nbsp;
@@ -84,36 +95,33 @@
         bufferingTime&nbsp;&nbsp;&nbsp;
         <input type="number" id="iPreload" value="500" />
         preloadTime&nbsp;&nbsp;&nbsp;
-        <div style="margin-right: 1000px; margin-bottom: 5px;"></div>
+        <div style="margin-right: 1000px; margin-bottom: 5px"></div>
         <input type="checkbox" id="iH265" /><label for="iH265">isH265</label>
-        <input type="checkbox" id="iIsLive" checked/><label for="iIsLive">isLive</label>
-        <input type="checkbox" id="iHasAudio" checked /><label for="iHasAudio">hasAudio</label>
-        <input type="checkbox" id="iHasVideo" checked /><label for="iHasVideo">hasVideo</label>
-        <input type="checkbox" id="iLoop" checked /><label for="iLoop">loop</label>
-        <input type="checkbox" id="iAutoPlay" checked /><label for="iAutoPlay">autoplay</label>
-        <button id="resetBtn">重设</button>
+        <input type="checkbox" id="iIsLive" /><label for="iIsLive">isLive</label>
+        <input type="checkbox" id="iHasAudio" /><label for="iHasAudio">hasAudio</label>
+        <input type="checkbox" id="iHasVideo" /><label for="iHasVideo">hasVideo</label>
+        <input type="checkbox" id="iLoop" /><label for="iLoop">loop</label>
+        <input type="checkbox" id="iAutoPlay" /><label for="iAutoPlay">autoplay</label>
+        <button id="createBtn">生成播放器</button><button id="resetBtn">重设</button>
       </div>
       <canvas id="canvas"></canvas>
       <div id="footer">
-        <span id="status">状态：待播放</span>
-        <span id="duration">
-          可播放时长: 0s
-        </span>
-        <span id="time">
-          进度：0s
-        </span>
-        <span id="performance">
-          解码平均：0ms, 单元平均：0ms
-        </span>
+        <div class="state">
+          <span id="status">状态：待播放</span>
+          <span id="duration"> 可播放时长: 0s </span>
+          <span id="time"> 进度：0s </span>
+          <span id="performance"> 解码平均：0ms, 单元平均：0ms </span>
+        </div>
+        <div class="btn">
+          <button id="playBtn">播放</button>
+          <button id="stopBtn">停止</button>
+          <button id="pauseBtn" style="display: none">暂停</button>
+          <button id="resumeBtn" style="display: none">恢复</button>
+          <button id="muteBtn">静音切换</button>
+          <input type="number" name="volume" step="0.1" max="1.0" min="0.0" value="1.0" />
+          <span>音量设置</span>
+        </div>
       </div>
-      <button id="playBtn">播放</button>
-      <button id="stopBtn">停止</button>
-      <button id="pauseBtn">暂停</button>
-      <button id="resumeBtn">恢复</button>
-      <button id="muteBtn">静音切换</button>
-
-      <input type="number" name="volume" step="0.1" max="1.0" min="0.0" value="1.0" />
-      <span>音量设置</span>
     </div>
     <script src="./index.js"></script>
     <script>
@@ -124,12 +132,10 @@
         const $time = $("time");
         const $duration = $("duration");
         const $performance = $("performance");
-
-        const defautVideoUrl = "https://ks3-cn-beijing.ksyun.com/ksplayer/h265/outside_demo/v1.1.3/720P2M30fpsh265-wasmtest.flv";
+        const defautVideoUrl =
+          "https://ks3-cn-beijing.ksyun.com/ksplayer/h265/outside_demo/v1.1.3/720P2M30fpsh265-wasmtest.flv";
+        const videoWidth = 720;
         const videoHeight = 400;
-        const videoWidth = 800;
-
-        let player = null;
 
         //////////////main logic///////////////////////////////////////////////////////
 
@@ -137,26 +143,35 @@
           //default setting
           $("header").style.width = videoWidth + "px";
           $("footer").style.width = videoWidth + "px";
+          $canvas.style.width = videoWidth + "px";
+          $canvas.style.height = videoHeight + "px";
           $("iUrl").value = defautVideoUrl;
           $("iH265").checked = true;
-
-          //set UI
-          setUI();
+          $("iIsLive").checked = true;
+          $("iHasAudio").checked = true;
+          $("iHasVideo").checked = true;
+          $("iLoop").checked = true;
+          $("iAutoPlay").checked = true;
 
           //set events
           $canvas.onclick = () => {
             $canvas.requestFullscreen();
           };
-
-          $("iIsLive").addEventListener("change", () => {
-            setUI();
+          $("createBtn").addEventListener("click", function () {
+            initPlayer(getOptions()).then(() => {
+              $("createBtn").style.display = "none";
+              $("resetBtn").style.display = "inline";
+            });
           });
         })();
 
         ///////////////////////////////////////////////////////////////////////////////
 
         function getOptions() {
+          let isH265 = $("iH265").checked;
           return {
+            asmUrl: "./prod." + (isH265 ? "h265" : "all") + ".asm.combine.js",
+            wasmUrl: "./prod." + (isH265 ? "h265" : "all") + ".wasm.combine.js",
             url: $("iUrl").value,
             $container: $canvas,
             hasVideo: $("iHasVideo").checked,
@@ -175,119 +190,104 @@
         }
 
         function initPlayer(options) {
-          let isH265 = $("iH265").checked;
-          WXInlinePlayer.init({
-            asmUrl: "./prod." + (isH265 ? "h265" : "all") + ".asm.combine.js",
-            wasmUrl: "./prod." + (isH265 ? "h265" : "all") + ".wasm.combine.js",
-          })
-          
-          return WXInlinePlayer.ready().then(()=>{
-            player = new WXInlinePlayer(getOptions());
-            player.on("loadError", (e) => {
-              console.e("loadError", e);
-            });
-            player.on("loadSuccess", () => {
-              console.log("loadSuccess");
-            });
-            player.on("mediaInfo", (mediaInfo) => {
-              console.log("mediaInfo", mediaInfo);
-              const { onMetaData } = mediaInfo;
-              //注意：这里是指定绘制的真实分辨率。若要让canvas拉伸填满指定的高宽，则由css的style.width和style.height决定。
-              $canvas.height = onMetaData.height || videoHeight;
-              $canvas.width = onMetaData.width || videoWidth;
-              for (let i = 0; i < onMetaData.length; i++) {
-                if ("height" in onMetaData[i]) {
-                  $canvas.height = onMetaData[i].height;
-                } else if ("width" in onMetaData[i]) {
-                  $canvas.width = onMetaData[i].width;
-                }
-              }
-            });
-
-            player.on("play", () => {
-              $status.innerHTML = "状态: 开播了";
-            });
-            player.on("buffering", () => {
-              $status.innerHTML = "状态: 加载中";
-            });
-            player.on("playing", () => {
-              $status.innerHTML = "状态: 播放中";
-            });
-            player.on("paused", () => {
-              $status.innerHTML = "状态：已暂停";
-            });
-            player.on("stopped", () => {
-              $status.innerHTML = "状态：已停止";
-            });
-            player.on("end", () => {
-              $status.innerHTML = "状态：已放完";
-            });
-            player.on("timeUpdate", (timestamp) => {
-              $time.innerHTML = "进度：" + Math.ceil((100 * timestamp) / player.getDuration()) + "%";
-              $duration.innerHTML = "可播放时长: " + Math.ceil(player.getAvaiableDuration() / 1000) + "s";
-            });
-            player.on("performance", ({ averageDecodeCost, averageUnitDuration }) => {
-              $performance.innerHTML =
-                "解码平均：" +
-                Math.floor(averageDecodeCost) +
-                "ms, 单元平均：" +
-                Math.floor(averageUnitDuration) +
-                "ms";
-            });
+          return WXInlinePlayer.ready(options).then((player) => {
+            console.log("WXInlinePlayer is ready!");
+            setPlayerUI();
+            setListener(player);
+            setEventForBtn(player);
           });
         }
 
-        function setUI() {
+        function setPlayerUI() {
           let chked = !$("iIsLive").checked;
           let isShow = chked ? "inline" : "none";
           $("pauseBtn").style.display = isShow;
           $("resumeBtn").style.display = isShow;
+          $("footer").style.display = "block";
         }
 
-        //addEventListener()添加的匿名函数无法通过removeEventListener()移除,会造成内存泄漏
-        //所以要对每个事件处理函数命名
-
-        let fnPlay = () => {
-          initPlayer(getOptions()).then(() => {
-            $("resetBtn").style.visibility = "visible";
-            player.play();
+        function setListener(player) {
+          player.on("loadError", (e) => {
+            console.error("loadError", e);
           });
-        };
-        $("playBtn").addEventListener("click", fnPlay);
+          player.on("loadSuccess", () => {
+            console.log("loadSuccess");
+          });
+          player.on("mediaInfo", (mediaInfo) => {
+            console.log("mediaInfo", mediaInfo);
+          });
+          player.on("play", () => {
+            $status.innerHTML = "状态: 开播了";
+          });
+          player.on("buffering", () => {
+            $status.innerHTML = "状态: 加载中";
+          });
+          player.on("playing", () => {
+            $status.innerHTML = "状态: 播放中";
+          });
+          player.on("paused", () => {
+            $status.innerHTML = "状态：已暂停";
+          });
+          player.on("resumed", () => {
+            $status.innerHTML = "状态：已继续";
+          });
+          player.on("stopped", () => {
+            $status.innerHTML = "状态：已停止";
+          });
+          player.on("ended", () => {
+            $status.innerHTML = "状态：已放完";
+          });
+          player.on("timeUpdate", (timestamp) => {
+            $time.innerHTML = "进度:" + Math.ceil((100 * timestamp) / player.getDuration()) + "%";
+            $duration.innerHTML = "可播放时长:" + Math.ceil(player.getAvaiableDuration() / 1000) + "s";
+          });
+          player.on("performance", ({ averageDecodeCost, averageUnitDuration }) => {
+            $performance.innerHTML =
+              "解码平均:" + Math.floor(averageDecodeCost) + "ms, 单元平均:" + Math.floor(averageUnitDuration) + "ms";
+          });
+        }
 
-        let fnPause = () => player.pause();
-        $("pauseBtn").addEventListener("click", fnPause);
+        function setEventForBtn(player) {
+          //addEventListener()添加的匿名函数无法通过removeEventListener()移除,会造成内存泄漏
+          //所以要对每个事件处理函数命名
+          let fnPlay = () => {
+            player.play();
+          };
+          $("playBtn").addEventListener("click", fnPlay);
 
-        let fnResume = () => player.resume();
-        $("resumeBtn").addEventListener("click", fnResume);
+          let fnPause = () => player.pause();
+          $("pauseBtn").addEventListener("click", fnPause);
 
-        let fnMute = () => player.mute(!player.mute());
-        $("muteBtn").addEventListener("click", fnMute);
+          let fnResume = () => player.resume();
+          $("resumeBtn").addEventListener("click", fnResume);
 
-        let fnChange = (ev) => player.volume(ev.target.value);
-        document.querySelector("input[name=volume]").addEventListener("change", fnChange);
+          let fnMute = () => player.mute(!player.mute());
+          $("muteBtn").addEventListener("click", fnMute);
 
-        let fnStop = () => player.stop();
-        $("stopBtn").addEventListener("click", fnStop);
+          let fnChange = (ev) => player.volume(ev.target.value);
+          document.querySelector("input[name=volume]").addEventListener("change", fnChange);
 
-        let fnReset = () => {
-          if (player) {
-            player.stop();
-            player = null;
-          }
+          let fnStop = () => player.stop();
+          $("stopBtn").addEventListener("click", fnStop);
 
-          //you must remove all eventListeners to prevent from memory leaking
-          $("playBtn").removeEventListener("click", fnPlay);
-          $("pauseBtn").removeEventListener("click", fnPause);
-          $("resumeBtn").removeEventListener("click", fnResume);
-          $("muteBtn").removeEventListener("click", fnMute);
-          document.querySelector("input[name=volume]").removeEventListener("click", fnChange);
-          $("stopBtn").removeEventListener("click", fnStop);
-          $("resetBtn").removeEventListener("click", fnReset);
-          //reload player
-          initPlayer(getOptions());
-        };
-        $("resetBtn").addEventListener("click", fnReset);
+          let fnReset = () => {
+            if (player) {
+              player.stop();
+              player = null;
+            }
+            //you must remove all eventListeners to prevent from memory leaking
+            $("playBtn").removeEventListener("click", fnPlay);
+            $("pauseBtn").removeEventListener("click", fnPause);
+            $("resumeBtn").removeEventListener("click", fnResume);
+            $("muteBtn").removeEventListener("click", fnMute);
+            document.querySelector("input[name=volume]").removeEventListener("click", fnChange);
+            $("stopBtn").removeEventListener("click", fnStop);
+            $("resetBtn").removeEventListener("click", fnReset);
+            //reload player
+            initPlayer(getOptions());
+          };
+          $("resetBtn").addEventListener("click", fnReset);
+        }
       })();
     </script>
   </body>
