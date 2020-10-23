@@ -1,6 +1,10 @@
 {
   "name": "wx-inline-player",
+<<<<<<< HEAD
   "version": "1.3.7",
+=======
+  "version": "1.3.6",
+>>>>>>> master
   "description": "",
   "main": "index.js",
   "repository": {
