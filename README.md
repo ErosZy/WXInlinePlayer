@@ -62,7 +62,7 @@
 * Safari 10.1+
 
 ## 示例
-> https://qiaozi-tech.github.io/WXInlinePlayer/example/index.html
+> https://eroszy.github.io/WXInlinePlayer/example/index.html
 
 ## 如何编译
 
