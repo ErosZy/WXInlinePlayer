@@ -347,7 +347,7 @@ class WXInlinePlayer extends EventEmitter {
 
   _onFrameHandler({ width, height, data }) {
     if (this.drawer) {
-      this.drawer.drawNextOutputPicture(width, height, data);
+      this.drawer.drawNextOutputPicture({ width, height, data });
     }
   }
 
