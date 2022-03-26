@@ -3,23 +3,23 @@
 [![LICENSE](https://img.shields.io/badge/license-Anti%20996-blue.svg)](https://github.com/996icu/996.ICU/blob/master/LICENSE)
 [![996.icu](https://img.shields.io/badge/link-996.icu-red.svg)](https://996.icu)
 
-* [简介](https://github.com/qiaozi-tech/WXInlinePlayer#%E7%AE%80%E4%BB%8B)
-* [特性](https://github.com/qiaozi-tech/WXInlinePlayer#%E7%89%B9%E6%80%A7)
-* [兼容性](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%85%BC%E5%AE%B9%E6%80%A7)
-* [示例](https://github.com/qiaozi-tech/WXInlinePlayer#%E7%A4%BA%E4%BE%8B)
-* [如何编译](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E7%BC%96%E8%AF%91)
-* [快速开始](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B)
-* [API](https://github.com/qiaozi-tech/WXInlinePlayer#api)
-* [事件](https://github.com/qiaozi-tech/WXInlinePlayer#%E4%BA%8B%E4%BB%B6)
-* [初始化参数](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%88%9D%E5%A7%8B%E5%8C%96%E5%8F%82%E6%95%B0)
-* [如何选择解码依赖](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E8%A7%A3%E7%A0%81%E4%BE%9D%E8%B5%96)
-* [如何降低卡顿和延迟](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%99%8D%E4%BD%8E%E5%8D%A1%E9%A1%BF%E5%92%8C%E5%BB%B6%E8%BF%9F)
-* [性能比较](https://github.com/qiaozi-tech/WXInlinePlayer/blob/master/README.md#%E6%80%A7%E8%83%BD%E6%AF%94%E8%BE%83)
-* [其他问题](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%85%B6%E4%BB%96%E9%97%AE%E9%A2%98)
-* [项目计划](https://github.com/qiaozi-tech/WXInlinePlayer#%E9%A1%B9%E7%9B%AE%E8%AE%A1%E5%88%92)
-* [已知使用的产品](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%B7%B2%E7%9F%A5%E4%BD%BF%E7%94%A8%E7%9A%84%E4%BA%A7%E5%93%81)
-* [QQ技术支持群](https://github.com/qiaozi-tech/WXInlinePlayer#qq%E6%8A%80%E6%9C%AF%E6%94%AF%E6%8C%81%E7%BE%A4)
-* [项目捐助](https://github.com/qiaozi-tech/WXInlinePlayer#%E9%A1%B9%E7%9B%AE%E6%8D%90%E8%B5%A0)
+* [简介](#%E7%AE%80%E4%BB%8B)
+* [特性](#%E7%89%B9%E6%80%A7)
+* [兼容性](#%E5%85%BC%E5%AE%B9%E6%80%A7)
+* [示例](#%E7%A4%BA%E4%BE%8B)
+* [如何编译](#%E5%A6%82%E4%BD%95%E7%BC%96%E8%AF%91)
+* [快速开始](#%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B)
+* [API](#api)
+* [事件](#%E4%BA%8B%E4%BB%B6)
+* [初始化参数](#%E5%88%9D%E5%A7%8B%E5%8C%96%E5%8F%82%E6%95%B0)
+* [如何选择解码依赖](#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E8%A7%A3%E7%A0%81%E4%BE%9D%E8%B5%96)
+* [如何降低卡顿和延迟](#%E5%A6%82%E4%BD%95%E9%99%8D%E4%BD%8E%E5%8D%A1%E9%A1%BF%E5%92%8C%E5%BB%B6%E8%BF%9F)
+* [性能比较](#%E6%80%A7%E8%83%BD%E6%AF%94%E8%BE%83)
+* [其他问题](#%E5%85%B6%E4%BB%96%E9%97%AE%E9%A2%98)
+* [项目计划](#%E9%A1%B9%E7%9B%AE%E8%AE%A1%E5%88%92)
+* [已知使用的产品](#%E5%B7%B2%E7%9F%A5%E4%BD%BF%E7%94%A8%E7%9A%84%E4%BA%A7%E5%93%81)
+* [QQ技术支持群](#qq%E6%8A%80%E6%9C%AF%E6%94%AF%E6%8C%81%E7%BE%A4)
+* [项目捐助](#%E9%A1%B9%E7%9B%AE%E6%8D%90%E8%B5%A0)
 
 ## 简介
 
@@ -44,9 +44,9 @@
 ## 特性
 
 1. FLV  H264/H265 点播/直播全支持
-2. 自由选择解码依赖，在实际gzip中，Tinyh264只需 ~180k，OpenH264 ~260k，de265 ~210k （[如何选择解码依赖](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E8%A7%A3%E7%A0%81%E4%BE%9D%E8%B5%96)）
+2. 自由选择解码依赖，在实际gzip中，Tinyh264只需 ~180k，OpenH264 ~260k，de265 ~210k （[如何选择解码依赖](#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E8%A7%A3%E7%A0%81%E4%BE%9D%E8%B5%96)）
 3. 专为移动端性能优化，内存和CPU占用稳定
-4. 直播延迟优化，比MSE的原生Video实现低1-2s（[如何降低卡顿和延迟](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%99%8D%E4%BD%8E%E5%8D%A1%E9%A1%BF%E5%92%8C%E5%BB%B6%E8%BF%9F)）
+4. 直播延迟优化，比MSE的原生Video实现低1-2s（[如何降低卡顿和延迟](#%E5%A6%82%E4%BD%95%E9%99%8D%E4%BD%8E%E5%8D%A1%E9%A1%BF%E5%92%8C%E5%BB%B6%E8%BF%9F)）
 5. 音频/视频独立支持
 6. 微信WebView自动播放
 7. 无音频动画自动播放
@@ -164,7 +164,7 @@ if(WXInlinePlayer.isSupport()){
 
 ### Promise WXInlinePlayer.init(Object)
 
-初始化WXInlinePlayer，需要传入加载的H264解码库的具体地址，关于解码库的选择，请参考：[如何选择解码依赖](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E8%A7%A3%E7%A0%81%E4%BE%9D%E8%B5%96)。
+初始化WXInlinePlayer，需要传入加载的H264解码库的具体地址，关于解码库的选择，请参考：[如何选择解码依赖](#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E8%A7%A3%E7%A0%81%E4%BE%9D%E8%B5%96)。
 ```javascript
 if(WXInlinePlayer.isSupport()){
   WXInlinePlayer.init({
@@ -191,7 +191,7 @@ if(WXInlinePlayer.isSupport()){
 
 ### WXInlinePlayerInstance WXInlinePlayer(Object)
 
-WXInlinePlayer构造函数，相关初始化参数请参考：[初始化参数](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%88%9D%E5%A7%8B%E5%8C%96%E5%8F%82%E6%95%B0)。
+WXInlinePlayer构造函数，相关初始化参数请参考：[初始化参数](#%E5%88%9D%E5%A7%8B%E5%8C%96%E5%8F%82%E6%95%B0)。
 
 ```javascript
 WXInlinePlayer.ready().then(()=>{
@@ -376,7 +376,7 @@ FFmpeg方案目前有几个比较大的问题，第一个是解码库的大小�
 
 * *为什么有些机器播放点播/直播会频繁卡顿，如何解决？*
 
-卡顿和延迟的原因比较复杂，对于WXInlinePlayer来说一般情况是解码速度跟不上播放速度，请参考[如何降低卡顿和延迟](https://github.com/qiaozi-tech/WXInlinePlayer#%E5%A6%82%E4%BD%95%E9%99%8D%E4%BD%8E%E5%8D%A1%E9%A1%BF%E5%92%8C%E5%BB%B6%E8%BF%9F)进行优化。
+卡顿和延迟的原因比较复杂，对于WXInlinePlayer来说一般情况是解码速度跟不上播放速度，请参考[如何降低卡顿和延迟](#%E5%A6%82%E4%BD%95%E9%99%8D%E4%BD%8E%E5%8D%A1%E9%A1%BF%E5%92%8C%E5%BB%B6%E8%BF%9F)进行优化。
 
 * *为什么不对UC浏览器（iOS/Android）进行支持？*
 
