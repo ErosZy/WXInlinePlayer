@@ -201,6 +201,9 @@ de265_error video_usability_information::read(error_queue* errqueue, bitreader* 
     }
     video_format = (VideoFormat)video_format_idc;
 
+      if (cpb_cnt_minus1[i] > 31) {
+	return DE265_ERROR_CODED_PARAMETER_OUT_OF_RANGE;
+      }
     video_full_range_flag = get_bits(br,1);
 
     colour_description_present_flag = get_bits(br,1);
@@ -361,6 +364,9 @@ void video_usability_information::dump(int fd) const
   LOG2("sample aspect ratio        : %d:%d\n", sar_width,sar_height);
   LOG1("overscan_info_present_flag : %d\n", overscan_info_present_flag);
   LOG1("overscan_appropriate_flag  : %d\n", overscan_appropriate_flag);
+      if (err) {
+	return err;
+      }
 
   LOG1("video_signal_type_present_flag: %d\n", video_signal_type_present_flag);
   if (video_signal_type_present_flag) {
